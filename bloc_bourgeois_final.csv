@@ -1,0 +1,578 @@
+pa_id,député,groupe_politique,anciennete,code_pcs,libelle_pcs
+PA1008,Alain David,SOC,7.2682,38,Ingénieur et cadre technique d'entreprise
+PA1567,Jérôme Guedj,SOC,9.3361,33,Cadre de la fonction publique
+PA1592,David Habib,LIOT,22.2078,37,Cadre administratif et commercial d'entreprise
+PA1630,Michel Herbillon,DR,26.0608,37,Cadre administratif et commercial d'entreprise
+PA1654,François Hollande,SOC,24.8898,33,Cadre de la fonction publique
+PA227089,Valérie Létard,LIOT,31.6485,0,Non classé
+PA266793,Jean-Yves Bony,DR,10.4668,12,Agriculteur sur moyenne exploitation
+PA266797,Philippe Gosselin,DR,19.0557,34,"Professeur, profession scientifique"
+PA266808,Vincent Rolland,DR,11.9808,33,Cadre de la fonction publique
+PA267042,Yannick Favennec-Bécot,LIOT,21.9986,33,Cadre de la fonction publique
+PA267200,Sébastien Huyghe,EPR,20.7702,31,Profession libérale
+PA267285,Laurent Wauquiez,DR,14.3461,0,Non classé
+PA267318,Jean-Carles Grelier,DEM,6.9815,31,Profession libérale
+PA267763,Jean-Pierre Bataille,LIOT,0.0,31,Profession libérale
+PA267780,Agnès Firmin Le Bodo,HOR,9.0086,31,Profession libérale
+PA267794,Michèle Tabarot,DR,24.5602,23,Chef d'entreprise de 10 salariés ou plus
+PA2940,Dominique Voynet,ECOS,6.9952,31,Profession libérale
+PA2952,Jean-Luc Warsmann,LIOT,25.3399,37,Cadre administratif et commercial d'entreprise
+PA309643,Véronique Besse,NI,14.3737,35,"Profession de l'information, des arts et des spectacles"
+PA330008,Xavier Breton,DR,16.9802,37,Cadre administratif et commercial d'entreprise
+PA330240,Éric Ciotti,UDDPLR,16.9802,0,Non classé
+PA330909,Vincent Descoeur,DR,11.9808,34,"Professeur, profession scientifique"
+PA331582,Philippe Vigier,DEM,20.2834,31,Profession libérale
+PA331973,Pascale Got,SOC,9.9986,35,"Profession de l'information, des arts et des spectacles"
+PA332228,Thierry Benoit,HOR,17.3547,37,Cadre administratif et commercial d'entreprise
+PA332523,Marie-Christine Dalloz,DR,16.9802,0,Non classé
+PA333285,Guillaume Garot,SOC,21.2999,33,Cadre de la fonction publique
+PA335054,Marietta Karamanli,SOC,16.9802,34,"Professeur, profession scientifique"
+PA335612,Jean-Paul Lecoq,GDR,12.564,43,Profession intermédiaire de la santé et du travail social
+PA335758,Franck Riester,EPR,19.4396,23,Chef d'entreprise de 10 salariés ou plus
+PA335999,Delphine Batho,ECOS,18.7107,33,Cadre de la fonction publique
+PA340343,Hervé Saulignac,SOC,6.9815,33,Cadre de la fonction publique
+PA341981,Marie Récalde,SOC,4.9993,37,Cadre administratif et commercial d'entreprise
+PA342196,Claudia Rouaux,SOC,6.9815,33,Cadre de la fonction publique
+PA342240,Jean-Luc Bourgeaux,DR,6.9815,12,Agriculteur sur moyenne exploitation
+PA342384,Élisa Martin,LFI-NFP,1.974,34,"Professeur, profession scientifique"
+PA342415,Marie-Noëlle Battistel,SOC,16.0186,37,Cadre administratif et commercial d'entreprise
+PA345722,Constance Le Grip,EPR,8.4616,33,Cadre de la fonction publique
+PA346782,Philippe Juvin,DR,1.974,34,"Professeur, profession scientifique"
+PA368,Michel Barnier,DR,3.0185,0,Non classé
+PA408578,Jean-Didier Berger,DR,0.1889,37,Cadre administratif et commercial d'entreprise
+PA569,Philippe Bonnecarrère,NI,9.6865,31,Profession libérale
+PA588884,Clémentine Autain,ECOS,6.9815,35,"Profession de l'information, des arts et des spectacles"
+PA605694,Olivier Falorni,DEM,11.9808,34,"Professeur, profession scientifique"
+PA605745,Nicolas Sansu,GDR,6.9733,33,Cadre de la fonction publique
+PA605782,Laurent Marcangeli,HOR,7.5573,31,Profession libérale
+PA606507,Florent Boudié,EPR,11.9808,33,Cadre de la fonction publique
+PA606545,Jean-Louis Roumégas,ECOS,4.9993,43,Profession intermédiaire de la santé et du travail social
+PA606573,Fanny Dombre Coste,SOC,5.4921,21,Artisan
+PA606793,Laurent Baumel,SOC,4.9993,37,Cadre administratif et commercial d'entreprise
+PA607090,Jean-Pierre Vigier,DR,11.9808,33,Cadre de la fonction publique
+PA607193,Sophie Errante,NI,12.1509,23,Chef d'entreprise de 10 salariés ou plus
+PA607395,Stéphane Travert,EPR,14.1418,37,Cadre administratif et commercial d'entreprise
+PA607553,Dominique Potier,SOC,12.4819,12,Agriculteur sur moyenne exploitation
+PA607619,Paul Molac,LIOT,12.0,34,"Professeur, profession scientifique"
+PA608016,Véronique Louwagie,DR,12.5582,31,Profession libérale
+PA608172,Christine Pirès Beaune,SOC,12.9692,33,Cadre de la fonction publique
+PA608264,Colette Capdevielle,SOC,4.9993,31,Profession libérale
+PA608416,Patrick Hetzel,DR,11.9808,34,"Professeur, profession scientifique"
+PA608826,Virginie Duby-Muller,DR,12.2765,37,Cadre administratif et commercial d'entreprise
+PA609332,Olivier Faure,SOC,12.3726,37,Cadre administratif et commercial d'entreprise
+PA610002,Eva Sas,ECOS,8.1585,37,Cadre administratif et commercial d'entreprise
+PA610654,Jean-Philippe Nilor,LFI-NFP,11.9808,33,Cadre de la fonction publique
+PA610968,Pouria Amirshahi,ECOS,4.9993,33,Cadre de la fonction publique
+PA642695,Éric Bothorel,EPR,12.4764,37,Cadre administratif et commercial d'entreprise
+PA642725,Eric Liégeon,DR,0.0,12,Agriculteur sur moyenne exploitation
+PA642764,Joël Aviragnet,SOC,9.807,37,Cadre administratif et commercial d'entreprise
+PA642847,Thibault Bazin,DR,6.9815,37,Cadre administratif et commercial d'entreprise
+PA642868,Paul Christophe,HOR,7.989,33,Cadre de la fonction publique
+PA642935,Olivier Becht,EPR,9.6958,33,Cadre de la fonction publique
+PA642988,Hervé de Lépinau,RN,1.974,31,Profession libérale
+PA643089,Jean-Louis Thiériot,DR,7.5548,31,Profession libérale
+PA643104,Christelle Minard,DR,0.0,12,Agriculteur sur moyenne exploitation
+PA643143,Christian Baptiste,SOC,1.974,33,Cadre de la fonction publique
+PA643157,Philippe Naillet,SOC,8.9008,37,Cadre administratif et commercial d'entreprise
+PA643175,Stella Dupont,NI,6.9815,37,Cadre administratif et commercial d'entreprise
+PA643184,Brigitte Klinkert,EPR,7.5001,74,Ancien cadre
+PA643192,Chantal Jourdan,SOC,6.9815,33,Cadre de la fonction publique
+PA677483,Stéphane Mazars,EPR,10.7491,31,Profession libérale
+PA687214,Sylvain Berrios,HOR,4.5092,0,Non classé
+PA695512,Guillaume Lepers,DR,0.0,37,Cadre administratif et commercial d'entreprise
+PA712014,Vincent Ledoux,EPR,9.2266,34,"Professeur, profession scientifique"
+PA712015,Julien Dive,DR,9.3251,38,Ingénieur et cadre technique d'entreprise
+PA717161,Élisabeth Borne,EPR,13.655,38,Ingénieur et cadre technique d'entreprise
+PA717379,Sylvain Maillard,EPR,7.2627,23,Chef d'entreprise de 10 salariés ou plus
+PA718674,Olga Givernet,EPR,6.9815,38,Ingénieur et cadre technique d'entreprise
+PA718784,Éric Pauget,DR,6.9815,37,Cadre administratif et commercial d'entreprise
+PA718838,Fabrice Brun,DR,6.9815,22,Commerçant et assimilé
+PA718850,Pierre Cordier,DR,6.9815,33,Cadre de la fonction publique
+PA718884,Valérie Bazin-Malgras,DR,6.9815,37,Cadre administratif et commercial d'entreprise
+PA719024,Christophe Blanchet,DEM,6.9815,22,Commerçant et assimilé
+PA719032,Bertrand Bouyx,HOR,6.9815,43,Profession intermédiaire de la santé et du travail social
+PA719052,Loïc Kervran,HOR,7.5647,37,Cadre administratif et commercial d'entreprise
+PA719080,Sandra Marsaud,EPR,6.9815,37,Cadre administratif et commercial d'entreprise
+PA719118,François Cormier-Bouligeon,EPR,7.4771,33,Cadre de la fonction publique
+PA719138,Michel Castellani,LIOT,6.9815,34,"Professeur, profession scientifique"
+PA719218,Hervé Berville,EPR,7.7969,37,Cadre administratif et commercial d'entreprise
+PA719272,Frédérique Meunier,DR,6.9815,31,Profession libérale
+PA719286,Paul-André Colombani,LIOT,6.9815,31,Profession libérale
+PA719338,Graziella Melchior,EPR,6.9815,34,"Professeur, profession scientifique"
+PA719372,Guillaume Kasbarian,EPR,7.948,37,Cadre administratif et commercial d'entreprise
+PA719388,Annaïg Le Meur,EPR,7.9847,21,Artisan
+PA719404,Didier Le Gac,EPR,6.9815,43,Profession intermédiaire de la santé et du travail social
+PA719412,Sandrine Le Feur,EPR,6.9815,12,Agriculteur sur moyenne exploitation
+PA719436,Nicolas Meizonnet,RN,6.9815,38,Ingénieur et cadre technique d'entreprise
+PA719472,Jean-René Cazeneuve,EPR,7.7262,38,Ingénieur et cadre technique d'entreprise
+PA719512,Corinne Vignon,EPR,6.9815,37,Cadre administratif et commercial d'entreprise
+PA719528,Jean-François Portarrieu,HOR,6.9815,35,"Profession de l'information, des arts et des spectacles"
+PA719550,Liliana Tanguy,EPR,6.9815,33,Cadre de la fonction publique
+PA719558,Erwan Balanant,DEM,8.0496,35,"Profession de l'information, des arts et des spectacles"
+PA719578,Loïc Prud'homme,LFI-NFP,6.9815,43,Profession intermédiaire de la santé et du travail social
+PA719632,Sophie Panonacle,EPR,6.9815,0,Non classé
+PA719640,Sophie Mette,DEM,6.9815,0,Non classé
+PA719736,Camille Galliard-Minier,EPR,5.0075,0,Non classé
+PA719756,Christine Le Nabour,EPR,7.614,43,Profession intermédiaire de la santé et du travail social
+PA719778,François Jolivet,HOR,7.5647,37,Cadre administratif et commercial d'entreprise
+PA719798,Daniel Labaronne,EPR,8.0293,33,Cadre de la fonction publique
+PA719822,Sabine Thillaye,DEM,6.9815,22,Commerçant et assimilé
+PA719890,Danielle Brulebois,EPR,6.9815,74,Ancien cadre
+PA719914,Geneviève Darrieussecq,DEM,14.6259,31,Profession libérale
+PA719922,Lionel Causse,EPR,7.4771,37,Cadre administratif et commercial d'entreprise
+PA719930,Boris Vallaud,SOC,7.5647,33,Cadre de la fonction publique
+PA719938,Marc Fesneau,DEM,9.954,33,Cadre de la fonction publique
+PA719968,Sylvie Bonnet,DR,0.5229,33,Cadre de la fonction publique
+PA720022,Michel Lauzzana,EPR,6.9815,31,Profession libérale
+PA720038,Sandrine Josso,DEM,7.1513,31,Profession libérale
+PA720092,Richard Ramos,DEM,6.9815,37,Cadre administratif et commercial d'entreprise
+PA720100,Aurélien Pradié,NI,7.4798,37,Cadre administratif et commercial d'entreprise
+PA720138,Laetitia Saint-Paul,HOR,6.9815,33,Cadre de la fonction publique
+PA720146,Denis Masséglia,EPR,6.9815,38,Ingénieur et cadre technique d'entreprise
+PA720154,Nicole Dubré-Chirat,EPR,6.9815,74,Ancien cadre
+PA720162,Philippe Bolo,DEM,6.9815,38,Ingénieur et cadre technique d'entreprise
+PA720190,Bertrand Sorre,EPR,6.9815,52,Employé civil et agent de service de la fonction publique
+PA720230,Lise Magnier,HOR,6.9815,33,Cadre de la fonction publique
+PA720256,Géraldine Bannier,DEM,7.563,34,"Professeur, profession scientifique"
+PA720334,Jimmy Pahun,DEM,6.9815,43,Profession intermédiaire de la santé et du travail social
+PA720342,Nicole Le Peih,EPR,6.9815,12,Agriculteur sur moyenne exploitation
+PA720354,Jean-Michel Jacques,EPR,8.4739,43,Profession intermédiaire de la santé et du travail social
+PA720362,Belkhir Belhaddad,SOC,7.2635,23,Chef d'entreprise de 10 salariés ou plus
+PA720370,Ludovic Mendes,EPR,7.3073,37,Cadre administratif et commercial d'entreprise
+PA720386,Fabien Di Filippo,DR,6.9815,74,Ancien cadre
+PA720430,Ugo Bernalicis,LFI-NFP,6.9815,33,Cadre de la fonction publique
+PA720446,Brigitte Liso,EPR,6.9815,22,Commerçant et assimilé
+PA720468,Sébastien Chenu,RN,6.9815,37,Cadre administratif et commercial d'entreprise
+PA720552,Isabelle Rauch,HOR,8.3762,31,Profession libérale
+PA720560,Perrine Goulet,DEM,7.3566,37,Cadre administratif et commercial d'entreprise
+PA720614,Marine Le Pen,RN,7.5655,31,Profession libérale
+PA720644,Jérôme Nury,DR,6.9815,33,Cadre de la fonction publique
+PA720668,Emmanuel Blairy,RN,6.9815,43,Profession intermédiaire de la santé et du travail social
+PA720720,Josy Poueyto,DEM,6.9815,74,Ancien cadre
+PA720728,Jean-Paul Mattei,DEM,7.5655,31,Profession libérale
+PA720822,Bruno Bilde,RN,6.9815,31,Profession libérale
+PA720838,Soumya Bourouaha,GDR,1.974,43,Profession intermédiaire de la santé et du travail social
+PA720846,Bastien Lachaud,LFI-NFP,6.9815,34,"Professeur, profession scientifique"
+PA720892,Mathilde Panot,LFI-NFP,7.7725,37,Cadre administratif et commercial d'entreprise
+PA720952,Aurélien Taché,LFI-NFP,7.4278,33,Cadre de la fonction publique
+PA720960,Olivier Serva,LIOT,7.4825,31,Profession libérale
+PA720976,Max Mathiasin,LIOT,7.4743,33,Cadre de la fonction publique
+PA720992,Jiovanny William,SOC,1.974,31,Profession libérale
+PA721004,Amélia Lakrafi,EPR,6.9815,22,Commerçant et assimilé
+PA721024,Anne Genetet,EPR,7.4278,31,Profession libérale
+PA721062,Jean-Hugues Ratenon,LFI-NFP,6.9815,55,Employé de commerce
+PA721110,Nicole Sanquer,LIOT,5.0075,34,"Professeur, profession scientifique"
+PA721158,Pieyre-Alexandre Anglade,EPR,6.9815,33,Cadre de la fonction publique
+PA721182,Frédéric Petit,DEM,6.9815,38,Ingénieur et cadre technique d'entreprise
+PA721202,Éric Coquerel,LFI-NFP,7.5647,31,Profession libérale
+PA721210,Alexis Corbière,ECOS,7.0007,34,"Professeur, profession scientifique"
+PA721234,Maud Petit,DEM,7.4771,37,Cadre administratif et commercial d'entreprise
+PA721270,Stéphane Peu,GDR,6.9815,54,Employé administratif d'entreprise
+PA721296,Guillaume Gouffier Valente,EPR,7.2279,33,Cadre de la fonction publique
+PA721314,Raphaël Schellenberger,NI,6.9815,33,Cadre de la fonction publique
+PA721336,Blandine Brocard,DEM,6.9815,54,Employé administratif d'entreprise
+PA721410,Émilie Bonnivard,DR,6.9815,37,Cadre administratif et commercial d'entreprise
+PA721426,Véronique Riotton,EPR,7.0669,23,Chef d'entreprise de 10 salariés ou plus
+PA721458,Xavier Roseren,HOR,6.9815,22,Commerçant et assimilé
+PA721474,Stéphane Viry,LIOT,6.9815,31,Profession libérale
+PA721486,Christophe Naegelen,LIOT,6.9815,23,Chef d'entreprise de 10 salariés ou plus
+PA721584,Jean Terlier,EPR,6.9815,31,Profession libérale
+PA721750,Céline Calvez,EPR,7.776,22,Commerçant et assimilé
+PA721764,Olivia Grégoire,EPR,8.2563,31,Profession libérale
+PA721816,Ian Boucard,DR,6.8227,33,Cadre de la fonction publique
+PA721844,Béatrice Piron,HOR,6.9815,23,Chef d'entreprise de 10 salariés ou plus
+PA721852,Marie Lebec,EPR,7.186,37,Cadre administratif et commercial d'entreprise
+PA721896,Elsa Faucillon,GDR,6.9815,54,Employé administratif d'entreprise
+PA721908,Yaël Braun-Pivet,EPR,9.5888,31,Profession libérale
+PA721916,Natalia Pouzyreff,EPR,6.9815,74,Ancien cadre
+PA721932,Marie-France Lorho,RN,6.9815,46,Profession intermédiaire administrative et commerciale des entreprises
+PA721960,Danièle Obono,LFI-NFP,7.0007,33,Cadre de la fonction publique
+PA721984,Philippe Latombe,DEM,6.9815,37,Cadre administratif et commercial d'entreprise
+PA722000,Stéphane Buchou,EPR,7.4771,37,Cadre administratif et commercial d'entreprise
+PA722070,Pierre Henriet,HOR,6.9815,43,Profession intermédiaire de la santé et du travail social
+PA722102,Annie Vidal,EPR,6.9815,74,Ancien cadre
+PA722134,Jean-Marie Fiévet,EPR,6.9815,43,Profession intermédiaire de la santé et du travail social
+PA722142,François Ruffin,ECOS,6.9815,33,Cadre de la fonction publique
+PA722150,Sacha Houlié,SOC,7.5647,31,Profession libérale
+PA722162,Nicolas Turquois,DEM,7.4771,12,Agriculteur sur moyenne exploitation
+PA722190,Gabriel Attal,EPR,9.0464,37,Cadre administratif et commercial d'entreprise
+PA722252,Marie-Pierre Rixain,EPR,7.3895,31,Profession libérale
+PA722284,Bruno Fuchs,DEM,6.9815,23,Chef d'entreprise de 10 salariés ou plus
+PA722336,Vincent Thiébaut,HOR,6.9815,37,Cadre administratif et commercial d'entreprise
+PA722358,Thomas Gassilloud,EPR,7.5647,23,Chef d'entreprise de 10 salariés ou plus
+PA722366,Jean-Luc Fugit,EPR,6.9815,34,"Professeur, profession scientifique"
+PA722374,Cyrille Isaac-Sibille,DEM,7.4798,31,Profession libérale
+PA722382,Benjamin Dirx,EPR,7.7207,22,Commerçant et assimilé
+PA722390,Josiane Corneloup,DR,7.3577,31,Profession libérale
+PA736201,Sophie Taillé-Polian,ECOS,6.7242,33,Cadre de la fonction publique
+PA757225,Mikaele Seo,EPR,1.974,43,Profession intermédiaire de la santé et du travail social
+PA759832,Agnès Pannier-Runacher,EPR,7.3629,0,Non classé
+PA774954,Anne-Laure Blin,DR,3.7235,37,Cadre administratif et commercial d'entreprise
+PA774958,Gérard Leseul,SOC,3.7235,37,Cadre administratif et commercial d'entreprise
+PA774960,Isabelle Santiago,SOC,4.567,33,Cadre de la fonction publique
+PA774962,Karine Lebon,GDR,3.7235,34,"Professeur, profession scientifique"
+PA791812,Sophia Chikirou,LFI-NFP,1.9932,23,Chef d'entreprise de 10 salariés ou plus
+PA791824,Sarah Legrain,LFI-NFP,2.5747,34,"Professeur, profession scientifique"
+PA793094,Nicolas Ray,DR,1.974,33,Cadre de la fonction publique
+PA793102,Christian Girard,RN,1.974,37,Cadre administratif et commercial d'entreprise
+PA793122,Romain Daubié,DEM,1.974,31,Profession libérale
+PA793134,Jérôme Buisson,RN,1.974,34,"Professeur, profession scientifique"
+PA793146,Nicolas Dragon,RN,1.974,31,Profession libérale
+PA793158,José Beaurain,RN,1.974,21,Artisan
+PA793166,Jocelyn Dessigny,RN,1.974,37,Cadre administratif et commercial d'entreprise
+PA793174,Yannick Monnet,GDR,1.974,33,Cadre de la fonction publique
+PA793182,Jorys Bovet,RN,1.974,67,Ouvrier non qualifié
+PA793194,Lionel Vuibert,NI,1.974,37,Cadre administratif et commercial d'entreprise
+PA793214,Audrey Abadie-Amiel,LIOT,0.0,34,"Professeur, profession scientifique"
+PA793218,Jordan Guitton,RN,1.974,33,Cadre de la fonction publique
+PA793230,Angélique Ranc,RN,1.974,85,Personne diverse sans activité professionnelle de moins de 60 ans (sauf retraité)
+PA793238,Christophe Barthès,RN,1.974,12,Agriculteur sur moyenne exploitation
+PA793246,Frédéric Falcon,RN,1.974,22,Commerçant et assimilé
+PA793254,Julien Rancoule,RN,1.974,31,Profession libérale
+PA793262,Laurent Alexandre,LFI-NFP,1.974,62,Ouvrier qualifié
+PA793270,Jean-François Rousset,EPR,1.974,31,Profession libérale
+PA793290,Gisèle Lelouis,RN,1.974,72,"Ancien artisan, commerçant, chef d'entreprise"
+PA793298,Lionel Tivoli,RN,1.974,23,Chef d'entreprise de 10 salariés ou plus
+PA793314,Alexandra Masson,RN,1.974,31,Profession libérale
+PA793322,Christelle D'Intorni,UDDPLR,1.974,31,Profession libérale
+PA793330,Bryan Masson,RN,1.974,46,Profession intermédiaire administrative et commerciale des entreprises
+PA793342,Alexandra Martin,DR,1.974,52,Employé civil et agent de service de la fonction publique
+PA793354,Joëlle Mélin,RN,1.974,31,Profession libérale
+PA793362,José Gonzalez,RN,1.974,77,Ancien employé ou ouvrier
+PA793374,Romain Baubry,RN,1.974,52,Employé civil et agent de service de la fonction publique
+PA793382,Emmanuel Taché,RN,1.974,33,Cadre de la fonction publique
+PA793394,Arthur Delaporte,SOC,1.974,34,"Professeur, profession scientifique"
+PA793398,Jérémie Patrier-Leitus,HOR,1.974,33,Cadre de la fonction publique
+PA793432,Franck Allisio,RN,1.974,31,Profession libérale
+PA793444,Manuel Bompard,LFI-NFP,1.974,38,Ingénieur et cadre technique d'entreprise
+PA793452,Hendrik Davi,ECOS,1.974,34,"Professeur, profession scientifique"
+PA793464,Sébastien Delogu,LFI-NFP,1.974,0,Non classé
+PA793508,Hubert Brigand,DR,1.974,74,Ancien cadre
+PA793520,Mickaël Cosson,DEM,1.974,33,Cadre de la fonction publique
+PA793532,Murielle Lepvraud,LFI-NFP,1.974,54,Employé administratif d'entreprise
+PA793548,Caroline Colombier,RN,1.974,37,Cadre administratif et commercial d'entreprise
+PA793572,Christophe Plassard,HOR,1.974,31,Profession libérale
+PA793592,Géraldine Grangier,RN,1.974,33,Cadre de la fonction publique
+PA793608,Katiana Levavasseur,RN,1.974,62,Ouvrier qualifié
+PA793616,Kévin Mauvieux,RN,1.974,55,Employé de commerce
+PA793624,Philippe Brun,SOC,1.974,33,Cadre de la fonction publique
+PA793632,Timothée Houssin,RN,1.974,37,Cadre administratif et commercial d'entreprise
+PA793656,Lisette Pollet,RN,1.974,62,Ouvrier qualifié
+PA793664,Marie Pochon,ECOS,1.974,33,Cadre de la fonction publique
+PA793672,Christine Loir,RN,1.974,56,Personnel des services directs aux particuliers
+PA793696,Serge Muller,RN,1.974,52,Employé civil et agent de service de la fonction publique
+PA793708,Sébastien Peytavie,ECOS,1.974,43,Profession intermédiaire de la santé et du travail social
+PA793716,Laurent Croizier,DEM,1.974,34,"Professeur, profession scientifique"
+PA793736,Hadrien Clouet,LFI-NFP,1.974,33,Cadre de la fonction publique
+PA793744,Anne Stambach-Terrenoir,LFI-NFP,1.974,33,Cadre de la fonction publique
+PA793756,François Piquemal,LFI-NFP,1.974,34,"Professeur, profession scientifique"
+PA793772,Christophe Bex,LFI-NFP,1.974,33,Cadre de la fonction publique
+PA793780,Christine Arrighi,ECOS,1.974,37,Cadre administratif et commercial d'entreprise
+PA793796,David Taupiac,LIOT,1.974,31,Profession libérale
+PA793816,Mélanie Thomin,SOC,1.974,34,"Professeur, profession scientifique"
+PA793832,Yoann Gillet,RN,1.974,33,Cadre de la fonction publique
+PA793844,Pascale Bordes,RN,1.974,31,Profession libérale
+PA793852,Pierre Meurin,RN,1.974,37,Cadre administratif et commercial d'entreprise
+PA793872,Nathalie Oziol,LFI-NFP,1.974,34,"Professeur, profession scientifique"
+PA793892,Stéphanie Galzy,RN,1.974,37,Cadre administratif et commercial d'entreprise
+PA793904,Aurélien Lopez-Liguori,RN,1.974,33,Cadre de la fonction publique
+PA793912,Sylvain Carrière,LFI-NFP,1.974,55,Employé de commerce
+PA793928,Edwige Diaz,RN,1.974,37,Cadre administratif et commercial d'entreprise
+PA793940,Thomas Cazenave,EPR,2.2119,33,Cadre de la fonction publique
+PA793948,Nicolas Thierry,ECOS,1.974,31,Profession libérale
+PA793980,Charles Fournier,ECOS,1.974,37,Cadre administratif et commercial d'entreprise
+PA793992,Henri Alfandari,HOR,1.974,72,"Ancien artisan, commerçant, chef d'entreprise"
+PA794008,Cyrielle Chatelain,ECOS,2.4816,33,Cadre de la fonction publique
+PA794022,Jérémie Iordanoff,ECOS,1.974,31,Profession libérale
+PA794030,Alexis Jolly,RN,1.974,22,Commerçant et assimilé
+PA794038,Yannick Neuder,DR,2.1777,33,Cadre de la fonction publique
+PA794058,Justine Gruet,DR,1.974,31,Profession libérale
+PA794082,Mathilde Hignet,LFI-NFP,1.974,69,Ouvrier agricole
+PA794094,Mickaël Bouloux,SOC,1.974,38,Ingénieur et cadre technique d'entreprise
+PA794106,Andrée Taurinya,LFI-NFP,1.974,34,"Professeur, profession scientifique"
+PA794114,Emmanuel Mandon,DEM,1.974,46,Profession intermédiaire administrative et commerciale des entreprises
+PA794118,Antoine Vermorel-Marques,DR,1.974,33,Cadre de la fonction publique
+PA794130,Andy Kerbrat,LFI-NFP,1.974,54,Employé administratif d'entreprise
+PA794138,Ségolène Amiot,LFI-NFP,1.974,54,Employé administratif d'entreprise
+PA794146,Julie Laernoes,ECOS,1.974,74,Ancien cadre
+PA794154,Jean-Claude Raux,ECOS,1.974,34,"Professeur, profession scientifique"
+PA794166,Matthias Tavel,LFI-NFP,1.974,33,Cadre de la fonction publique
+PA794178,Jean-Pierre Taite,DR,1.974,72,"Ancien artisan, commerçant, chef d'entreprise"
+PA794198,Roger Chudeau,RN,1.974,33,Cadre de la fonction publique
+PA794206,Christophe Marion,EPR,1.974,33,Cadre de la fonction publique
+PA794234,François Gernigon,HOR,1.974,31,Profession libérale
+PA794270,Anna Pic,SOC,1.974,34,"Professeur, profession scientifique"
+PA794278,Xavier Albertini,HOR,2.1629,31,Profession libérale
+PA794322,Thomas Ménagé,RN,1.974,37,Cadre administratif et commercial d'entreprise
+PA794330,Anthony Brosse,EPR,1.974,43,Profession intermédiaire de la santé et du travail social
+PA794354,Hélène Laporte,RN,1.974,37,Cadre administratif et commercial d'entreprise
+PA794418,Florence Goulet,RN,1.974,33,Cadre de la fonction publique
+PA794430,Michel Criaud,HOR,0.0,21,Artisan
+PA794434,Christophe Bentz,RN,1.974,34,"Professeur, profession scientifique"
+PA794442,Laurence Robert-Dehault,RN,1.974,31,Profession libérale
+PA794466,Jean Moulliere,HOR,0.0,33,Cadre de la fonction publique
+PA794470,Félicie Gérard,HOR,1.974,74,Ancien cadre
+PA794478,David Guiraud,LFI-NFP,1.974,46,Profession intermédiaire administrative et commerciale des entreprises
+PA794486,Violette Spillebout,EPR,1.974,37,Cadre administratif et commercial d'entreprise
+PA794494,Roger Vicot,SOC,1.974,37,Cadre administratif et commercial d'entreprise
+PA794502,Michaël Taverne,RN,1.974,52,Employé civil et agent de service de la fonction publique
+PA794530,Matthieu Marchio,RN,1.974,37,Cadre administratif et commercial d'entreprise
+PA794562,Philippe Ballard,RN,1.974,35,"Profession de l'information, des arts et des spectacles"
+PA794570,Alexandre Sabatou,RN,1.974,33,Cadre de la fonction publique
+PA794578,Véronique Ludmann,NI,0.0,0,Non classé
+PA794582,Kévin Pfeffer,RN,1.974,33,Cadre de la fonction publique
+PA794590,Alexandre Loubet,RN,1.974,37,Cadre administratif et commercial d'entreprise
+PA794598,Laurent Jacobelli,RN,1.974,35,"Profession de l'information, des arts et des spectacles"
+PA794658,Philippe Fait,HOR,1.974,43,Profession intermédiaire de la santé et du travail social
+PA794670,Caroline Parmentier,RN,1.974,33,Cadre de la fonction publique
+PA794678,Thierry Frappé,RN,1.974,31,Profession libérale
+PA794686,Marianne Maximi,LFI-NFP,1.974,43,Profession intermédiaire de la santé et du travail social
+PA794702,Delphine Lingemann,DEM,1.974,31,Profession libérale
+PA794710,Julien Brugerolles,GDR,0.0,33,Cadre de la fonction publique
+PA794718,Christine Engrand,NI,1.974,37,Cadre administratif et commercial d'entreprise
+PA794734,Michel Guiniot,RN,1.974,37,Cadre administratif et commercial d'entreprise
+PA794762,Sandrine Dogor-Such,RN,1.974,55,Employé de commerce
+PA794770,Michèle Martinez,RN,1.974,46,Profession intermédiaire administrative et commerciale des entreprises
+PA794778,Sandra Regol,ECOS,1.974,0,Non classé
+PA794786,Emmanuel Fernandes,LFI-NFP,1.974,46,Profession intermédiaire administrative et commerciale des entreprises
+PA794798,Françoise Buffet,EPR,1.974,72,"Ancien artisan, commerçant, chef d'entreprise"
+PA794802,Charles Sitzenstuhl,EPR,1.974,33,Cadre de la fonction publique
+PA794810,Louise Morel,DEM,1.974,37,Cadre administratif et commercial d'entreprise
+PA794830,Hubert Ott,DEM,1.974,34,"Professeur, profession scientifique"
+PA794838,Didier Lemaire,HOR,1.974,52,Employé civil et agent de service de la fonction publique
+PA794854,Inaki Echaniz,SOC,1.974,33,Cadre de la fonction publique
+PA794870,Sylvie Ferrer,LFI-NFP,1.974,0,Non classé
+PA794886,Sophie Blanc,RN,1.974,31,Profession libérale
+PA794894,Anaïs Sabatini,RN,1.974,31,Profession libérale
+PA794906,Gabriel Amard,LFI-NFP,1.974,37,Cadre administratif et commercial d'entreprise
+PA794938,Idir Boumertit,LFI-NFP,1.974,43,Profession intermédiaire de la santé et du travail social
+PA794946,Antoine Villedieu,RN,1.974,52,Employé civil et agent de service de la fonction publique
+PA794954,Emeric Salmon,RN,1.974,37,Cadre administratif et commercial d'entreprise
+PA794982,Julie Delpech,EPR,1.974,37,Cadre administratif et commercial d'entreprise
+PA794994,Alexandre Portier,DR,1.974,34,"Professeur, profession scientifique"
+PA795010,Marie-Charlotte Garin,ECOS,1.974,33,Cadre de la fonction publique
+PA795026,Anne-Cécile Violland,HOR,1.974,43,Profession intermédiaire de la santé et du travail social
+PA795046,Caroline Yadan,EPR,1.974,31,Profession libérale
+PA795050,Astrid Panosyan-Bouvet,EPR,1.974,33,Cadre de la fonction publique
+PA795076,Sandrine Rousseau,ECOS,1.974,34,"Professeur, profession scientifique"
+PA795084,Rodrigo Arenas,LFI-NFP,1.974,33,Cadre de la fonction publique
+PA795100,Éric Martineau,DEM,1.974,12,Agriculteur sur moyenne exploitation
+PA795108,Élise Leboucher,LFI-NFP,1.974,43,Profession intermédiaire de la santé et du travail social
+PA795124,Didier Padey,DEM,1.974,37,Cadre administratif et commercial d'entreprise
+PA795136,Jean-François Coulomme,LFI-NFP,1.974,33,Cadre de la fonction publique
+PA795144,Antoine Armand,EPR,1.974,33,Cadre de la fonction publique
+PA795156,Fatiha Keloua Hachi,SOC,1.974,34,"Professeur, profession scientifique"
+PA795164,Aurélie Trouvé,LFI-NFP,1.974,33,Cadre de la fonction publique
+PA795176,Nicolas Metzdorf,EPR,1.974,33,Cadre de la fonction publique
+PA795200,Alma Dufour,LFI-NFP,1.974,33,Cadre de la fonction publique
+PA795228,Nadège Abomangoli,LFI-NFP,1.974,33,Cadre de la fonction publique
+PA795240,Mereana Reid Arbelot,GDR,1.974,33,Cadre de la fonction publique
+PA795244,Stéphane Lenormand,LIOT,1.974,74,Ancien cadre
+PA795258,Frantz Gumbs,DEM,1.974,33,Cadre de la fonction publique
+PA795270,Marie-Agnès Poussier-Winsback,HOR,2.4312,34,"Professeur, profession scientifique"
+PA795278,Béatrice Bellamy,HOR,1.974,37,Cadre administratif et commercial d'entreprise
+PA795298,Jérôme Legavre,LFI-NFP,1.974,34,"Professeur, profession scientifique"
+PA795310,Clémence Guetté,LFI-NFP,1.974,33,Cadre de la fonction publique
+PA795318,Louis Boyard,LFI-NFP,1.974,0,Non classé
+PA795326,Christopher Weissberg,EPR,1.974,23,Chef d'entreprise de 10 salariés ou plus
+PA795334,Benoît Larrouquis,EPR,0.0,23,Chef d'entreprise de 10 salariés ou plus
+PA795350,Frédéric Valletoux,HOR,2.15,31,Profession libérale
+PA795362,Lisa Belluco,ECOS,2.5292,33,Cadre de la fonction publique
+PA795374,Pascal Lecamp,DEM,1.974,37,Cadre administratif et commercial d'entreprise
+PA795390,Sandrine Lalanne,EPR,0.0,0,Non classé
+PA795402,Nathalie Coggia,EPR,0.0,37,Cadre administratif et commercial d'entreprise
+PA795410,Béatrice Roullaud,RN,1.974,31,Profession libérale
+PA795422,Damien Maudet,LFI-NFP,1.974,37,Cadre administratif et commercial d'entreprise
+PA795430,Stéphane Delautrette,SOC,1.974,38,Ingénieur et cadre technique d'entreprise
+PA795454,Karim Ben Cheikh,ECOS,1.7385,33,Cadre de la fonction publique
+PA795466,Ersilia Soudais,LFI-NFP,1.974,34,"Professeur, profession scientifique"
+PA795482,Manon Meunier,LFI-NFP,1.974,33,Cadre de la fonction publique
+PA795516,Maxime Laisney,LFI-NFP,1.974,34,"Professeur, profession scientifique"
+PA795528,Charles Rodwell,EPR,2.4723,33,Cadre de la fonction publique
+PA795540,Daniel Grenon,NI,1.974,72,"Ancien artisan, commerçant, chef d'entreprise"
+PA795552,Julien Odoul,RN,1.974,33,Cadre de la fonction publique
+PA795588,Farida Amrani,LFI-NFP,1.974,52,Employé civil et agent de service de la fonction publique
+PA795596,Paul Vannier,LFI-NFP,1.974,34,"Professeur, profession scientifique"
+PA795616,Carlos Martens Bilongo,LFI-NFP,1.974,34,"Professeur, profession scientifique"
+PA795636,Benjamin Lucas-Lundy,ECOS,1.974,0,Non classé
+PA795644,Nathalie Da Conceicao Carvalho,RN,1.974,31,Profession libérale
+PA795664,Paul Midy,EPR,2.4668,23,Chef d'entreprise de 10 salariés ou plus
+PA795672,Arnaud Le Gall,LFI-NFP,1.974,33,Cadre de la fonction publique
+PA795722,Karl Olive,EPR,1.974,31,Profession libérale
+PA795730,Bastien Marchive,EPR,1.974,37,Cadre administratif et commercial d'entreprise
+PA795746,Antoine Léaument,LFI-NFP,1.974,33,Cadre de la fonction publique
+PA795762,Elie Califer,SOC,1.974,74,Ancien cadre
+PA795778,Jean-Philippe Tanguy,RN,1.974,37,Cadre administratif et commercial d'entreprise
+PA795786,Yaël Ménaché,RN,1.974,46,Profession intermédiaire administrative et commerciale des entreprises
+PA795808,Sabrina Sebaihi,ECOS,1.974,31,Profession libérale
+PA795820,Marcellin Nadeau,GDR,1.974,33,Cadre de la fonction publique
+PA795844,Karen Erodi,LFI-NFP,1.974,31,Profession libérale
+PA795864,Pierre Cazeneuve,EPR,1.974,33,Cadre de la fonction publique
+PA795868,Jean-Victor Castor,GDR,1.974,38,Ingénieur et cadre technique d'entreprise
+PA795876,Davy Rimane,GDR,1.974,48,"Contremaître, agent de maîtrise"
+PA795884,Marc Ferracci,EPR,1.974,34,"Professeur, profession scientifique"
+PA795900,Marine Hamelet,RN,1.974,55,Employé de commerce
+PA795908,Yannick Chenevard,EPR,2.4832,31,Profession libérale
+PA795912,Laure Lavalette,RN,1.974,0,Non classé
+PA795920,Prisca Thevenot,EPR,2.2645,46,Profession intermédiaire administrative et commerciale des entreprises
+PA795954,Catherine Ibled,EPR,0.0,37,Cadre administratif et commercial d'entreprise
+PA795962,Joséphine Missoffe,EPR,0.0,0,Non classé
+PA795966,Stéphane Rambaud,RN,1.974,74,Ancien cadre
+PA795974,Philippe Lottiaux,RN,1.974,33,Cadre de la fonction publique
+PA795982,Aurélien Saintoul,LFI-NFP,1.974,33,Cadre de la fonction publique
+PA795998,Émeline K/Bidi,GDR,1.974,31,Profession libérale
+PA796010,Frédéric Maillot,GDR,1.974,43,Profession intermédiaire de la santé et du travail social
+PA796018,Danielle Simonnet,ECOS,1.974,34,"Professeur, profession scientifique"
+PA796026,Julie Lechanteux,RN,1.974,0,Non classé
+PA796034,Frank Giletti,RN,1.974,33,Cadre de la fonction publique
+PA796042,Frédéric Boccaletti,RN,1.974,0,Non classé
+PA796050,Philippe Schreck,RN,1.974,31,Profession libérale
+PA796062,Thomas Portes,LFI-NFP,1.974,52,Employé civil et agent de service de la fonction publique
+PA796070,Perceval Gaillard,LFI-NFP,1.974,43,Profession intermédiaire de la santé et du travail social
+PA796078,Estelle Youssouffa,LIOT,1.974,31,Profession libérale
+PA796090,Aymeric Caron,LFI-NFP,1.974,35,"Profession de l'information, des arts et des spectacles"
+PA796106,Édouard Bénard,GDR,1.974,52,Employé civil et agent de service de la fonction publique
+PA796118,Bénédicte Auzanot,RN,1.974,0,Non classé
+PA805166,Anne Bergantz,DEM,1.6674,43,Profession intermédiaire de la santé et du travail social
+PA817203,Laure Miller,EPR,1.3607,31,Profession libérale
+PA817211,René Pilato,LFI-NFP,1.3607,34,"Professeur, profession scientifique"
+PA822617,Martine Froger,SOC,1.1882,37,Cadre administratif et commercial d'entreprise
+PA826635,Aurélien Rousseau,SOC,0.6242,0,Non classé
+PA840075,Eddy Casterman,RN,0.0,37,Cadre administratif et commercial d'entreprise
+PA840119,Sandra Delannoy,NI,0.0,21,Artisan
+PA840135,Alexandre Dufosset,RN,0.0,54,Employé administratif d'entreprise
+PA840143,Guillaume Florquin,RN,0.0,33,Cadre de la fonction publique
+PA840159,Bruno Clavet,RN,0.0,45,Profession intermédiaire administrative de la fonction publique
+PA840171,Emmanuel Grégoire,SOC,0.0,37,Cadre administratif et commercial d'entreprise
+PA840235,Moerani Frébault,EPR,0.0,33,Cadre de la fonction publique
+PA840657,Sophie Ricourt Vaginay,UDDPLR,0.0,37,Cadre administratif et commercial d'entreprise
+PA840665,Marie-José Allemand,SOC,0.0,12,Agriculteur sur moyenne exploitation
+PA840673,Valérie Rossi,SOC,0.0,37,Cadre administratif et commercial d'entreprise
+PA840685,Vincent Trébuchet,UDDPLR,0.0,37,Cadre administratif et commercial d'entreprise
+PA840701,Bernard Chaix,UDDPLR,0.0,22,Commerçant et assimilé
+PA840721,Marc Chavent,UDDPLR,0.0,33,Cadre de la fonction publique
+PA840757,Monique Griseti,RN,0.0,22,Commerçant et assimilé
+PA840765,Laurent Lhardit,SOC,0.0,37,Cadre administratif et commercial d'entreprise
+PA840773,Olivier Fayssat,UDDPLR,0.0,23,Chef d'entreprise de 10 salariés ou plus
+PA840781,Romain Tonussi,RN,0.0,45,Profession intermédiaire administrative de la fonction publique
+PA840793,Marc Pena,SOC,0.0,34,"Professeur, profession scientifique"
+PA840801,Emmanuel Fouquart,RN,0.0,52,Employé civil et agent de service de la fonction publique
+PA840809,Gérault Verny,UDDPLR,0.0,23,Chef d'entreprise de 10 salariés ou plus
+PA840817,Joël Bruneau,LIOT,0.0,31,Profession libérale
+PA840829,Fabrice Barusseau,SOC,0.0,34,"Professeur, profession scientifique"
+PA840837,Pascal Markowsky,RN,0.0,72,"Ancien artisan, commerçant, chef d'entreprise"
+PA840857,Nadine Lechon,RN,0.0,12,Agriculteur sur moyenne exploitation
+PA840869,Florence Joubert,RN,0.0,33,Cadre de la fonction publique
+PA840889,Matthieu Bloch,UDDPLR,0.0,37,Cadre administratif et commercial d'entreprise
+PA840903,Paul Christophle,SOC,0.0,37,Cadre administratif et commercial d'entreprise
+PA840915,Thibaut Monnier,RN,0.0,37,Cadre administratif et commercial d'entreprise
+PA840939,Océane Godard,SOC,0.0,37,Cadre administratif et commercial d'entreprise
+PA840947,Catherine Hervieu,ECOS,0.0,0,Non classé
+PA840955,Pierre Pribetich,SOC,0.0,34,"Professeur, profession scientifique"
+PA840967,René Lioret,RN,0.0,74,Ancien cadre
+PA840979,Corentin Le Fur,DR,0.0,37,Cadre administratif et commercial d'entreprise
+PA840983,Bartolomé Lenoir,UDDPLR,0.0,37,Cadre administratif et commercial d'entreprise
+PA840997,Benoît Biteau,ECOS,0.0,12,Agriculteur sur moyenne exploitation
+PA841017,Harold Huwart,LIOT,0.0,33,Cadre de la fonction publique
+PA841023,Pierre-Yves Cadalen,LFI-NFP,0.0,34,"Professeur, profession scientifique"
+PA841047,François-Xavier Ceccoli,DR,0.0,23,Chef d'entreprise de 10 salariés ou plus
+PA841067,Alexandre Allegret-Pilot,UDDPLR,0.0,33,Cadre de la fonction publique
+PA841075,Sylvie Josserand,RN,0.0,31,Profession libérale
+PA841091,Arnaud Simion,SOC,0.0,33,Cadre de la fonction publique
+PA841107,Jacques Oberti,SOC,0.0,38,Ingénieur et cadre technique d'entreprise
+PA841131,Manon Bouquin,RN,0.0,33,Cadre de la fonction publique
+PA841139,Julien Gabarron,RN,0.0,37,Cadre administratif et commercial d'entreprise
+PA841151,Alix Fruchon,DR,0.0,0,Non classé
+PA841183,Hanane Mansouri,UDDPLR,0.0,84,"Elève, étudiant"
+PA841191,Sandrine Nosbé,LFI-NFP,0.0,54,Employé administratif d'entreprise
+PA841199,Thierry Perez,RN,0.0,33,Cadre de la fonction publique
+PA841207,Charles Alloncle,UDDPLR,0.0,37,Cadre administratif et commercial d'entreprise
+PA841215,Marie Mesmeur,LFI-NFP,0.0,0,Non classé
+PA841223,Tristan Lahais,ECOS,0.0,37,Cadre administratif et commercial d'entreprise
+PA841243,Sébastien Saint-Pasteur,SOC,0.0,33,Cadre de la fonction publique
+PA841251,Mathilde Feld,LFI-NFP,0.0,33,Cadre de la fonction publique
+PA841295,Pierrick Courbon,SOC,0.0,37,Cadre administratif et commercial d'entreprise
+PA841315,Karim Benbrahim,SOC,0.0,38,Ingénieur et cadre technique d'entreprise
+PA841327,Fabrice Roussel,SOC,0.0,34,"Professeur, profession scientifique"
+PA841339,Jean-Michel Brard,HOR,0.0,22,Commerçant et assimilé
+PA841351,Emmanuel Duplessy,ECOS,0.0,33,Cadre de la fonction publique
+PA841359,Constance de Pélichy,LIOT,0.0,37,Cadre administratif et commercial d'entreprise
+PA841367,Christophe Proença,SOC,0.0,34,"Professeur, profession scientifique"
+PA841381,Sophie Pantel,SOC,0.0,0,Non classé
+PA841395,Maxime Michelet,UDDPLR,0.0,33,Cadre de la fonction publique
+PA841419,Damien Girard,ECOS,0.0,38,Ingénieur et cadre technique d'entreprise
+PA841431,Nathalie Colin-Oesterlé,HOR,0.0,31,Profession libérale
+PA841439,Pascal Jenft,RN,0.0,21,Artisan
+PA841451,Julien Guibert,RN,0.0,46,Profession intermédiaire administrative et commerciale des entreprises
+PA841463,Estelle Mercier,SOC,0.0,34,"Professeur, profession scientifique"
+PA841471,Stéphane Hablot,SOC,0.0,0,Non classé
+PA841479,Frédéric Weber,RN,0.0,43,Profession intermédiaire de la santé et du travail social
+PA841487,Anthony Boulogne,RN,0.0,37,Cadre administratif et commercial d'entreprise
+PA841495,Maxime Amblard,RN,0.0,38,Ingénieur et cadre technique d'entreprise
+PA841507,Nicolas Bonnet,ECOS,0.0,38,Ingénieur et cadre technique d'entreprise
+PA841515,Aurélien Le Coq,LFI-NFP,0.0,54,Employé administratif d'entreprise
+PA841539,Julien Gokel,SOC,0.0,45,Profession intermédiaire administrative de la fonction publique
+PA841553,Thierry Tesson,RN,0.0,74,Ancien cadre
+PA841563,Claire Marais-Beuil,RN,0.0,31,Profession libérale
+PA841575,Frédéric-Pierre Vos,RN,0.0,31,Profession libérale
+PA841587,David Magnier,RN,0.0,48,"Contremaître, agent de maîtrise"
+PA841605,Antoine Golliot,RN,0.0,47,Technicien
+PA841613,Marc de Fleurian,RN,0.0,33,Cadre de la fonction publique
+PA841621,Auguste Evrard,RN,0.0,33,Cadre de la fonction publique
+PA841633,Peio Dufau,SOC,0.0,48,"Contremaître, agent de maîtrise"
+PA841645,Théo Bernhardt,RN,0.0,0,Non classé
+PA841657,Anaïs Belouassa-Cherifi,LFI-NFP,0.0,37,Cadre administratif et commercial d'entreprise
+PA841665,Denis Fégné,SOC,0.0,74,Ancien cadre
+PA841681,Thierry Sother,SOC,0.0,33,Cadre de la fonction publique
+PA841701,Léa Balage El Mariky,ECOS,0.0,37,Cadre administratif et commercial d'entreprise
+PA841713,Boris Tavernier,ECOS,0.0,37,Cadre administratif et commercial d'entreprise
+PA841717,Sandrine Runel,SOC,0.0,33,Cadre de la fonction publique
+PA841729,Abdelkader Lahmar,LFI-NFP,0.0,34,"Professeur, profession scientifique"
+PA841737,Jonathan Gery,RN,0.0,53,Policier et militaire
+PA841749,Tiffany Joncour,RN,0.0,37,Cadre administratif et commercial d'entreprise
+PA841761,Aurélien Dutremble,RN,0.0,47,Technicien hospitalier
+PA841769,Éric Michoux,UDDPLR,0.0,23,Chef d'entreprise de 10 salariés ou plus
+PA841813,Florence Herouin-Léautey,SOC,0.0,33,Cadre de la fonction publique
+PA841825,Patrice Martin,RN,0.0,11,Agriculteur sur petite exploitation
+PA841837,Robert Le Bourgeois,RN,0.0,37,Cadre administratif et commercial d'entreprise
+PA841845,Arnaud Saint-Martin,LFI-NFP,0.0,34,"Professeur, profession scientifique"
+PA841853,Céline Hervieu,SOC,0.0,31,Profession libérale
+PA841873,Julien Limongi,RN,0.0,74,Ancien cadre
+PA841885,Arnaud Bonnet,ECOS,0.0,34,"Professeur, profession scientifique"
+PA841893,Céline Thiébault-Martinez,SOC,0.0,37,Cadre administratif et commercial d'entreprise
+PA841919,Dieynaba Diop,SOC,0.0,34,"Professeur, profession scientifique"
+PA841927,Anne-Sophie Ronceret,EPR,0.0,33,Cadre de la fonction publique
+PA841931,Laurent Mazaury,LIOT,0.0,37,Cadre administratif et commercial d'entreprise
+PA841947,Zahia Hamdane,LFI-NFP,0.0,43,Profession intermédiaire de la santé et du travail social
+PA841955,Matthias Renault,RN,0.0,37,Cadre administratif et commercial d'entreprise
+PA841973,Pierre-Henri Carbonnel,UDDPLR,0.0,12,Agriculteur sur moyenne exploitation
+PA841981,Catherine Rimbert,RN,0.0,31,Profession libérale
+PA842001,Guillaume Bigot,RN,0.0,35,"Profession de l'information, des arts et des spectacles"
+PA842013,Steevy Gustave,ECOS,0.0,35,"Profession de l'information, des arts et des spectacles"
+PA842029,Claire Lejeune,LFI-NFP,0.0,0,Non classé
+PA842037,Bérenger Cernon,LFI-NFP,0.0,65,"Ouvrier qualifié de la manutention, du magasinage et du transport"
+PA842045,Julie Ozenne,ECOS,0.0,38,Ingénieur et cadre technique d'entreprise
+PA842073,Gaëtan Dussausaye,RN,0.0,55,Employé de commerce
+PA842085,Sébastien Humbert,RN,0.0,33,Cadre de la fonction publique
+PA842097,Sophie-Laurence Roy,RN,0.0,31,Profession libérale
+PA842105,Raphaël Arnault,LFI-NFP,0.0,52,Employé civil et agent de service de la fonction publique
+PA842121,Nicolas Tryzna,DR,0.0,31,Profession libérale
+PA842125,Thomas Lam,HOR,0.0,23,Chef d'entreprise de 10 salariés ou plus
+PA842141,Élisabeth de Maistre,DR,0.0,31,Profession libérale
+PA842147,Christophe Mongardien,EPR,0.5202,0,Non classé
+PA842155,Aly Diouara,LFI-NFP,0.0,33,Cadre de la fonction publique
+PA842183,Benoît Blanchard,HOR,0.0,0,Non classé
+PA842187,Gabrielle Cathala,LFI-NFP,0.0,33,Cadre de la fonction publique
+PA842195,Romain Eskenazi,SOC,0.0,33,Cadre de la fonction publique
+PA842211,Béatrice Bellay,SOC,0.0,33,Cadre de la fonction publique
+PA842227,Joseph Rivière,RN,0.0,45,Profession intermédiaire administrative de la fonction publique
+PA842255,Anne Sicard,RN,0.0,37,Cadre administratif et commercial d'entreprise
+PA842263,Ayda Hadizadeh,SOC,0.0,37,Cadre administratif et commercial d'entreprise
+PA842271,Emmanuel Maurel,GDR,0.0,34,"Professeur, profession scientifique"
+PA842279,Anchya Bamana,RN,0.0,33,Cadre de la fonction publique
+PA842299,Emmanuel Tjibaou,GDR,0.0,33,Cadre de la fonction publique
+PA842311,Vincent Caure,EPR,0.0,33,Cadre de la fonction publique
+PA870009,Lionel Duparay,DR,0.0,37,Cadre administratif et commercial d'entreprise
+PA878242,Antoine Valentin,UDDPLR,0.0,23,Chef d'entreprise de 10 salariés ou plus
+PA879389,Marie-Philippe Lubet,EPR,0.0,0,Non classé
+PA942,Charles de Courson,LIOT,24.3326,33,Cadre de la fonction publique
