@@ -312,7 +312,7 @@ VARS_BY_CAT = {
 }
 
 VAR_LABELS = {
-    'score_exploitation':       'Score exploitation (Marx) — part capital vs travail',
+    'score_exploitation':       'Score exploitationn (Marx) — part capital vs travail',
     'score_domination':         'Score domination (Bourdieu) — hiérarchie sociale totale',
     'score_cap_cult':           'Score capital culturel — diplômes + professions intellectuelles',
     'score_cap_eco':            'Score capital économique — richesse, patrimoine, revenus',
