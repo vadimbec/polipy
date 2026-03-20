@@ -42,7 +42,7 @@ def build_hybride():
                          {'IRIS': str, 'COM': str})
     df_act = read_insee(os.path.join(PATH_IRIS, "base-ic-activite-residents-2021.CSV"),
                         {'IRIS': str, 'COM': str})
-    df_pop = read_insee(os.path.join(PATH_IRIS, "base-ic-evol-struct-pop-2020.CSV"),
+    df_pop = read_insee(os.path.join(PATH_IRIS, "base-ic-evol-struct-pop-2021.CSV"),
                         {'IRIS': str, 'COM': str})
     df_filo_iris = read_insee(os.path.join(PATH_IRIS, "BASE_TD_FILO_IRIS_2021_DISP.csv"),
                               {'IRIS': str})
@@ -53,7 +53,7 @@ def build_hybride():
 
     print(f"  Diplômes : {len(df_dipl)} IRIS")
     print(f"  Activité : {len(df_act)} IRIS")
-    print(f"  Population 2020 : {len(df_pop)} IRIS")
+    print(f"  Population 2021 : {len(df_pop)} IRIS")
     print(f"  FILO IRIS : {len(df_filo_iris)} IRIS")
 
     # Préparer fallback commune
@@ -81,18 +81,77 @@ def build_hybride():
             df_filo_iris[col] = df_filo_iris[col].str.replace(',', '.').replace(['nd', 'ns', 's'], np.nan)
             df_filo_iris[col] = pd.to_numeric(df_filo_iris[col], errors='coerce')
 
-    # Fusion census (diplômes + activité + population 2020)
+    # Fusion census (diplômes + activité + population 2021)
     merged_census = pd.merge(
         df_dipl,
         df_act.drop(columns=['COM', 'TYP_IRIS', 'LAB_IRIS'], errors='ignore'),
         on='IRIS', how='outer'
     )
     df_pop['IRIS'] = df_pop['IRIS'].astype(str).str.zfill(9)
+    existing_cols = set(merged_census.columns) - {'IRIS'}
+    pop_cols_to_drop = [c for c in df_pop.columns if c in existing_cols or c in ('COM', 'TYP_IRIS', 'LAB_IRIS')]
     merged_census = pd.merge(
         merged_census,
-        df_pop.drop(columns=['COM', 'TYP_IRIS', 'LAB_IRIS'], errors='ignore'),
+        df_pop.drop(columns=pop_cols_to_drop, errors='ignore'),
         on='IRIS', how='outer'
     )
+    # + Logement 2022
+    df_log = read_insee(os.path.join(PATH_IRIS, "base-ic-logement-2022.CSV"),
+                        {'IRIS': str, 'COM': str})
+    df_log['IRIS'] = df_log['IRIS'].astype(str).str.zfill(9)
+    existing_cols = set(merged_census.columns) - {'IRIS'}
+    log_cols_to_drop = [c for c in df_log.columns if c in existing_cols or c in ('COM', 'TYP_IRIS', 'LAB_IRIS')]
+    merged_census = pd.merge(
+        merged_census,
+        df_log.drop(columns=log_cols_to_drop, errors='ignore'),
+        on='IRIS', how='outer'
+    )
+    print(f"  Logement 2022 : {len(df_log)} IRIS ({len(df_log.columns) - len(log_cols_to_drop)} nouvelles cols)")
+
+    # + BPE 2024 (format long → pivot par domaine)
+    df_bpe = read_insee(os.path.join(PATH_IRIS, "ds_bpe_iris_2024_geo_2024.csv"),
+                        {'GEO': str})
+    df_bpe.rename(columns={'GEO': 'IRIS'}, inplace=True)
+    df_bpe['IRIS'] = df_bpe['IRIS'].astype(str).str.zfill(9)
+    DOM_NAMES = {'A': 'services', 'B': 'commerces', 'C': 'enseignement',
+                 'D': 'sante', 'E': 'transports', 'F': 'sports_culture', 'G': 'tourisme'}
+    bpe_domain = df_bpe.groupby(['IRIS', 'FACILITY_DOM'])['OBS_VALUE'].sum().unstack(fill_value=0)
+    bpe_domain.columns = [f'bpe_{k}_{DOM_NAMES[k]}' for k in bpe_domain.columns]
+    bpe_domain['bpe_total'] = bpe_domain.sum(axis=1)
+    bpe_domain = bpe_domain.reset_index()
+    merged_census = pd.merge(merged_census, bpe_domain, on='IRIS', how='left')
+    bpe_cols = [c for c in merged_census.columns if c.startswith('bpe_')]
+    merged_census[bpe_cols] = merged_census[bpe_cols].fillna(0)
+    print(f"  BPE 2024 : {len(df_bpe)} lignes → {len(bpe_cols)} colonnes agrégées")
+
+    # + BPE éducation enrichi (éducation prioritaire, privé)
+    df_bpe_edu = read_insee(os.path.join(PATH_IRIS, "ds_bpe_education_iris_2024_geo_2024.csv"),
+                            {'GEO': str})
+    df_bpe_edu.rename(columns={'GEO': 'IRIS'}, inplace=True)
+    df_bpe_edu['IRIS'] = df_bpe_edu['IRIS'].astype(str).str.zfill(9)
+    bpe_ep = df_bpe_edu[df_bpe_edu['EP'].astype(str) == '1'].groupby('IRIS')['OBS_VALUE'].sum().rename('bpe_educ_prioritaire')
+    bpe_pr = df_bpe_edu[df_bpe_edu['SCHOOL_SECTOR'].astype(str) == 'PR'].groupby('IRIS')['OBS_VALUE'].sum().rename('bpe_ecole_privee')
+    merged_census = merged_census.join(bpe_ep, on='IRIS', how='left')
+    merged_census = merged_census.join(bpe_pr, on='IRIS', how='left')
+    merged_census[['bpe_educ_prioritaire', 'bpe_ecole_privee']] = merged_census[['bpe_educ_prioritaire', 'bpe_ecole_privee']].fillna(0)
+    print(f"  BPE éducation : {len(df_bpe_edu)} lignes (EP, privé)")
+
+    # + BPE sport/culture enrichi (indoor, accessibilité)
+    df_bpe_sp = read_insee(os.path.join(PATH_IRIS, "ds_bpe_sport_culture_iris_2024_geo_2024.csv"),
+                           {'GEO': str})
+    df_bpe_sp.rename(columns={'GEO': 'IRIS'}, inplace=True)
+    df_bpe_sp['IRIS'] = df_bpe_sp['IRIS'].astype(str).str.zfill(9)
+    # Sport = sous-domaines F1 (sports) + F2 (loisirs)
+    df_sport = df_bpe_sp[df_bpe_sp['FACILITY_SDOM'].isin(['F1', 'F2'])]
+    bpe_indoor = df_sport[df_sport['INDOOR'].astype(str) == '1'].groupby('IRIS')['OBS_VALUE'].sum().rename('bpe_sport_indoor')
+    bpe_access = df_sport[df_sport['PRACTICE_AREA_ACCESSIBILITY'].astype(str) == '1'].groupby('IRIS')['OBS_VALUE'].sum().rename('bpe_sport_accessible')
+    bpe_sport_tot = df_sport.groupby('IRIS')['OBS_VALUE'].sum().rename('bpe_sport_total')
+    merged_census = merged_census.join(bpe_indoor, on='IRIS', how='left')
+    merged_census = merged_census.join(bpe_access, on='IRIS', how='left')
+    merged_census = merged_census.join(bpe_sport_tot, on='IRIS', how='left')
+    merged_census[['bpe_sport_indoor', 'bpe_sport_accessible', 'bpe_sport_total']] = merged_census[['bpe_sport_indoor', 'bpe_sport_accessible', 'bpe_sport_total']].fillna(0)
+    print(f"  BPE sport/culture : {len(df_bpe_sp)} lignes (indoor, accessibilité)")
+
     # + FILO IRIS
     final_db = pd.merge(merged_census, df_filo_iris, on='IRIS', how='left')
     # + fallback commune
@@ -208,51 +267,126 @@ def compute_demographics(df):
     print("=" * 60)
 
     AGE_MAP = {
-        "P20_POP0002": 1,  "P20_POP0305": 4,  "P20_POP0610": 8,
-        "P20_POP1117": 14, "P20_POP1824": 21, "P20_POP2539": 32,
-        "P20_POP4054": 47, "P20_POP5564": 60, "P20_POP6579": 72, "P20_POP80P": 90
+        "P21_POP0002": 1,  "P21_POP0305": 4,  "P21_POP0610": 8,
+        "P21_POP1117": 14, "P21_POP1824": 21, "P21_POP2539": 32,
+        "P21_POP4054": 47, "P21_POP5564": 60, "P21_POP6579": 72, "P21_POP80P": 90
     }
     CSP_MAPPING = {
-        "pct_csp_agriculteur":   "C20_POP15P_CS1",
-        "pct_csp_independant":   "C20_POP15P_CS2",
-        "pct_csp_plus":          "C20_POP15P_CS3",
-        "pct_csp_intermediaire": "C20_POP15P_CS4",
-        "pct_csp_employe":       "C20_POP15P_CS5",
-        "pct_csp_ouvrier":       "C20_POP15P_CS6",
-        "pct_csp_retraite":      "C20_POP15P_CS7",
-        "pct_csp_sans_emploi":   "C20_POP15P_CS8",
+        "pct_csp_agriculteur":   "C21_POP15P_CS1",
+        "pct_csp_independant":   "C21_POP15P_CS2",
+        "pct_csp_plus":          "C21_POP15P_CS3",
+        "pct_csp_intermediaire": "C21_POP15P_CS4",
+        "pct_csp_employe":       "C21_POP15P_CS5",
+        "pct_csp_ouvrier":       "C21_POP15P_CS6",
+        "pct_csp_retraite":      "C21_POP15P_CS7",
+        "pct_csp_sans_emploi":   "C21_POP15P_CS8",
     }
 
-    pop = df['P20_POP'].replace(0, np.nan)
-    pop15 = df['C20_POP15P'].replace(0, np.nan)
+    pop = df['P21_POP'].replace(0, np.nan)
+    pop15 = df['C21_POP15P'].replace(0, np.nan)
 
     # Age moyen pondéré
     df['age_moyen'] = sum(age * df[col] for col, age in AGE_MAP.items()) / pop
-    df['pop_totale'] = df['P20_POP']
+    df['pop_totale'] = df['P21_POP']
 
     # Tranches d'âge
-    df['pct_0_19']    = df['P20_POP0019'] / pop * 100
-    df['pct_20_64']   = df['P20_POP2064'] / pop * 100
-    df['pct_65_plus'] = df['P20_POP65P']  / pop * 100
+    df['pct_0_19']    = df['P21_POP0019'] / pop * 100
+    df['pct_20_64']   = df['P21_POP2064'] / pop * 100
+    df['pct_65_plus'] = df['P21_POP65P']  / pop * 100
 
     # Immigration
-    df['pct_etrangers'] = df['P20_POP_ETR'] / pop * 100
-    df['pct_immigres']  = df['P20_POP_IMM'] / pop * 100
+    df['pct_etrangers'] = df['P21_POP_ETR'] / pop * 100
+    df['pct_immigres']  = df['P21_POP_IMM'] / pop * 100
 
     # CSP
     for col_out, col_in in CSP_MAPPING.items():
         df[col_out] = df[col_in] / pop15 * 100
 
     # Nouvelles variables
-    pop_h15 = df['C20_H15P'].replace(0, np.nan)
-    pop_f15 = df['C20_F15P'].replace(0, np.nan)
-    df['pct_femmes']        = df['P20_POPF'] / pop * 100
-    df['taille_menage_moy'] = df['P20_POP'] / df['P20_PMEN'].replace(0, np.nan)
-    df['pct_hors_menage']   = df['P20_PHORMEN'] / pop * 100
-    df['ecart_csp_plus_hf'] = (df['C20_H15P_CS3'] / pop_h15 - df['C20_F15P_CS3'] / pop_f15) * 100
+    pop_h15 = df['C21_H15P'].replace(0, np.nan)
+    pop_f15 = df['C21_F15P'].replace(0, np.nan)
+    df['pct_femmes']        = df['P21_POPF'] / pop * 100
+    df['taille_menage_moy'] = df['P21_POP'] / df['P21_PMEN'].replace(0, np.nan)
+    df['pct_hors_menage']   = df['P21_PHORMEN'] / pop * 100
+    df['ecart_csp_plus_hf'] = (df['C21_H15P_CS3'] / pop_h15 - df['C21_F15P_CS3'] / pop_f15) * 100
 
-    n_computed = 20  # pop_totale, age_moyen, 3 tranches, 2 immigration, 8 CSP, 4 nouvelles
-    print(f"  {n_computed} variables démographiques calculées")
+    # ── Logement (2022) ──
+    rp = df['P22_RP'].replace(0, np.nan)
+    log_tot = df['P22_LOG'].replace(0, np.nan)
+    achtot = df['P22_RP_ACHTOT'].replace(0, np.nan)
+    norme = df['C22_RP_NORME'].replace(0, np.nan)
+
+    df['pct_proprietaires']     = df['P22_RP_PROP'] / rp * 100
+    df['pct_locataires']        = df['P22_RP_LOC'] / rp * 100
+    df['pct_hlm']               = df['P22_RP_LOCHLMV'] / rp * 100
+    df['pct_logvac']            = df['P22_LOGVAC'] / log_tot * 100
+    df['pct_maison']            = df['P22_MAISON'] / log_tot * 100
+    df['pct_appart']            = df['P22_APPART'] / log_tot * 100
+    df['pct_petits_logements']  = (df['P22_RP_M30M2'] + df['P22_RP_3040M2']) / rp * 100
+    df['pct_grands_logements']  = df['P22_RP_120M2P'] / rp * 100
+    df['pct_logements_anciens'] = df['P22_RP_ACH1919'] / achtot * 100
+    df['pct_logements_recents'] = df['P22_RP_ACH2019'] / achtot * 100
+    df['pct_voiture_0']         = (rp - df['P22_RP_VOIT1P']) / rp * 100
+    df['pct_voiture_2plus']     = df['P22_RP_VOIT2P'] / rp * 100
+    df['pct_suroccupation']     = (df['C22_RP_SUROCC_MOD'] + df['C22_RP_SUROCC_ACC']) / norme * 100
+
+    # Clipper tous les pourcentages logement à [0, 100]
+    pct_log_vars = ['pct_proprietaires', 'pct_locataires', 'pct_hlm',
+                    'pct_logvac', 'pct_maison', 'pct_appart',
+                    'pct_petits_logements', 'pct_grands_logements',
+                    'pct_logements_anciens', 'pct_logements_recents',
+                    'pct_voiture_0', 'pct_voiture_2plus', 'pct_suroccupation']
+    for v in pct_log_vars:
+        df[v] = df[v].clip(0, 100)
+
+    SURF_BRACKETS = {
+        'P22_RP_M30M2': 20, 'P22_RP_3040M2': 35, 'P22_RP_4060M2': 50,
+        'P22_RP_6080M2': 70, 'P22_RP_80100M2': 90, 'P22_RP_100120M2': 110,
+        'P22_RP_120M2P': 140
+    }
+    df['surface_moyenne'] = sum(df[col] * mid for col, mid in SURF_BRACKETS.items()) / rp
+    
+    # ── Énergie de chauffage ──
+    df['pct_chauffage_elec']          = df['P22_RP_CELEC'] / rp * 100
+    df['pct_chauffage_fioul']         = df['P22_RP_CFIOUL'] / rp * 100
+    df['pct_chauffage_gaz_ville']     = df['P22_RP_CGAZV'] / rp * 100
+    df['pct_chauffage_gaz_bouteille'] = df['P22_RP_CGAZB'] / rp * 100
+    df['pct_chauffage_autre']         = df['P22_RP_CAUT'] / rp * 100
+
+    # ── Confort du logement ──
+    df['pct_garage']            = df['P22_RP_GARL'] / rp * 100
+    df['nb_pieces_moyen']       = df['P22_NBPI_RP'] / rp
+    df['pct_studios']           = df['P22_RP_1P'] / rp * 100
+    df['pct_logements_5p_plus'] = df['P22_RP_5PP'] / rp * 100
+
+    # Clipper les nouveaux pourcentages à [0, 100]
+    pct_new_vars = ['pct_chauffage_elec', 'pct_chauffage_fioul',
+                    'pct_chauffage_gaz_ville', 'pct_chauffage_gaz_bouteille',
+                    'pct_chauffage_autre', 'pct_garage', 'pct_studios',
+                    'pct_logements_5p_plus']
+    for v in pct_new_vars:
+        df[v] = df[v].clip(0, 100)
+
+    # ── Équipements BPE pour 1000 hab ──
+    # NaN pour IRIS < 50 hab (ratios instables), puis winsorisation au p99
+    pop_k = (df['pop_totale'] / 1000).replace(0, np.nan)
+    low_pop_mask = df['pop_totale'] < 50
+    bpe_cols = [c for c in df.columns if c.startswith('bpe_') and not c.endswith('_pour1000')]
+    for col in bpe_cols:
+        df[f'{col}_pour1000'] = df[col] / pop_k
+        df.loc[low_pop_mask, f'{col}_pour1000'] = np.nan
+    # Winsoriser au p99
+    bpe_pour1000_cols = [f'{c}_pour1000' for c in bpe_cols]
+    for col in bpe_pour1000_cols:
+        p99 = df[col].quantile(0.99)
+        df[col] = df[col].clip(upper=p99)
+
+    # ── Accessibilité sport (ratio interne, pas pour-1000) ──
+    sport_tot = df['bpe_sport_total'].replace(0, np.nan)
+    df['pct_sport_accessible'] = (df['bpe_sport_accessible'] / sport_tot * 100).clip(0, 100)
+
+    n_computed = 20 + 23 + len(bpe_cols)
+    print(f"  {n_computed} variables dérivées calculées (démo + logement + énergie + BPE)")
     return df
 
 
@@ -267,7 +401,7 @@ def build_final(ml_path):
     df_final = pd.read_csv(ml_path, dtype={'IRIS': str, 'COM': str}, low_memory=False)
     print(f"  Base ML : {len(df_final)} IRIS x {len(df_final.columns)} cols")
 
-    # Calcul des variables démographiques dérivées (colonnes P20_/C20_ déjà présentes)
+    # Calcul des variables démographiques dérivées (colonnes P21_/C21_ déjà présentes)
     df_final = compute_demographics(df_final)
 
     # Noms de communes (COG 2026)
@@ -277,6 +411,7 @@ def build_final(ml_path):
         usecols=['COM', 'LIBELLE']
     ).rename(columns={'LIBELLE': 'nom_commune'})
     df_cog['COM'] = df_cog['COM'].str.zfill(5)
+    df_cog = df_cog.drop_duplicates(subset='COM', keep='first')
 
     # Ajouter nom_commune
     df_final['_COM5'] = df_final['COM'].astype(str).str.zfill(5)
@@ -300,6 +435,12 @@ def build_final(ml_path):
         'pct_csp_retraite', 'pct_csp_sans_emploi',
         'pct_femmes', 'taille_menage_moy', 'pct_hors_menage', 'ecart_csp_plus_hf',
         'DISP_MED21', 'DISP_TP6021', 'DISP_PPAT21',
+        'pct_proprietaires', 'pct_hlm', 'pct_maison', 'surface_moyenne',
+        'pct_suroccupation', 'bpe_total_pour1000', 'bpe_D_sante_pour1000',
+        'pct_chauffage_elec', 'pct_chauffage_fioul', 'nb_pieces_moyen',
+        'pct_garage', 'pct_studios',
+        'bpe_educ_prioritaire_pour1000', 'bpe_ecole_privee_pour1000',
+        'bpe_sport_indoor_pour1000', 'pct_sport_accessible',
     ]
     for col in cols_verif:
         if col in df_final.columns:
@@ -308,19 +449,6 @@ def build_final(ml_path):
         else:
             print(f"    {col:<30} MANQUANT")
 
-    # Comparaison avec ancien fichier
-    old_path = os.path.join(PATH_IRIS, "iris_final_socio_politique.csv")
-    if os.path.exists(old_path):
-        df_old = pd.read_csv(old_path, low_memory=False)
-        print("\n  --- Comparaison médianes (nouveau vs jolivet) ---")
-        print("  NOTE: pct_0_19/20_64/65_plus ~2x plus grands (bug utils.py corrigé)")
-        for col in cols_verif:
-            if col in df_final.columns and col in df_old.columns:
-                new_med = df_final[col].median()
-                old_med = df_old[col].median()
-                print(f"    {col}: nouveau={new_med:.2f}  jolivet={old_med:.2f}  delta={new_med-old_med:+.3f}")
-
-    return output_path
 
 
 # =============================================================================
