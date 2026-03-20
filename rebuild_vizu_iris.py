@@ -372,7 +372,7 @@ AXIS_PRESETS = [
         ],
         'desc': {
             'title': 'Transition \u00e9nerg\u00e9tique \u2014 Fioul \u00d7 \u00c9lectricit\u00e9',
-            'x': '<b>Axe X \u2014 Chauffage fioul</b> : % des RP chauff\u00e9es au fioul (invers\u00e9). Gauche = forte d\u00e9pendance fioul, droite = transition effectu\u00e9e.',
+            'x': '<b>Axe X \u2014 Chauffage fioul</b> : % des RP chauff\u00e9es au fioul. Gauche = transition effectu\u00e9e, droite = forte d\u00e9pendance fioul.',
             'y': '<b>Axe Y \u2014 Chauffage \u00e9lectrique</b> : % des RP chauff\u00e9es \u00e0 l\'\u00e9lectricit\u00e9.',
             'quadrants': {
                 'tl': '<b>\u00c9lectrique, peu de fioul</b> \u2014 Logements r\u00e9cents ou r\u00e9nov\u00e9s, transition avanc\u00e9e.',
