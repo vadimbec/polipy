@@ -40,6 +40,7 @@ resultats_elections/
 
 # Large iris files (keep elections + small CSVs)
 iris/iris_final_socio_politique.csv
+iris/iris_final_socio_politique_bis.csv
 iris/iris_coordonnees_finales.csv
 iris/iris_database_machine_learning.csv
 iris/iris_coordonnees_classes.csv
