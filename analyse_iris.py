@@ -33,10 +33,23 @@ from scipy.cluster.hierarchy import linkage, dendrogram, fcluster
 from scipy.spatial.distance import squareform
 from sklearn.manifold import TSNE
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
-from sklearn.ensemble import GradientBoostingClassifier
-from sklearn.inspection import permutation_importance
+from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
+from sklearn.inspection import permutation_importance, PartialDependenceDisplay
 from sklearn.model_selection import cross_val_score
 from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+from sklearn.feature_selection import mutual_info_regression
+
+import statsmodels.api as sm
+import networkx as nx
+
+try:
+    import umap
+    HAS_UMAP = True
+except ImportError:
+    HAS_UMAP = False
+    print("[!] umap-learn non disponible — section UMAP sera ignorée")
 
 warnings.filterwarnings('ignore', category=FutureWarning)
 warnings.filterwarnings('ignore', category=UserWarning)
@@ -512,7 +525,13 @@ def variable_quality_assessment(df, var_names):
         for _, r in flagged_low.iterrows():
             print(f"    {r['variable']:35s}  CV={r['wcv']:.4f}  mean={r['wmean']:.2f}")
 
-    # ── Distribution plots ──
+    # ── Distribution plots (with KDE overlay, colored by category) ──
+    cat_colors = {
+        'Démographie': '#e41a1c', 'CSP': '#377eb8', 'Revenus': '#4daf4a',
+        'Composition revenus': '#984ea3', 'Diplômes / Emploi': '#ff7f00',
+        'Transport': '#a65628', 'Logement': '#f781bf', 'Chauffage': '#999999',
+        'Confort logement': '#66c2a5', 'Équipements BPE': '#fc8d62',
+    }
     n_vars = len(var_names)
     ncols = 6
     nrows = (n_vars + ncols - 1) // ncols
@@ -521,12 +540,23 @@ def variable_quality_assessment(df, var_names):
     for i, v in enumerate(var_names):
         ax = axes[i]
         xv = df[v].dropna().values
-        ax.hist(xv, bins=50, color='steelblue', alpha=0.7, density=True)
-        ax.set_title(v, fontsize=7, fontweight='bold')
+        cat = cats.get(v, 'autre')
+        color = cat_colors.get(cat, 'steelblue')
+        ax.hist(xv, bins=50, color=color, alpha=0.5, density=True)
+        # KDE overlay
+        if len(xv) > 10 and np.std(xv) > 1e-10:
+            try:
+                from scipy.stats import gaussian_kde
+                kde = gaussian_kde(xv)
+                x_grid = np.linspace(xv.min(), xv.max(), 200)
+                ax.plot(x_grid, kde(x_grid), color=color, lw=1.5)
+            except Exception:
+                pass
+        ax.set_title(f'{v}\n({cat})', fontsize=6, fontweight='bold')
         ax.tick_params(labelsize=5)
     for j in range(i + 1, len(axes)):
         axes[j].set_visible(False)
-    fig.suptitle('Distributions de toutes les variables', fontsize=14, y=1.0)
+    fig.suptitle('Distributions de toutes les variables (KDE + histogramme, colorées par catégorie)', fontsize=14, y=1.0)
     fig.tight_layout()
     fig.savefig(os.path.join(OUTPUT_DIR, '01_distributions.png'), dpi=120, bbox_inches='tight')
     plt.close(fig)
@@ -619,20 +649,7 @@ def correlation_analysis(df, var_names):
     for _, r in df_nl.head(10).iterrows():
         print(f"    {r['var1']:35s} × {r['var2']:35s}  Δ={r['diff']:+.3f} (P={r['pearson_r']:+.3f} S={r['spearman_r']:+.3f})")
 
-    # ── Heatmap ──
-    fig, ax = plt.subplots(figsize=(20, 18))
-    mask = np.triu(np.ones_like(corr_p, dtype=bool), k=1)
-    sns.heatmap(df_corr_p, mask=mask, cmap='RdBu_r', center=0, vmin=-1, vmax=1,
-                ax=ax, square=True, linewidths=0.1,
-                xticklabels=True, yticklabels=True,
-                cbar_kws={'shrink': 0.6})
-    ax.tick_params(labelsize=5)
-    ax.set_title('Matrice de corrélation Pearson pondérée (population)', fontsize=12)
-    fig.tight_layout()
-    fig.savefig(os.path.join(OUTPUT_DIR, '02_corr_heatmap.png'), dpi=150, bbox_inches='tight')
-    plt.close(fig)
-
-    # ── Dendrogram ──
+    # ── Dendrogram (compute linkage first, needed for heatmap ordering) ──
     dist = 1 - np.abs(corr_p)
     np.fill_diagonal(dist, 0)
     dist = np.clip(dist, 0, None)
@@ -646,6 +663,24 @@ def correlation_analysis(df, var_names):
     ax.set_ylabel('Distance')
     fig.tight_layout()
     fig.savefig(os.path.join(OUTPUT_DIR, '02_dendrogram.png'), dpi=120, bbox_inches='tight')
+    plt.close(fig)
+
+    # ── Heatmap (reordered by hierarchical clustering) ──
+    fig, ax = plt.subplots(figsize=(20, 18))
+    from scipy.cluster.hierarchy import leaves_list
+    leaf_order = leaves_list(Z)
+    ordered_vars = [var_names[i] for i in leaf_order]
+    corr_ordered = df_corr_p.loc[ordered_vars, ordered_vars]
+    n_ov = len(ordered_vars)
+    mask_ordered = np.triu(np.ones((n_ov, n_ov), dtype=bool), k=1)
+    sns.heatmap(corr_ordered, mask=mask_ordered, cmap='RdBu_r', center=0, vmin=-1, vmax=1,
+                ax=ax, square=True, linewidths=0.1,
+                xticklabels=True, yticklabels=True,
+                cbar_kws={'shrink': 0.6})
+    ax.tick_params(labelsize=5)
+    ax.set_title('Matrice de corrélation Pearson pondérée — ordonnée par clustering hiérarchique', fontsize=12)
+    fig.tight_layout()
+    fig.savefig(os.path.join(OUTPUT_DIR, '02_corr_heatmap.png'), dpi=150, bbox_inches='tight')
     plt.close(fig)
 
     print(f"  → Fichiers : 02_corr_pearson.csv, 02_corr_spearman.csv, 02_redundant_pairs.csv,")
@@ -779,15 +814,23 @@ def weighted_pca_analysis(df, var_names):
     fig.savefig(os.path.join(OUTPUT_DIR, '03_pca_scree.png'), dpi=120)
     plt.close(fig)
 
-    # ── Biplot PC1 vs PC2 ──
+    # ── Biplot PC1 vs PC2 (colored by dominant candidate) ──
     fig, ax = plt.subplots(figsize=(14, 12))
 
     # Subsample for scatter
     n_plot = min(5000, len(df))
     rng = np.random.RandomState(RANDOM_SEED)
     idx_plot = rng.choice(len(df), n_plot, replace=False)
-    ax.scatter(scores[idx_plot, 0], scores[idx_plot, 1],
-               c='lightgray', s=2, alpha=0.3, rasterized=True)
+
+    # Color by dominant candidate
+    cands_plot = df['dominant_candidate'].iloc[idx_plot].values
+    for cand in CANDIDATES:
+        mask_c = cands_plot == cand
+        if mask_c.sum() > 0:
+            ax.scatter(scores[idx_plot[mask_c], 0], scores[idx_plot[mask_c], 1],
+                       c=CANDIDATE_COLORS.get(cand, '#ccc'), s=3, alpha=0.4,
+                       label=cand, rasterized=True)
+    ax.legend(fontsize=7, markerscale=3, loc='upper right')
 
     # Loading arrows
     scale = max(abs(scores[:, 0]).max(), abs(scores[:, 1]).max()) * 0.8
@@ -804,7 +847,7 @@ def weighted_pca_analysis(df, var_names):
     ax.axvline(0, color='gray', lw=0.3)
     ax.set_xlabel(f'PC1 ({explained_ratio[0]*100:.1f}%)')
     ax.set_ylabel(f'PC2 ({explained_ratio[1]*100:.1f}%)')
-    ax.set_title('Biplot PCA pondérée — PC1 × PC2')
+    ax.set_title('Biplot PCA pondérée — PC1 × PC2 (coloré par candidat dominant)')
     fig.tight_layout()
     fig.savefig(os.path.join(OUTPUT_DIR, '03_pca_biplot.png'), dpi=120)
     plt.close(fig)
@@ -1208,11 +1251,23 @@ def candidate_profiles(df, var_names):
     max_z = df_z[cand_order].abs().max(axis=1).sort_values(ascending=False)
     top_vars = max_z.head(40).index.tolist()
 
+    # Reorder variables by hierarchical clustering for better readability
+    z_data = df_z.loc[top_vars, cand_order].values
+    if len(top_vars) > 3:
+        from scipy.cluster.hierarchy import linkage as _linkage, leaves_list as _leaves_list
+        from scipy.spatial.distance import pdist
+        dist_vars = pdist(z_data, metric='euclidean')
+        Z_vars = _linkage(dist_vars, method='ward')
+        var_order = _leaves_list(Z_vars)
+        top_vars_ordered = [top_vars[i] for i in var_order]
+    else:
+        top_vars_ordered = top_vars
+
     fig, ax = plt.subplots(figsize=(14, 16))
-    z_plot = df_z.loc[top_vars, cand_order]
+    z_plot = df_z.loc[top_vars_ordered, cand_order]
     sns.heatmap(z_plot, cmap='RdBu_r', center=0, vmin=-3, vmax=3,
                 ax=ax, linewidths=0.5, annot=True, fmt='.1f', annot_kws={'size': 6})
-    ax.set_title('Profils candidats — Z-scores vs moyenne nationale\n(top 40 variables les plus discriminantes)',
+    ax.set_title('Profils candidats — Z-scores vs moyenne nationale\n(top 40 variables, ordonnées par clustering)',
                  fontsize=11)
     ax.tick_params(labelsize=7)
     fig.tight_layout()
@@ -1412,19 +1467,37 @@ def discriminant_analysis(df, var_names):
     )
     print(f"\n  Précision cross-validée (5-fold) : {cv_scores.mean():.3f} ± {cv_scores.std():.3f}")
 
-    # ── Scatter LD1 × LD2 ──
+    # ── Scatter LD1 × LD2 (with 95% confidence ellipses) ──
     fig, ax = plt.subplots(figsize=(12, 10))
+    from matplotlib.patches import Ellipse
     for cls in valid_classes:
         mask_cls = y_lda == cls
-        ax.scatter(X_lda_proj[mask_cls, 0], X_lda_proj[mask_cls, 1],
+        pts = X_lda_proj[mask_cls, :2]
+        ax.scatter(pts[:, 0], pts[:, 1],
                    c=CANDIDATE_COLORS.get(cls, '#999'), s=3, alpha=0.3,
                    label=cls, rasterized=True)
+        # 95% confidence ellipse
+        if pts.shape[0] > 5:
+            mean_x, mean_y = pts[:, 0].mean(), pts[:, 1].mean()
+            cov = np.cov(pts[:, 0], pts[:, 1])
+            eigenvals, eigenvecs = np.linalg.eigh(cov)
+            order = eigenvals.argsort()[::-1]
+            eigenvals = eigenvals[order]
+            eigenvecs = eigenvecs[:, order]
+            angle = np.degrees(np.arctan2(eigenvecs[1, 0], eigenvecs[0, 0]))
+            # 95% CI: chi2(2) = 5.991
+            width, height = 2 * np.sqrt(eigenvals * 5.991)
+            ell = Ellipse(xy=(mean_x, mean_y), width=width, height=height,
+                          angle=angle, facecolor='none',
+                          edgecolor=CANDIDATE_COLORS.get(cls, '#999'),
+                          lw=1.5, ls='--', alpha=0.8)
+            ax.add_patch(ell)
     ax.legend(fontsize=9, markerscale=4)
     ld1_pct = f" ({ev_ratio[0]*100:.1f}%)" if ev_ratio is not None else ""
     ld2_pct = f" ({ev_ratio[1]*100:.1f}%)" if ev_ratio is not None and len(ev_ratio) > 1 else ""
     ax.set_xlabel(f'LD1{ld1_pct}')
     ax.set_ylabel(f'LD2{ld2_pct}')
-    ax.set_title(f'LDA — Présidentielles 2022 T1\n(accuracy CV: {cv_scores.mean():.1%})')
+    ax.set_title(f'LDA — Présidentielles 2022 T1 (ellipses IC 95%)\n(accuracy CV: {cv_scores.mean():.1%})')
     fig.tight_layout()
     fig.savefig(os.path.join(OUTPUT_DIR, '09_lda_scatter.png'), dpi=120)
     plt.close(fig)
@@ -1727,6 +1800,1470 @@ def party_informed_scores(df, var_names, lda_results, corr_by_candidate):
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+#  PART 1 (cont.) — EXTENSIONS AGNOSTIQUES
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ── 1.7 UMAP ────────────────────────────────────────────────────────────────
+
+def umap_exploration(df, var_names, pca_results):
+    """UMAP dimensionality reduction — complements t-SNE with better global structure."""
+    print("\n" + "─" * 70)
+    print("  1.7  UMAP (alternative au t-SNE)")
+    print("─" * 70)
+
+    if not HAS_UMAP:
+        print("  [!] umap-learn non installé — section ignorée")
+        return
+
+    X_std = pca_results['X_std']
+    pop = df['_pop'].values
+
+    # Same stratified subsample as t-SNE
+    n_sample = min(15000, len(df))
+    rng = np.random.RandomState(RANDOM_SEED)
+    pop_deciles = pd.qcut(pop, 10, labels=False, duplicates='drop')
+    idx_sample = []
+    for d in range(10):
+        d_idx = np.where(pop_deciles == d)[0]
+        n_take = min(len(d_idx), n_sample // 10)
+        idx_sample.extend(rng.choice(d_idx, n_take, replace=False))
+    idx_sample = np.array(idx_sample)
+
+    # PCA pre-reduction
+    n_pca_dims = min(20, X_std.shape[1])
+    scores_sub = X_std[idx_sample] @ pca_results['eigenvectors'][:, :n_pca_dims]
+
+    print(f"\n  UMAP sur {len(idx_sample)} IRIS (n_neighbors=15, min_dist=0.1)...")
+    reducer = umap.UMAP(n_neighbors=15, min_dist=0.1, n_components=2,
+                         random_state=RANDOM_SEED, metric='euclidean')
+    embed = reducer.fit_transform(scores_sub)
+
+    print("  INTERPRÉTATION SOCIO-POLITIQUE :")
+    print("    UMAP préserve mieux la structure globale que t-SNE : les distances entre")
+    print("    clusters ont un sens (clusters éloignés = profils sociologiques très différents).")
+    print("    C'est particulièrement utile pour identifier les 'ponts' sociologiques entre")
+    print("    électorats (ex: zones péri-urbaines entre bloc Le Pen et bloc Macron).")
+
+    # Plot by dominant candidate
+    fig, axes = plt.subplots(1, 2, figsize=(18, 8))
+    ax = axes[0]
+    cands_sub = df['dominant_candidate'].iloc[idx_sample].values
+    for cand in CANDIDATES:
+        mask = cands_sub == cand
+        if mask.sum() > 0:
+            ax.scatter(embed[mask, 0], embed[mask, 1], c=CANDIDATE_COLORS.get(cand, '#ccc'),
+                       s=3, alpha=0.4, label=cand, rasterized=True)
+    ax.set_title('UMAP coloré par candidat dominant (Prés. 2022 T1)')
+    ax.legend(fontsize=7, markerscale=3)
+    ax.set_xticks([])
+    ax.set_yticks([])
+
+    ax = axes[1]
+    if 'score_cap_cult' in df.columns:
+        color_var = df['score_cap_cult'].iloc[idx_sample].values
+    else:
+        color_var = df['DISP_MED21'].iloc[idx_sample].values
+    sc = ax.scatter(embed[:, 0], embed[:, 1], c=color_var, cmap='RdBu_r',
+                    s=3, alpha=0.4, rasterized=True)
+    plt.colorbar(sc, ax=ax, shrink=0.7)
+    ax.set_title('UMAP coloré par score capital culturel')
+    ax.set_xticks([])
+    ax.set_yticks([])
+
+    fig.suptitle(f'UMAP ({len(idx_sample)} IRIS, n_neighbors=15)', fontsize=13)
+    fig.tight_layout()
+    fig.savefig(os.path.join(OUTPUT_DIR, '05b_umap_by_party.png'), dpi=120)
+    plt.close(fig)
+
+    # UMAP colored by multiple scores
+    score_vars = [s for s in EXISTING_SCORES_CONFIG if s in df.columns]
+    n_scores = len(score_vars)
+    ncols = 4
+    nrows = (n_scores + ncols - 1) // ncols
+    fig, axes = plt.subplots(nrows, ncols, figsize=(20, 5 * nrows))
+    axes = axes.flatten()
+    for i, sv in enumerate(score_vars):
+        ax = axes[i]
+        vals = df[sv].iloc[idx_sample].values
+        sc = ax.scatter(embed[:, 0], embed[:, 1], c=vals, cmap='RdBu_r',
+                        s=2, alpha=0.4, rasterized=True)
+        plt.colorbar(sc, ax=ax, shrink=0.6)
+        ax.set_title(sv, fontsize=9)
+        ax.set_xticks([])
+        ax.set_yticks([])
+    for j in range(i + 1, len(axes)):
+        axes[j].set_visible(False)
+    fig.suptitle('UMAP coloré par scores composites existants', fontsize=13)
+    fig.tight_layout()
+    fig.savefig(os.path.join(OUTPUT_DIR, '05b_umap_by_score.png'), dpi=120)
+    plt.close(fig)
+
+    print(f"  → Fichiers : 05b_umap_by_party.png, 05b_umap_by_score.png")
+
+
+# ── 1.8 Clustering K-Means ──────────────────────────────────────────────────
+
+def clustering_analysis(df, var_names, pca_results):
+    """K-Means clustering on PCA scores with profiling."""
+    print("\n" + "─" * 70)
+    print("  1.8  ANALYSE DE CLUSTERING (K-Means)")
+    print("─" * 70)
+
+    pop = df['_pop'].values
+    n_retain = pca_results['n_retain']
+    scores = pca_results['scores'][:, :n_retain]
+
+    # Test k=4 to k=12
+    k_range = range(4, 13)
+    inertias = []
+    silhouettes = []
+
+    # Subsample for silhouette (too slow on full dataset)
+    n_sil = min(20000, len(df))
+    rng = np.random.RandomState(RANDOM_SEED)
+    sil_idx = rng.choice(len(df), n_sil, replace=False)
+
+    print(f"\n  Test de k=4 à k=12 sur {n_retain} PCs...")
+    for k in k_range:
+        km = KMeans(n_clusters=k, random_state=RANDOM_SEED, n_init=10, max_iter=300)
+        km.fit(scores)
+        inertias.append(km.inertia_)
+        sil = silhouette_score(scores[sil_idx], km.labels_[sil_idx], sample_size=n_sil)
+        silhouettes.append(sil)
+        print(f"    k={k:2d}  inertia={km.inertia_:12.0f}  silhouette={sil:.4f}")
+
+    # Best k by silhouette
+    best_k = list(k_range)[np.argmax(silhouettes)]
+    print(f"\n  Meilleur k par silhouette : k={best_k} (sil={max(silhouettes):.4f})")
+
+    # Elbow + silhouette plot
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
+    ax1.plot(list(k_range), inertias, 'bo-')
+    ax1.set_xlabel('k')
+    ax1.set_ylabel('Inertia')
+    ax1.set_title('Méthode du coude')
+    ax1.axvline(best_k, color='red', ls='--', label=f'best k={best_k}')
+    ax1.legend()
+
+    ax2.plot(list(k_range), silhouettes, 'go-')
+    ax2.set_xlabel('k')
+    ax2.set_ylabel('Silhouette score')
+    ax2.set_title('Score silhouette')
+    ax2.axvline(best_k, color='red', ls='--', label=f'best k={best_k}')
+    ax2.legend()
+
+    fig.suptitle('K-Means : choix du nombre de clusters', fontsize=13)
+    fig.tight_layout()
+    fig.savefig(os.path.join(OUTPUT_DIR, '12_cluster_silhouette.png'), dpi=120)
+    plt.close(fig)
+
+    # Final clustering with best k
+    km_final = KMeans(n_clusters=best_k, random_state=RANDOM_SEED, n_init=10)
+    df['cluster'] = km_final.fit_predict(scores)
+
+    # Cluster profiles (weighted means of original variables)
+    profile_rows = []
+    for c in range(best_k):
+        mask = df['cluster'] == c
+        n_iris = mask.sum()
+        pop_total = pop[mask].sum()
+        row = {'cluster': c, 'n_iris': n_iris, 'pop_total': int(pop_total)}
+        for v in var_names:
+            row[v] = weighted_mean(df.loc[mask, v].values, pop[mask])
+        profile_rows.append(row)
+    df_profiles = pd.DataFrame(profile_rows)
+    df_profiles.to_csv(os.path.join(OUTPUT_DIR, '12_cluster_profiles.csv'), index=False)
+
+    # Cluster naming heuristics
+    cluster_names = {}
+    for c in range(best_k):
+        row = df_profiles.iloc[c]
+        traits = []
+        if row.get('pct_hlm', 0) > 20: traits.append('HLM')
+        if row.get('pct_csp_plus', 0) > 15: traits.append('cadres')
+        if row.get('pct_csp_ouvrier', 0) > 15: traits.append('ouvrier')
+        if row.get('pct_65_plus', 0) > 25: traits.append('âgé')
+        if row.get('pct_etudiants', 0) > 10: traits.append('étudiant')
+        if row.get('pct_immigres', 0) > 15: traits.append('immigré')
+        if row.get('pct_maison', 0) > 60: traits.append('pavillonnaire')
+        if row.get('pct_appart', 0) > 80: traits.append('urbain-dense')
+        if row.get('DISP_MED21', 0) > 25000: traits.append('aisé')
+        if row.get('DISP_TP6021', 0) > 20: traits.append('précaire')
+        name = '/'.join(traits[:3]) if traits else f'cluster_{c}'
+        cluster_names[c] = name
+        print(f"    Cluster {c} ({name}): n={row['n_iris']}, pop={row['pop_total']/1e6:.2f}M")
+
+    # Profiles heatmap (z-scored)
+    var_cols = [v for v in var_names if v in df_profiles.columns]
+    z_profiles = df_profiles[var_cols].copy()
+    for v in var_cols:
+        mu = weighted_mean(df[v].values, pop)
+        sigma = weighted_std(df[v].values, pop)
+        if sigma > 1e-10:
+            z_profiles[v] = (z_profiles[v] - mu) / sigma
+        else:
+            z_profiles[v] = 0
+    z_profiles.index = [f"C{c}: {cluster_names[c]}" for c in range(best_k)]
+
+    # Select top 40 most variable across clusters
+    var_range = z_profiles.abs().max(axis=0).sort_values(ascending=False)
+    top40 = var_range.head(40).index.tolist()
+
+    fig, ax = plt.subplots(figsize=(16, 10))
+    sns.heatmap(z_profiles[top40].T, cmap='RdBu_r', center=0, vmin=-3, vmax=3,
+                ax=ax, linewidths=0.5, annot=True, fmt='.1f', annot_kws={'size': 6})
+    ax.set_title(f'Profils des {best_k} clusters (z-scores, top 40 variables)', fontsize=11)
+    ax.tick_params(labelsize=7)
+    fig.tight_layout()
+    fig.savefig(os.path.join(OUTPUT_DIR, '12_cluster_profiles_heatmap.png'), dpi=120, bbox_inches='tight')
+    plt.close(fig)
+
+    # Cross-tabulation clusters × dominant candidate
+    ct = pd.crosstab(df['cluster'].map(lambda c: f"C{c}: {cluster_names[c]}"),
+                     df['dominant_candidate'], margins=True)
+    ct.to_csv(os.path.join(OUTPUT_DIR, '12_cluster_party_crosstab.csv'))
+
+    # Chi² test
+    ct_no_margins = ct.iloc[:-1, :-1]
+    chi2, p_chi2, dof, expected = stats.chi2_contingency(ct_no_margins)
+    print(f"\n  Chi² clusters × candidat dominant : χ²={chi2:.1f}, p={p_chi2:.2e}, dof={dof}")
+
+    # Mosaic-like stacked bar plot
+    ct_pct = ct_no_margins.div(ct_no_margins.sum(axis=1), axis=0) * 100
+    fig, ax = plt.subplots(figsize=(14, 8))
+    ct_pct.plot(kind='barh', stacked=True, ax=ax,
+                color=[CANDIDATE_COLORS.get(c, '#ccc') for c in ct_pct.columns])
+    ax.set_xlabel('% des IRIS du cluster')
+    ax.set_title(f'Composition électorale des clusters (χ²={chi2:.0f}, p={p_chi2:.1e})')
+    ax.legend(bbox_to_anchor=(1.02, 1), loc='upper left', fontsize=8)
+    fig.tight_layout()
+    fig.savefig(os.path.join(OUTPUT_DIR, '12_cluster_party_mosaic.png'), dpi=120, bbox_inches='tight')
+    plt.close(fig)
+
+    print("  INTERPRÉTATION SOCIO-POLITIQUE :")
+    print("    Le clustering révèle des 'types de territoires' au-delà du simple clivage")
+    print("    gauche/droite. On observe typiquement : quartiers populaires urbains (HLM,")
+    print("    immigration → Mélenchon), périurbain pavillonnaire (voiture, maison →")
+    print("    Le Pen), centres-villes aisés (cadres, vélo → Macron/Jadot), etc.")
+
+    print(f"\n  → Fichiers : 12_cluster_silhouette.png, 12_cluster_profiles.csv,")
+    print(f"               12_cluster_profiles_heatmap.png, 12_cluster_party_crosstab.csv,")
+    print(f"               12_cluster_party_mosaic.png")
+
+    return km_final, cluster_names
+
+
+# ── 1.9 Redundancy Analysis ─────────────────────────────────────────────────
+
+def redundancy_analysis(df, var_names, corr_matrix, redundant_pairs, pca_results):
+    """Build redundancy graph, select core non-redundant variables."""
+    print("\n" + "─" * 70)
+    print("  1.9  ANALYSE DE REDONDANCE ET SÉLECTION DE VARIABLES")
+    print("─" * 70)
+
+    pop = df['_pop'].values
+
+    # Build redundancy graph (edges = |r| > 0.85)
+    G = nx.Graph()
+    G.add_nodes_from(var_names)
+    for _, row in redundant_pairs.iterrows():
+        G.add_edge(row['var1'], row['var2'], weight=abs(row['pearson_r']))
+
+    components = list(nx.connected_components(G))
+    n_comp = len([c for c in components if len(c) > 1])
+    print(f"\n  Graphe de redondance : {len(G.edges)} arêtes, {n_comp} composantes connexes (>1 var)")
+
+    # For each connected component, keep variable with best discriminant power
+    core_vars = []
+    removed_vars = []
+    for comp in components:
+        if len(comp) == 1:
+            core_vars.append(list(comp)[0])
+            continue
+
+        # Discriminant power = variance of candidate barycentre positions
+        best_var = None
+        best_power = -1
+        for v in comp:
+            if v not in df.columns:
+                continue
+            # Compute inter-candidate variance
+            bary_vals = []
+            for cand in CANDIDATES:
+                sc = f'score_{cand}'
+                if sc in df.columns:
+                    w = df[sc].fillna(0).values * pop
+                    if w.sum() > 0:
+                        bary_vals.append(weighted_mean(df[v].values, w))
+            if bary_vals:
+                power = np.var(bary_vals)
+                if power > best_power:
+                    best_power = power
+                    best_var = v
+
+        if best_var:
+            core_vars.append(best_var)
+            removed_vars.extend([v for v in comp if v != best_var])
+            print(f"    Composante {list(comp)[:3]}... → garder {best_var} (discr={best_power:.2f})")
+        else:
+            core_vars.extend(list(comp))
+
+    print(f"\n  Core set : {len(core_vars)} variables (supprimées : {len(removed_vars)})")
+    pd.DataFrame({'variable': core_vars, 'kept': True}).to_csv(
+        os.path.join(OUTPUT_DIR, '13_core_variable_set.csv'), index=False)
+
+    # Redundancy graph visualization
+    fig, ax = plt.subplots(figsize=(16, 12))
+    pos = nx.spring_layout(G, seed=RANDOM_SEED, k=2)
+    # Color nodes: core = green, removed = red
+    node_colors = ['#16A34A' if v in core_vars else '#DC2626' for v in G.nodes]
+    nx.draw(G, pos, ax=ax, node_color=node_colors, node_size=100,
+            font_size=5, with_labels=True, edge_color='gray', alpha=0.7,
+            width=[G[u][v]['weight'] * 2 for u, v in G.edges])
+    ax.set_title(f'Graphe de redondance (|r|>0.85)\nVert=gardé ({len(core_vars)}), Rouge=supprimé ({len(removed_vars)})')
+    fig.tight_layout()
+    fig.savefig(os.path.join(OUTPUT_DIR, '13_redundancy_graph.png'), dpi=120, bbox_inches='tight')
+    plt.close(fig)
+
+    # Compare PCA on core set vs full set
+    core_available = [v for v in core_vars if v in df.columns]
+    X_core = df[core_available].values.astype(float)
+    for j in range(X_core.shape[1]):
+        col = X_core[:, j]
+        nans = ~np.isfinite(col)
+        if nans.any():
+            col[nans] = np.nanmedian(col)
+
+    w_norm = pop / pop.sum()
+    means = (X_core * w_norm[:, None]).sum(axis=0)
+    X_c = X_core - means
+    stds = np.sqrt((X_c ** 2 * w_norm[:, None]).sum(axis=0))
+    stds[stds < 1e-10] = 1e-10
+    X_std = X_c / stds
+    C = (X_std * w_norm[:, None]).T @ X_std
+    eigenvalues, _ = np.linalg.eigh(C)
+    eigenvalues = np.sort(np.maximum(eigenvalues, 0))[::-1]
+    cumvar_core = np.cumsum(eigenvalues / eigenvalues.sum())
+
+    cumvar_full = np.cumsum(pca_results['explained_ratio'])
+
+    comp_data = []
+    for n_pc in [5, 10, 15, 20]:
+        if n_pc <= len(cumvar_full) and n_pc <= len(cumvar_core):
+            comp_data.append({
+                'n_PCs': n_pc,
+                'cumvar_full': round(cumvar_full[n_pc - 1] * 100, 1),
+                'cumvar_core': round(cumvar_core[n_pc - 1] * 100, 1),
+            })
+    pd.DataFrame(comp_data).to_csv(os.path.join(OUTPUT_DIR, '13_core_pca_comparison.csv'), index=False)
+
+    print(f"\n  Comparaison PCA :")
+    for row in comp_data:
+        print(f"    {row['n_PCs']} PCs : full={row['cumvar_full']:.1f}%  core={row['cumvar_core']:.1f}%")
+
+    print(f"\n  → Fichiers : 13_redundancy_graph.png, 13_core_variable_set.csv, 13_core_pca_comparison.csv")
+    return core_vars
+
+
+# ── 1.10 Mutual Information ─────────────────────────────────────────────────
+
+def mutual_information_analysis(df, var_names):
+    """MI vs Pearson² to detect non-linear dependencies."""
+    print("\n" + "─" * 70)
+    print("  1.10  MUTUAL INFORMATION ET DÉPENDANCES NON-LINÉAIRES")
+    print("─" * 70)
+
+    pop = df['_pop'].values
+
+    # Subsample for speed
+    n_sample = min(10000, len(df))
+    rng = np.random.RandomState(RANDOM_SEED)
+    idx = rng.choice(len(df), n_sample, replace=False)
+
+    X = df[var_names].iloc[idx].values.astype(float)
+    for j in range(X.shape[1]):
+        col = X[:, j]
+        nans = ~np.isfinite(col)
+        if nans.any():
+            col[nans] = np.nanmedian(col)
+
+    # Compute pairwise MI for a selection of important pairs
+    # (full pairwise is O(p²) × MI cost — we compute MI for each var vs top 20 others)
+    print(f"\n  Calcul MI sur {n_sample} IRIS, {len(var_names)} variables...")
+
+    # Faster approach: MI of each variable against all others via mutual_info_regression
+    mi_matrix = np.zeros((len(var_names), len(var_names)))
+    for j in range(len(var_names)):
+        mi_vals = mutual_info_regression(X, X[:, j], random_state=RANDOM_SEED, n_neighbors=5)
+        mi_matrix[j, :] = mi_vals
+
+    # Symmetrize
+    mi_matrix = (mi_matrix + mi_matrix.T) / 2
+    np.fill_diagonal(mi_matrix, 0)
+
+    # Pearson correlation matrix on same subsample
+    corr_sub = np.corrcoef(X.T)
+    r2_matrix = corr_sub ** 2
+
+    # Find pairs where MI >> r²
+    mi_rows = []
+    n = len(var_names)
+    for i in range(n):
+        for j in range(i + 1, n):
+            mi_val = mi_matrix[i, j]
+            r2_val = r2_matrix[i, j]
+            # Normalize MI to [0,1] scale approximately
+            mi_norm = min(mi_val / max(mi_matrix.max(), 1e-10), 1.0)
+            gap = mi_norm - r2_val
+            mi_rows.append({
+                'var1': var_names[i], 'var2': var_names[j],
+                'MI': round(mi_val, 4), 'MI_norm': round(mi_norm, 4),
+                'r2': round(r2_val, 4), 'gap_MI_r2': round(gap, 4),
+            })
+
+    df_mi = pd.DataFrame(mi_rows).sort_values('gap_MI_r2', ascending=False)
+    df_mi.to_csv(os.path.join(OUTPUT_DIR, '14_mutual_information.csv'), index=False)
+
+    # Top 20 non-linear pairs
+    top20 = df_mi.head(20)
+    print(f"\n  Top 20 paires avec le plus grand écart MI - r² (dépendances non-linéaires) :")
+    for _, r in top20.iterrows():
+        print(f"    {r['var1']:30s} × {r['var2']:30s}  MI_n={r['MI_norm']:.3f}  r²={r['r2']:.3f}  gap={r['gap_MI_r2']:+.3f}")
+
+    # MI_norm vs r² scatter
+    fig, ax = plt.subplots(figsize=(10, 8))
+    ax.scatter(df_mi['r2'], df_mi['MI_norm'], s=5, alpha=0.3, c='steelblue')
+    ax.plot([0, 1], [0, 1], 'r--', lw=1, label='MI = r²')
+    # Annotate top 10
+    for _, r in top20.head(10).iterrows():
+        ax.annotate(f"{r['var1'][:15]}×{r['var2'][:15]}",
+                    (r['r2'], r['MI_norm']), fontsize=5, alpha=0.8)
+    ax.set_xlabel('r² (Pearson²)')
+    ax.set_ylabel('MI normalisée')
+    ax.set_title('Mutual Information vs r² — points au-dessus de la diagonale = non-linéarité')
+    ax.legend()
+    fig.tight_layout()
+    fig.savefig(os.path.join(OUTPUT_DIR, '14_mi_vs_r2_scatter.png'), dpi=120)
+    plt.close(fig)
+
+    # Scatter plots of top 6 non-linear pairs
+    top6 = top20.head(6)
+    fig, axes = plt.subplots(2, 3, figsize=(18, 12))
+    axes = axes.flatten()
+    for i, (_, r) in enumerate(top6.iterrows()):
+        ax = axes[i]
+        v1, v2 = r['var1'], r['var2']
+        x1 = df[v1].iloc[idx].values
+        x2 = df[v2].iloc[idx].values
+        valid = np.isfinite(x1) & np.isfinite(x2)
+        ax.scatter(x1[valid], x2[valid], s=2, alpha=0.3, c='steelblue')
+        ax.set_xlabel(v1, fontsize=7)
+        ax.set_ylabel(v2, fontsize=7)
+        ax.set_title(f'MI_n={r["MI_norm"]:.3f}, r²={r["r2"]:.3f}\ngap={r["gap_MI_r2"]:+.3f}', fontsize=8)
+    fig.suptitle('Top 6 paires avec plus forte dépendance non-linéaire', fontsize=13)
+    fig.tight_layout()
+    fig.savefig(os.path.join(OUTPUT_DIR, '14_nonlinear_scatters.png'), dpi=120)
+    plt.close(fig)
+
+    print("  INTERPRÉTATION :")
+    print("    Les paires à fort écart MI-r² capturent des relations non-linéaires (seuils,")
+    print("    effets de saturation, interactions). Ces relations sont invisibles à une PCA")
+    print("    standard et justifient l'utilisation de méthodes non-linéaires (RF, UMAP).")
+
+    print(f"\n  → Fichiers : 14_mutual_information.csv, 14_mi_vs_r2_scatter.png, 14_nonlinear_scatters.png")
+    return df_mi
+
+
+# ── 1.11 Geographic Variance (ICC) ──────────────────────────────────────────
+
+def geographic_variance_analysis(df, var_names):
+    """ICC: inter-department variance / total variance per variable."""
+    print("\n" + "─" * 70)
+    print("  1.11  VARIANCE GÉOGRAPHIQUE (ICC inter-département)")
+    print("─" * 70)
+
+    pop = df['_pop'].values
+
+    # Extract department code from IRIS code (first 2 or 3 digits of COM)
+    if 'COM' in df.columns:
+        df['_dept'] = df['COM'].astype(str).str[:2]
+        # Handle DOM-TOM (97x)
+        mask_dom = df['_dept'] == '97'
+        df.loc[mask_dom, '_dept'] = df.loc[mask_dom, 'COM'].astype(str).str[:3]
+    elif 'IRIS' in df.columns:
+        df['_dept'] = df['IRIS'].astype(str).str[:2]
+    else:
+        print("  [!] Pas de code commune/IRIS pour calculer l'ICC — section ignorée")
+        return None
+
+    depts = df['_dept'].unique()
+    n_depts = len(depts)
+    print(f"\n  Départements détectés : {n_depts}")
+
+    rows = []
+    for v in var_names:
+        x = df[v].values.astype(float)
+        valid = np.isfinite(x)
+        if valid.sum() < 100:
+            continue
+
+        # Total weighted variance
+        var_total = weighted_std(x, pop) ** 2
+        if var_total < 1e-15:
+            continue
+
+        # Inter-department variance (variance of department means)
+        dept_means = []
+        dept_pops = []
+        for d in depts:
+            mask_d = (df['_dept'] == d).values & valid
+            if mask_d.sum() < 5:
+                continue
+            dept_means.append(weighted_mean(x[mask_d], pop[mask_d]))
+            dept_pops.append(pop[mask_d].sum())
+
+        if len(dept_means) < 5:
+            continue
+
+        dept_means = np.array(dept_means)
+        dept_pops = np.array(dept_pops)
+        grand_mean = np.average(dept_means, weights=dept_pops)
+        var_inter = np.average((dept_means - grand_mean) ** 2, weights=dept_pops)
+
+        icc = var_inter / var_total
+
+        rows.append({
+            'variable': v,
+            'var_total': round(var_total, 4),
+            'var_inter_dept': round(var_inter, 4),
+            'ICC': round(icc, 4),
+            'signal': 'territorial' if icc > 0.3 else ('mixte' if icc > 0.1 else 'local'),
+        })
+
+    df_icc = pd.DataFrame(rows).sort_values('ICC', ascending=False)
+    df_icc.to_csv(os.path.join(OUTPUT_DIR, '15_geographic_variance.csv'), index=False)
+
+    print(f"\n  Variables à fort signal territorial (ICC > 0.3) :")
+    for _, r in df_icc[df_icc['ICC'] > 0.3].iterrows():
+        print(f"    {r['variable']:35s}  ICC={r['ICC']:.3f}")
+    print(f"\n  Variables à signal local (ICC < 0.1) :")
+    for _, r in df_icc[df_icc['ICC'] < 0.1].head(10).iterrows():
+        print(f"    {r['variable']:35s}  ICC={r['ICC']:.3f}")
+
+    # Bar plot
+    fig, ax = plt.subplots(figsize=(14, max(8, len(df_icc) * 0.25)))
+    colors = ['#DC2626' if icc > 0.3 else '#F97316' if icc > 0.1 else '#16A34A'
+              for icc in df_icc['ICC']]
+    ax.barh(range(len(df_icc)), df_icc['ICC'].values, color=colors, alpha=0.8)
+    ax.set_yticks(range(len(df_icc)))
+    ax.set_yticklabels(df_icc['variable'].values, fontsize=6)
+    ax.axvline(0.3, color='red', ls='--', lw=1, label='ICC=0.3 (territorial)')
+    ax.axvline(0.1, color='orange', ls='--', lw=1, label='ICC=0.1 (mixte)')
+    ax.set_xlabel('ICC (variance inter-département / totale)')
+    ax.set_title('ICC : effet géographique par variable')
+    ax.legend(fontsize=8)
+    ax.invert_yaxis()
+    fig.tight_layout()
+    fig.savefig(os.path.join(OUTPUT_DIR, '15_icc_barplot.png'), dpi=120, bbox_inches='tight')
+    plt.close(fig)
+
+    print("\n  INTERPRÉTATION SOCIO-POLITIQUE :")
+    print("    ICC élevé = la variable varie surtout entre départements (effet macro-")
+    print("    géographique, ex: chauffage fioul = Nord/campagne, pct_immigrés = grandes")
+    print("    villes). ICC faible = variation au sein même des communes (ex: % HLM,")
+    print("    revenu médian). Pour la visualisation, les variables à ICC moyen/faible sont")
+    print("    souvent plus discriminantes localement entre IRIS d'une même ville.")
+
+    print(f"\n  → Fichiers : 15_geographic_variance.csv, 15_icc_barplot.png")
+    return df_icc
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  PART 2 (cont.) — EXTENSIONS CONDITIONNÉES
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ── 2.6 Random Forest + PDP ─────────────────────────────────────────────────
+
+def random_forest_analysis(df, var_names):
+    """RandomForest multiclass + permutation importance + Partial Dependence."""
+    print("\n" + "─" * 70)
+    print("  2.6  RANDOM FOREST (importance + PDP)")
+    print("─" * 70)
+
+    pop = df['_pop'].values
+    X = df[var_names].values.astype(float)
+
+    # Impute NaN
+    for j in range(X.shape[1]):
+        col = X[:, j]
+        nans = ~np.isfinite(col)
+        if nans.any():
+            col[nans] = np.nanmedian(col)
+
+    # Multiclass target: dominant candidate (top 5 only)
+    score_cols = [f'score_{c}' for c in CANDIDATES if f'score_{c}' in df.columns]
+    cand_names = [c.replace('score_', '') for c in score_cols]
+    scores = df[score_cols].fillna(0).values
+    dominant_idx = scores.argmax(axis=1)
+    dominant_score = scores.max(axis=1)
+    labels = np.array([cand_names[i] for i in dominant_idx])
+    labels[dominant_score < 20] = 'MIXED'
+
+    class_counts = pd.Series(labels).value_counts()
+    valid_classes = class_counts[class_counts >= 200].index.tolist()
+    if 'MIXED' in valid_classes:
+        valid_classes.remove('MIXED')
+
+    mask = np.isin(labels, valid_classes)
+    X_rf = X[mask]
+    y_rf = labels[mask]
+    w_rf = pop[mask]
+
+    print(f"\n  Classes : {valid_classes}")
+    print(f"  Échantillon : {len(X_rf)} IRIS")
+
+    # Subsample for speed
+    n_max = 30000
+    if len(X_rf) > n_max:
+        rng = np.random.RandomState(RANDOM_SEED)
+        idx = rng.choice(len(X_rf), n_max, replace=False)
+        X_rf, y_rf, w_rf = X_rf[idx], y_rf[idx], w_rf[idx]
+
+    print("  Entraînement RandomForest (300 arbres, max_depth=12)...")
+    rf = RandomForestClassifier(n_estimators=300, max_depth=12, random_state=RANDOM_SEED,
+                                 n_jobs=-1, class_weight='balanced')
+    rf.fit(X_rf, y_rf, sample_weight=w_rf)
+
+    # Cross-validation
+    cv_scores = cross_val_score(
+        RandomForestClassifier(n_estimators=100, max_depth=12, random_state=RANDOM_SEED,
+                               n_jobs=-1, class_weight='balanced'),
+        X_rf, y_rf, cv=5, scoring='accuracy'
+    )
+    print(f"  Accuracy CV 5-fold : {cv_scores.mean():.3f} ± {cv_scores.std():.3f}")
+
+    # Permutation importance (more reliable than impurity-based)
+    print("  Calcul permutation importance...")
+    perm_imp = permutation_importance(rf, X_rf, y_rf, n_repeats=10,
+                                       random_state=RANDOM_SEED, n_jobs=-1,
+                                       sample_weight=w_rf)
+
+    df_imp = pd.DataFrame({
+        'variable': var_names,
+        'impurity_importance': rf.feature_importances_,
+        'perm_importance_mean': perm_imp.importances_mean,
+        'perm_importance_std': perm_imp.importances_std,
+    }).sort_values('perm_importance_mean', ascending=False)
+    df_imp.to_csv(os.path.join(OUTPUT_DIR, '16_rf_permutation_importance.csv'), index=False)
+
+    print(f"\n  Top 15 variables (permutation importance) :")
+    for _, r in df_imp.head(15).iterrows():
+        print(f"    {r['variable']:35s}  perm={r['perm_importance_mean']:.4f}±{r['perm_importance_std']:.4f}  "
+              f"impurity={r['impurity_importance']:.4f}")
+
+    # Importance bar plot
+    top20 = df_imp.head(20)
+    fig, ax = plt.subplots(figsize=(12, 8))
+    y_pos = range(len(top20))
+    ax.barh(y_pos, top20['perm_importance_mean'].values, xerr=top20['perm_importance_std'].values,
+            color='steelblue', alpha=0.8)
+    ax.set_yticks(y_pos)
+    ax.set_yticklabels(top20['variable'].values, fontsize=8)
+    ax.set_xlabel('Permutation importance')
+    ax.set_title(f'Random Forest — Top 20 variables (accuracy CV: {cv_scores.mean():.1%})')
+    ax.invert_yaxis()
+    fig.tight_layout()
+    fig.savefig(os.path.join(OUTPUT_DIR, '16_rf_importance_barplot.png'), dpi=120, bbox_inches='tight')
+    plt.close(fig)
+
+    # Partial Dependence Plots for top 8 variables
+    top8_idx = [list(var_names).index(v) for v in df_imp.head(8)['variable'] if v in var_names]
+    fig, axes = plt.subplots(2, 4, figsize=(24, 10))
+    try:
+        PartialDependenceDisplay.from_estimator(
+            rf, X_rf, features=top8_idx, feature_names=var_names,
+            ax=axes.flatten()[:len(top8_idx)], grid_resolution=50, n_jobs=-1
+        )
+        fig.suptitle('Partial Dependence Plots — Top 8 variables (Random Forest)', fontsize=13)
+        fig.tight_layout()
+        fig.savefig(os.path.join(OUTPUT_DIR, '16_partial_dependence.png'), dpi=120, bbox_inches='tight')
+    except Exception as e:
+        print(f"  [!] PDP erreur : {e}")
+    plt.close(fig)
+
+    print("\n  INTERPRÉTATION :")
+    print("    La permutation importance mesure la perte de précision quand on brouille une variable.")
+    print("    C'est plus fiable que l'impurity importance (pas biaisée vers les vars à haute cardinalité).")
+    print("    Les PDP montrent l'effet marginal de chaque variable sur les prédictions.")
+
+    print(f"\n  → Fichiers : 16_rf_permutation_importance.csv, 16_rf_importance_barplot.png, 16_partial_dependence.png")
+    return df_imp
+
+
+# ── 2.7 Pairwise Candidate Contrasts ────────────────────────────────────────
+
+def pairwise_contrasts(df, var_names):
+    """Direct pairwise comparisons between major candidate pairs."""
+    print("\n" + "─" * 70)
+    print("  2.7  CONTRASTES PAR PAIRES DE CANDIDATS")
+    print("─" * 70)
+
+    pop = df['_pop'].values
+
+    pairs = [
+        ('LE_PEN', 'MELENCHON'),
+        ('MACRON', 'LE_PEN'),
+        ('MACRON', 'MELENCHON'),
+        ('JADOT', 'LE_PEN'),
+    ]
+
+    all_results = []
+    for cand_a, cand_b in pairs:
+        if cand_a not in df['dominant_candidate'].values or cand_b not in df['dominant_candidate'].values:
+            continue
+
+        mask_a = df['dominant_candidate'] == cand_a
+        mask_b = df['dominant_candidate'] == cand_b
+
+        print(f"\n  {cand_a} ({mask_a.sum()} IRIS) vs {cand_b} ({mask_b.sum()} IRIS) :")
+
+        contrast_rows = []
+        for v in var_names:
+            xa = df.loc[mask_a, v].values.astype(float)
+            xb = df.loc[mask_b, v].values.astype(float)
+            wa = pop[mask_a]
+            wb = pop[mask_b]
+
+            valid_a = np.isfinite(xa)
+            valid_b = np.isfinite(xb)
+            if valid_a.sum() < 30 or valid_b.sum() < 30:
+                continue
+
+            mean_a = np.average(xa[valid_a], weights=wa[valid_a])
+            mean_b = np.average(xb[valid_b], weights=wb[valid_b])
+
+            # Weighted t-test approximation
+            std_a = np.sqrt(np.average((xa[valid_a] - mean_a) ** 2, weights=wa[valid_a]))
+            std_b = np.sqrt(np.average((xb[valid_b] - mean_b) ** 2, weights=wb[valid_b]))
+            pooled_std = np.sqrt((std_a ** 2 + std_b ** 2) / 2)
+
+            if pooled_std < 1e-10:
+                continue
+
+            effect_size = (mean_a - mean_b) / pooled_std  # Cohen's d
+
+            contrast_rows.append({
+                'pair': f'{cand_a}_vs_{cand_b}',
+                'variable': v,
+                'mean_A': round(mean_a, 3),
+                'mean_B': round(mean_b, 3),
+                'diff': round(mean_a - mean_b, 3),
+                'cohen_d': round(effect_size, 3),
+                'abs_d': round(abs(effect_size), 3),
+            })
+
+        df_contrast = pd.DataFrame(contrast_rows).sort_values('abs_d', ascending=False)
+        all_results.append(df_contrast)
+
+        # Top 10
+        for _, r in df_contrast.head(10).iterrows():
+            sign = "+" if r['cohen_d'] > 0 else "-"
+            print(f"    {sign} {r['variable']:35s}  d={r['cohen_d']:+.3f}  ({r['mean_A']:.1f} vs {r['mean_B']:.1f})")
+
+    if all_results:
+        df_all = pd.concat(all_results, ignore_index=True)
+        df_all.to_csv(os.path.join(OUTPUT_DIR, '17_pairwise_contrasts.csv'), index=False)
+
+        # Scatter plots for top 2 discriminating variables per pair
+        fig, axes = plt.subplots(2, 2, figsize=(16, 14))
+        for idx_pair, (cand_a, cand_b) in enumerate(pairs[:4]):
+            ax = axes.flatten()[idx_pair]
+            pair_data = df_all[df_all['pair'] == f'{cand_a}_vs_{cand_b}']
+            if pair_data.empty:
+                ax.set_visible(False)
+                continue
+
+            top2 = pair_data.head(2)['variable'].values
+            if len(top2) < 2:
+                ax.set_visible(False)
+                continue
+
+            v1, v2 = top2[0], top2[1]
+            mask_a = df['dominant_candidate'] == cand_a
+            mask_b = df['dominant_candidate'] == cand_b
+
+            ax.scatter(df.loc[mask_a, v1], df.loc[mask_a, v2],
+                       c=CANDIDATE_COLORS.get(cand_a, '#999'), s=3, alpha=0.3,
+                       label=cand_a, rasterized=True)
+            ax.scatter(df.loc[mask_b, v1], df.loc[mask_b, v2],
+                       c=CANDIDATE_COLORS.get(cand_b, '#999'), s=3, alpha=0.3,
+                       label=cand_b, rasterized=True)
+            ax.set_xlabel(v1, fontsize=8)
+            ax.set_ylabel(v2, fontsize=8)
+            ax.set_title(f'{cand_a} vs {cand_b}', fontsize=10)
+            ax.legend(fontsize=8, markerscale=3)
+
+        fig.suptitle('Contrastes pairés — Top 2 variables discriminantes par paire', fontsize=13)
+        fig.tight_layout()
+        fig.savefig(os.path.join(OUTPUT_DIR, '17_pairwise_scatters.png'), dpi=120, bbox_inches='tight')
+        plt.close(fig)
+
+    print("\n  INTERPRÉTATION SOCIO-POLITIQUE :")
+    print("    Le Pen vs Mélenchon : même milieux populaires mais clivage urbain/rural,")
+    print("      immigration, logement social (HLM → Mélenchon, pavillonnaire → Le Pen).")
+    print("    Macron vs Le Pen : clivage diplôme/revenu (CSP+/BAC+5 → Macron, ouvriers → Le Pen).")
+    print("    Macron vs Mélenchon : même urbains diplômés mais clivage revenus/patrimoine.")
+    print("    Jadot vs Le Pen : clivage maximal écolo-métropole vs périurbain-auto.")
+
+    print(f"\n  → Fichiers : 17_pairwise_contrasts.csv, 17_pairwise_scatters.png")
+    return df_all if all_results else None
+
+
+# ── 2.8 WLS Regression ──────────────────────────────────────────────────────
+
+def wls_regression(df, var_names):
+    """Weighted Least Squares regression of each candidate's score."""
+    print("\n" + "─" * 70)
+    print("  2.8  RÉGRESSION LINÉAIRE PONDÉRÉE (WLS)")
+    print("─" * 70)
+
+    pop = df['_pop'].values
+
+    X = df[var_names].values.astype(float)
+    for j in range(X.shape[1]):
+        col = X[:, j]
+        nans = ~np.isfinite(col)
+        if nans.any():
+            col[nans] = np.nanmedian(col)
+
+    # Standardize X for comparable coefficients
+    scaler = StandardScaler()
+    X_std = scaler.fit_transform(X)
+
+    results = {}
+    top5_cands = sorted(CANDIDATES, key=lambda c: df.get(f'score_{c}', pd.Series(0)).sum(),
+                        reverse=True)[:6]
+
+    for cand in top5_cands:
+        sc = f'score_{cand}'
+        if sc not in df.columns:
+            continue
+
+        y = df[sc].fillna(0).values.astype(float)
+
+        # WLS with population weights
+        X_wls = sm.add_constant(X_std)
+        try:
+            model = sm.WLS(y, X_wls, weights=pop).fit()
+            betas = model.params[1:]  # Skip intercept
+            pvals = model.pvalues[1:]
+            r2 = model.rsquared_adj
+
+            results[cand] = {
+                'betas': betas,
+                'pvals': pvals,
+                'r2_adj': r2,
+            }
+
+            print(f"\n  {cand} — R² ajusté = {r2:.4f}")
+            # Top 10 by |beta|
+            top_idx = np.abs(betas).argsort()[::-1][:10]
+            for k in top_idx:
+                sig = '***' if pvals[k] < 0.001 else ('**' if pvals[k] < 0.01 else ('*' if pvals[k] < 0.05 else ''))
+                print(f"    {var_names[k]:35s}  β={betas[k]:+.4f}  p={pvals[k]:.1e} {sig}")
+        except Exception as e:
+            print(f"  [!] WLS pour {cand} échoué : {e}")
+            continue
+
+    # Coefficients heatmap
+    if results:
+        beta_df = pd.DataFrame({cand: res['betas'] for cand, res in results.items()},
+                                index=var_names)
+        beta_df.to_csv(os.path.join(OUTPUT_DIR, '18_wls_coefficients.csv'))
+
+        # R² comparison
+        r2_data = [{'candidat': c, 'R2_adj_WLS': round(r['r2_adj'], 4)} for c, r in results.items()]
+        pd.DataFrame(r2_data).to_csv(os.path.join(OUTPUT_DIR, '18_wls_vs_gbm.csv'), index=False)
+
+        # Select top 30 variables by max |beta|
+        max_beta = beta_df.abs().max(axis=1).sort_values(ascending=False)
+        top30 = max_beta.head(30).index.tolist()
+
+        fig, ax = plt.subplots(figsize=(14, 14))
+        cand_order = [c for c in top5_cands if c in beta_df.columns]
+        sns.heatmap(beta_df.loc[top30, cand_order], cmap='RdBu_r', center=0,
+                    vmin=-0.5, vmax=0.5, ax=ax, linewidths=0.5,
+                    annot=True, fmt='.2f', annot_kws={'size': 6})
+        r2_str = ', '.join([f"{c}: {results[c]['r2_adj']:.3f}" for c in cand_order if c in results])
+        ax.set_title(f'Coefficients WLS standardisés (top 30 variables)\nR² adj: {r2_str}', fontsize=10)
+        ax.tick_params(labelsize=7)
+        fig.tight_layout()
+        fig.savefig(os.path.join(OUTPUT_DIR, '18_wls_coefficients_heatmap.png'), dpi=120, bbox_inches='tight')
+        plt.close(fig)
+
+    print("\n  INTERPRÉTATION :")
+    print("    Les coefficients β standardisés mesurent l'effet 'toutes choses égales par ailleurs'.")
+    print("    Un β positif = quand cette variable augmente (d'1 écart-type), le score du candidat")
+    print("    augmente. C'est l'analyse la plus directement interprétable en socio-politique.")
+    print("    Comparer R² WLS vs GBM montre si la relation est linéaire ou non.")
+
+    print(f"\n  → Fichiers : 18_wls_coefficients.csv, 18_wls_coefficients_heatmap.png, 18_wls_vs_gbm.csv")
+    return results
+
+
+# ── 2.9 Abstention Analysis ─────────────────────────────────────────────────
+
+def abstention_analysis(df, var_names):
+    """Socio-economic profile of abstention."""
+    print("\n" + "─" * 70)
+    print("  2.9  ANALYSE DE L'ABSTENTION")
+    print("─" * 70)
+
+    if 'pct_abstention' not in df.columns:
+        print("  [!] Pas de données d'abstention — section ignorée")
+        return None
+
+    pop = df['_pop'].values
+    abst = df['pct_abstention'].fillna(0).values
+    labels = get_var_labels()
+
+    print(f"\n  Abstention : médiane={np.median(abst):.1f}%, "
+          f"min={abst.min():.1f}%, max={abst.max():.1f}%")
+
+    # Weighted correlations with abstention
+    corr_rows = []
+    for v in var_names:
+        x = df[v].values.astype(float)
+        valid = np.isfinite(x) & np.isfinite(abst)
+        if valid.sum() < 100:
+            continue
+        r, p = stats.pearsonr(x[valid], abst[valid])
+        # Population-weighted correlation
+        w = pop[valid]
+        x_c = x[valid] - np.average(x[valid], weights=w)
+        a_c = abst[valid] - np.average(abst[valid], weights=w)
+        cov_wa = np.average(x_c * a_c, weights=w)
+        std_x = np.sqrt(np.average(x_c ** 2, weights=w))
+        std_a = np.sqrt(np.average(a_c ** 2, weights=w))
+        r_w = cov_wa / (std_x * std_a) if std_x > 0 and std_a > 0 else 0
+
+        corr_rows.append({
+            'variable': v,
+            'label': labels.get(v, v),
+            'r_pearson': round(r, 4),
+            'r_weighted': round(r_w, 4),
+            'p_value': p,
+        })
+
+    df_corr = pd.DataFrame(corr_rows).sort_values('r_weighted', key=abs, ascending=False)
+    df_corr.to_csv(os.path.join(OUTPUT_DIR, '19_abstention_profile.csv'), index=False)
+
+    print(f"\n  Top 15 corrélats de l'abstention (r pondéré population) :")
+    for _, r in df_corr.head(15).iterrows():
+        sig = '***' if r['p_value'] < 0.001 else ''
+        print(f"    {r['variable']:35s}  r_w={r['r_weighted']:+.4f}  r={r['r_pearson']:+.4f} {sig}")
+
+    # WLS regression of abstention
+    X = df[var_names].values.astype(float)
+    for j in range(X.shape[1]):
+        col = X[:, j]
+        nans = ~np.isfinite(col)
+        if nans.any():
+            col[nans] = np.nanmedian(col)
+
+    scaler = StandardScaler()
+    X_std = scaler.fit_transform(X)
+    X_wls = sm.add_constant(X_std)
+    try:
+        model = sm.WLS(abst, X_wls, weights=pop).fit()
+        print(f"\n  WLS Abstention : R² ajusté = {model.rsquared_adj:.4f}")
+        betas = model.params[1:]
+        pvals = model.pvalues[1:]
+        top_idx = np.abs(betas).argsort()[::-1][:10]
+        print(f"  Top 10 prédicteurs (β standardisés) :")
+        for k in top_idx:
+            sig = '***' if pvals[k] < 0.001 else ('**' if pvals[k] < 0.01 else '*' if pvals[k] < 0.05 else '')
+            print(f"    {var_names[k]:35s}  β={betas[k]:+.4f}  p={pvals[k]:.1e} {sig}")
+    except Exception as e:
+        print(f"  [!] WLS abstention échoué : {e}")
+
+    # Correlation bar plot (top 30)
+    top30 = df_corr.head(30)
+    fig, ax = plt.subplots(figsize=(12, 10))
+    colors = ['#DC2626' if r > 0 else '#3B82F6' for r in top30['r_weighted']]
+    ax.barh(range(len(top30)), top30['r_weighted'].values, color=colors, alpha=0.8)
+    ax.set_yticks(range(len(top30)))
+    ax.set_yticklabels(top30['variable'].values, fontsize=7)
+    ax.axvline(0, color='black', lw=0.5)
+    ax.set_xlabel('Corrélation pondérée avec abstention')
+    ax.set_title('Profil sociologique de l\'abstention\n(top 30 variables corrélées)')
+    ax.invert_yaxis()
+    fig.tight_layout()
+    fig.savefig(os.path.join(OUTPUT_DIR, '19_abstention_correlations.png'), dpi=120, bbox_inches='tight')
+    plt.close(fig)
+
+    print("\n  INTERPRÉTATION SOCIO-POLITIQUE :")
+    print("    L'abstention en France est fortement liée à la précarité socio-économique :")
+    print("    chômage, faibles revenus, logement social, faible diplôme. Mais aussi aux")
+    print("    jeunes urbains (étudiants). C'est le 'premier parti de France' et son profil")
+    print("    socio croise celui de Mélenchon et Le Pen (quartiers populaires urbains et")
+    print("    zones rurales isolées).")
+
+    print(f"\n  → Fichiers : 19_abstention_profile.csv, 19_abstention_correlations.png")
+    return df_corr
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  PART 3 — SYNTHÈSE ET RECOMMANDATIONS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ── 3.1 Recommended Axis Pairs ──────────────────────────────────────────────
+
+def recommend_axis_pairs(df, var_names, proposed_scores, party_scores, scores_df, party_scores_df):
+    """Score and rank axis pairs for visualization."""
+    print("\n" + "─" * 70)
+    print("  3.1  RECOMMANDATION DE PAIRES D'AXES")
+    print("─" * 70)
+
+    pop = df['_pop'].values
+
+    # Collect all scores
+    all_scores = {}
+    for name in EXISTING_SCORES_CONFIG:
+        if name in df.columns:
+            all_scores[name] = df[name].values
+    for name in proposed_scores:
+        if name in scores_df.columns:
+            all_scores[name] = scores_df[name].values
+    for name in party_scores:
+        if name in party_scores_df.columns:
+            all_scores[name] = party_scores_df[name].values
+
+    score_names = list(all_scores.keys())
+    print(f"\n  Scores disponibles : {len(score_names)}")
+
+    # Candidate barycentres on each score
+    bary = {}
+    for sn in score_names:
+        sv = all_scores[sn]
+        cand_bary = {}
+        for cand in CANDIDATES:
+            sc = f'score_{cand}'
+            if sc in df.columns:
+                w = df[sc].fillna(0).values * pop
+                if w.sum() > 0:
+                    cand_bary[cand] = np.average(sv, weights=w)
+        bary[sn] = cand_bary
+
+    # Evaluate each pair
+    pair_rows = []
+    for i in range(len(score_names)):
+        for j in range(i + 1, len(score_names)):
+            sn1, sn2 = score_names[i], score_names[j]
+            sv1, sv2 = all_scores[sn1], all_scores[sn2]
+
+            # 1. Mutual correlation (want low)
+            valid = np.isfinite(sv1) & np.isfinite(sv2)
+            if valid.sum() < 100:
+                continue
+            r_mutual = abs(np.corrcoef(sv1[valid], sv2[valid])[0, 1])
+
+            # 2. Discriminant power (variance of barycentres)
+            if bary[sn1] and bary[sn2]:
+                bary_x = list(bary[sn1].values())
+                bary_y = list(bary[sn2].values())
+                discrim = np.var(bary_x) + np.var(bary_y)
+            else:
+                discrim = 0
+
+            # 3. Variance of IRIS
+            var_iris = np.nanvar(sv1) + np.nanvar(sv2)
+
+            # 4. Interpretability (fewer variables = more interpretable)
+            n_vars_1 = len(proposed_scores.get(sn1, {}).get('pos_vars', [])) + len(proposed_scores.get(sn1, {}).get('neg_vars', []))
+            n_vars_2 = len(proposed_scores.get(sn2, {}).get('pos_vars', [])) + len(proposed_scores.get(sn2, {}).get('neg_vars', []))
+            if n_vars_1 == 0:
+                n_vars_1 = len(EXISTING_SCORES_CONFIG.get(sn1, {}).get('pos_vars', [])) + len(EXISTING_SCORES_CONFIG.get(sn1, {}).get('neg_vars', []))
+            if n_vars_2 == 0:
+                n_vars_2 = len(EXISTING_SCORES_CONFIG.get(sn2, {}).get('pos_vars', [])) + len(EXISTING_SCORES_CONFIG.get(sn2, {}).get('neg_vars', []))
+            if n_vars_1 == 0:
+                n_vars_1 = len(party_scores.get(sn1, {}).get('pos_vars', []))
+            if n_vars_2 == 0:
+                n_vars_2 = len(party_scores.get(sn2, {}).get('pos_vars', []))
+            interp = 1.0 / max(n_vars_1 + n_vars_2, 1)
+
+            # Composite score (normalize components)
+            orthog_score = max(0, 1 - r_mutual)  # 0 to 1, 1 is best
+            # Normalize others relative to observed range
+            pair_rows.append({
+                'axis_x': sn1, 'axis_y': sn2,
+                'r_mutual': round(r_mutual, 3),
+                'discriminant_power': round(discrim, 2),
+                'variance_iris': round(var_iris, 2),
+                'interpretability': round(interp, 4),
+                'orthogonality': round(orthog_score, 3),
+            })
+
+    df_pairs = pd.DataFrame(pair_rows)
+
+    if len(df_pairs) > 0:
+        # Normalize each criterion to [0,1] and compute composite score
+        for col in ['orthogonality', 'discriminant_power', 'variance_iris', 'interpretability']:
+            mn, mx = df_pairs[col].min(), df_pairs[col].max()
+            if mx > mn:
+                df_pairs[f'{col}_norm'] = (df_pairs[col] - mn) / (mx - mn)
+            else:
+                df_pairs[f'{col}_norm'] = 0.5
+
+        df_pairs['composite_score'] = (
+            0.30 * df_pairs['orthogonality_norm'] +
+            0.35 * df_pairs['discriminant_power_norm'] +
+            0.20 * df_pairs['variance_iris_norm'] +
+            0.15 * df_pairs['interpretability_norm']
+        )
+
+        df_pairs = df_pairs.sort_values('composite_score', ascending=False)
+        df_pairs.to_csv(os.path.join(OUTPUT_DIR, '20_recommended_axis_pairs.csv'), index=False)
+
+        print(f"\n  Top 10 paires d'axes recommandées :")
+        for _, r in df_pairs.head(10).iterrows():
+            print(f"    {r['axis_x']:30s} × {r['axis_y']:30s}  "
+                  f"score={r['composite_score']:.3f}  |r|={r['r_mutual']:.2f}  discr={r['discriminant_power']:.1f}")
+
+        # Plot top 3 pairs
+        top3 = df_pairs.head(3)
+        fig, axes = plt.subplots(1, 3, figsize=(21, 7))
+        for idx_p, (_, pair_row) in enumerate(top3.iterrows()):
+            ax = axes[idx_p]
+            sn_x, sn_y = pair_row['axis_x'], pair_row['axis_y']
+            sv_x, sv_y = all_scores[sn_x], all_scores[sn_y]
+
+            # Subsample
+            n_plot = min(5000, len(df))
+            rng = np.random.RandomState(RANDOM_SEED)
+            plot_idx = rng.choice(len(df), n_plot, replace=False)
+
+            cands_plot = df['dominant_candidate'].iloc[plot_idx].values
+            for cand in CANDIDATES:
+                mask_c = cands_plot == cand
+                if mask_c.sum() > 0:
+                    ax.scatter(sv_x[plot_idx[mask_c]], sv_y[plot_idx[mask_c]],
+                               c=CANDIDATE_COLORS.get(cand, '#ccc'), s=3, alpha=0.4,
+                               label=cand, rasterized=True)
+            ax.legend(fontsize=6, markerscale=3)
+            ax.set_xlabel(sn_x, fontsize=8)
+            ax.set_ylabel(sn_y, fontsize=8)
+            ax.set_title(f'Score={pair_row["composite_score"]:.3f}\n|r|={pair_row["r_mutual"]:.2f}', fontsize=9)
+
+        fig.suptitle('Top 3 paires d\'axes recommandées (colorées par candidat dominant)', fontsize=13)
+        fig.tight_layout()
+        fig.savefig(os.path.join(OUTPUT_DIR, '20_top3_axis_pairs.png'), dpi=120, bbox_inches='tight')
+        plt.close(fig)
+
+    print(f"\n  → Fichiers : 20_recommended_axis_pairs.csv, 20_top3_axis_pairs.png")
+    return df_pairs
+
+
+# ── 3.2 Score Fiches ────────────────────────────────────────────────────────
+
+def score_fiches(df, var_names, proposed_scores, party_scores, scores_df, party_scores_df):
+    """Detailed 'fiches' for each proposed score with socio-political justification."""
+    print("\n" + "─" * 70)
+    print("  3.2  FICHES SCORES AVEC JUSTIFICATION SOCIO-POLITIQUE")
+    print("─" * 70)
+
+    pop = df['_pop'].values
+    labels = get_var_labels()
+
+    # Merge all proposed scores
+    all_proposed = {}
+    for name, cfg in proposed_scores.items():
+        all_proposed[name] = cfg
+    for name, cfg in party_scores.items():
+        all_proposed[name] = cfg
+
+    # Merge all score values
+    all_score_vals = {}
+    for name in all_proposed:
+        if name in scores_df.columns:
+            all_score_vals[name] = scores_df[name].values
+        elif name in party_scores_df.columns:
+            all_score_vals[name] = party_scores_df[name].values
+
+    fiches = []
+    fiche_text = []
+
+    for name, cfg in all_proposed.items():
+        if name not in all_score_vals:
+            continue
+
+        sv = all_score_vals[name]
+        pos_vars = cfg.get('pos_vars', [])
+        neg_vars = cfg.get('neg_vars', [])
+        desc = cfg.get('description', cfg.get('pc_origin', ''))
+
+        # Correlation with each candidate
+        cand_corrs = {}
+        cand_bary = {}
+        for cand in CANDIDATES:
+            sc = f'score_{cand}'
+            if sc in df.columns:
+                y = df[sc].fillna(0).values
+                valid = np.isfinite(sv) & np.isfinite(y)
+                if valid.sum() > 100:
+                    cand_corrs[cand] = round(np.corrcoef(sv[valid], y[valid])[0, 1], 3)
+                w = df[sc].fillna(0).values * pop
+                if w.sum() > 0:
+                    cand_bary[cand] = round(np.average(sv, weights=w), 2)
+
+        # Max |r| with existing scores
+        max_r_exist = 0
+        for en in EXISTING_SCORES_CONFIG:
+            if en in df.columns:
+                valid = np.isfinite(sv) & np.isfinite(df[en].values)
+                if valid.sum() > 100:
+                    r_val = abs(np.corrcoef(sv[valid], df[en].values[valid])[0, 1])
+                    max_r_exist = max(max_r_exist, r_val)
+
+        fiche = {
+            'score': name,
+            'description': desc,
+            'n_pos_vars': len(pos_vars),
+            'n_neg_vars': len(neg_vars),
+            'mean': round(np.nanmean(sv), 2),
+            'std': round(np.nanstd(sv), 2),
+            'range': f"[{np.nanmin(sv):.1f}, {np.nanmax(sv):.1f}]",
+            'max_r_with_existing': round(max_r_exist, 3),
+            'novel': max_r_exist < 0.5,
+        }
+        for cand in CANDIDATES:
+            fiche[f'r_{cand}'] = cand_corrs.get(cand, np.nan)
+            fiche[f'bary_{cand}'] = cand_bary.get(cand, np.nan)
+        fiches.append(fiche)
+
+        # Text fiche
+        text = f"\n{'='*60}\n"
+        text += f"SCORE : {name}\n"
+        text += f"{'='*60}\n"
+        text += f"Description : {desc}\n"
+        text += f"Variables positives ({len(pos_vars)}) : {', '.join(pos_vars)}\n"
+        text += f"Variables négatives ({len(neg_vars)}) : {', '.join(neg_vars)}\n"
+        text += f"Distribution : mean={fiche['mean']}, std={fiche['std']}, range={fiche['range']}\n"
+        text += f"Orthogonalité : max|r| avec existants = {max_r_exist:.3f} ({'NOUVEAU' if max_r_exist < 0.5 else 'REDONDANT'})\n"
+        text += f"Corrélations candidats : {cand_corrs}\n"
+        text += f"Barycentres candidats : {cand_bary}\n"
+        fiche_text.append(text)
+
+    df_fiches = pd.DataFrame(fiches)
+    df_fiches.to_csv(os.path.join(OUTPUT_DIR, '21_final_score_recommendations.csv'), index=False)
+
+    # Text implementation guide
+    novel_scores = df_fiches[df_fiches['novel']]
+    guide_text = "GUIDE D'IMPLÉMENTATION — Scores recommandés pour rebuild_vizu_iris.py\n"
+    guide_text += "=" * 70 + "\n\n"
+    guide_text += f"Scores nouveaux (max|r| < 0.5 avec existants) : {len(novel_scores)}\n\n"
+    for _, r in novel_scores.iterrows():
+        name = r['score']
+        cfg = all_proposed[name]
+        guide_text += f"  '{name}': {{\n"
+        guide_text += f"      'pos_vars': {cfg.get('pos_vars', [])},\n"
+        guide_text += f"      'neg_vars': {cfg.get('neg_vars', [])},\n"
+        guide_text += f"  }},\n\n"
+    guide_text += "\n".join(fiche_text)
+
+    with open(os.path.join(OUTPUT_DIR, '21_implementation_guide.txt'), 'w', encoding='utf-8') as f:
+        f.write(guide_text)
+
+    # Score fiches visualization (distributions + barycentres)
+    n_scores = len(all_score_vals)
+    ncols = 4
+    nrows = (n_scores + ncols - 1) // ncols
+    fig, axes = plt.subplots(nrows, ncols, figsize=(20, 4 * nrows))
+    axes = axes.flatten() if n_scores > 4 else [axes] if n_scores == 1 else axes.flatten()
+
+    for i, (name, sv) in enumerate(all_score_vals.items()):
+        if i >= len(axes):
+            break
+        ax = axes[i]
+        ax.hist(sv[np.isfinite(sv)], bins=50, color='steelblue', alpha=0.5, density=True)
+
+        # Mark barycentres
+        for cand in ['MACRON', 'LE_PEN', 'MELENCHON', 'JADOT', 'ZEMMOUR']:
+            sc_col = f'score_{cand}'
+            if sc_col in df.columns:
+                w = df[sc_col].fillna(0).values * pop
+                if w.sum() > 0:
+                    bary_val = np.average(sv, weights=w)
+                    ax.axvline(bary_val, color=CANDIDATE_COLORS.get(cand, '#999'),
+                               lw=2, label=cand)
+
+        novel_flag = " (NOUVEAU)" if name in [r['score'] for _, r in novel_scores.iterrows()] else ""
+        ax.set_title(f'{name}{novel_flag}', fontsize=8, fontweight='bold')
+        ax.legend(fontsize=5, loc='upper right')
+        ax.tick_params(labelsize=6)
+
+    for j in range(i + 1, len(axes)):
+        axes[j].set_visible(False)
+
+    fig.suptitle('Fiches scores — Distribution + barycentres candidats', fontsize=13)
+    fig.tight_layout()
+    fig.savefig(os.path.join(OUTPUT_DIR, '21_score_fiches.png'), dpi=120, bbox_inches='tight')
+    plt.close(fig)
+
+    print(f"\n  Scores analysés : {len(fiches)}")
+    print(f"  Scores nouveaux (max|r| < 0.5) : {len(novel_scores)}")
+    for _, r in novel_scores.iterrows():
+        print(f"    {r['score']:40s}  max|r|={r['max_r_with_existing']:.3f}")
+
+    print(f"\n  → Fichiers : 21_final_score_recommendations.csv, 21_score_fiches.png, 21_implementation_guide.txt")
+    return df_fiches
+
+
+# ── 3.3 Synthesis Report ────────────────────────────────────────────────────
+
+def synthesis_report(df, var_names, pca_results, lda_results, rf_importance,
+                     wls_results, corr_by_cand):
+    """Generate final synthesis report combining all methods."""
+    print("\n" + "─" * 70)
+    print("  3.3  RAPPORT DE SYNTHÈSE")
+    print("─" * 70)
+
+    pop = df['_pop'].values
+    labels = get_var_labels()
+
+    # ── Consensus importance across methods ──
+    consensus_rows = []
+    for v in var_names:
+        row = {'variable': v, 'label': labels.get(v, v)}
+
+        # PCA: max |loading| across retained PCs
+        loadings = pca_results['loadings']
+        if v in loadings.index:
+            row['pca_max_loading'] = loadings.loc[v].abs().max()
+        else:
+            row['pca_max_loading'] = 0
+
+        # LDA: max |coefficient| across LDs
+        lda_coefs = lda_results['coefs']
+        if v in lda_coefs.index:
+            row['lda_max_coef'] = lda_coefs.loc[v].abs().max()
+        else:
+            row['lda_max_coef'] = 0
+
+        # RF: permutation importance
+        if rf_importance is not None and v in rf_importance['variable'].values:
+            row['rf_perm_importance'] = rf_importance.loc[rf_importance['variable'] == v, 'perm_importance_mean'].values[0]
+        else:
+            row['rf_perm_importance'] = 0
+
+        # WLS: max |beta| across candidates
+        if wls_results:
+            betas = [abs(res['betas'][list(var_names).index(v)]) for res in wls_results.values()
+                     if v in var_names and list(var_names).index(v) < len(res['betas'])]
+            row['wls_max_beta'] = max(betas) if betas else 0
+        else:
+            row['wls_max_beta'] = 0
+
+        # Correlation: max |r| with any candidate
+        if corr_by_cand is not None and v in corr_by_cand.index:
+            row['max_corr_candidate'] = corr_by_cand.loc[v].abs().max()
+        else:
+            row['max_corr_candidate'] = 0
+
+        consensus_rows.append(row)
+
+    df_consensus = pd.DataFrame(consensus_rows)
+
+    # Normalize each method to [0,1]
+    for col in ['pca_max_loading', 'lda_max_coef', 'rf_perm_importance', 'wls_max_beta', 'max_corr_candidate']:
+        mx = df_consensus[col].max()
+        if mx > 0:
+            df_consensus[f'{col}_norm'] = df_consensus[col] / mx
+        else:
+            df_consensus[f'{col}_norm'] = 0
+
+    # Composite importance
+    df_consensus['consensus_importance'] = (
+        0.20 * df_consensus['pca_max_loading_norm'] +
+        0.25 * df_consensus['lda_max_coef_norm'] +
+        0.25 * df_consensus['rf_perm_importance_norm'] +
+        0.20 * df_consensus['wls_max_beta_norm'] +
+        0.10 * df_consensus['max_corr_candidate_norm']
+    )
+    df_consensus = df_consensus.sort_values('consensus_importance', ascending=False)
+    df_consensus.to_csv(os.path.join(OUTPUT_DIR, '22_consensus_importance.csv'), index=False)
+
+    print(f"\n  Top 20 variables par importance consensus multi-méthodes :")
+    print(f"  {'Variable':35s}  {'PCA':>5s}  {'LDA':>5s}  {'RF':>5s}  {'WLS':>5s}  {'Corr':>5s}  {'Total':>6s}")
+    print(f"  {'─'*35}  {'─'*5}  {'─'*5}  {'─'*5}  {'─'*5}  {'─'*5}  {'─'*6}")
+    for _, r in df_consensus.head(20).iterrows():
+        print(f"  {r['variable']:35s}  {r['pca_max_loading_norm']:.2f}  {r['lda_max_coef_norm']:.2f}  "
+              f"{r['rf_perm_importance_norm']:.2f}  {r['wls_max_beta_norm']:.2f}  "
+              f"{r['max_corr_candidate_norm']:.2f}  {r['consensus_importance']:.3f}")
+
+    # ── Candidate signatures (top 5 per candidate) ──
+    sig_rows = []
+    for cand in CANDIDATES:
+        if corr_by_cand is None or cand not in corr_by_cand.columns:
+            continue
+        corrs = corr_by_cand[cand].abs().sort_values(ascending=False)
+        for v in corrs.head(5).index:
+            sig_rows.append({
+                'candidat': cand,
+                'variable': v,
+                'label': labels.get(v, v),
+                'correlation': round(corr_by_cand.loc[v, cand], 4),
+                'consensus_rank': int(df_consensus[df_consensus['variable'] == v].index[0]) + 1
+                if v in df_consensus['variable'].values else 999,
+            })
+
+    df_sig = pd.DataFrame(sig_rows)
+    df_sig.to_csv(os.path.join(OUTPUT_DIR, '22_candidate_signatures.csv'), index=False)
+
+    print(f"\n  Signatures électorales (top 5 variables par candidat) :")
+    for cand in CANDIDATES:
+        cand_sig = df_sig[df_sig['candidat'] == cand]
+        if cand_sig.empty:
+            continue
+        print(f"\n  {cand}:")
+        for _, r in cand_sig.iterrows():
+            print(f"    {r['variable']:35s}  r={r['correlation']:+.3f}  (rang consensus: #{r['consensus_rank']})")
+
+    # ── Synthesis report text ──
+    report = []
+    report.append("RAPPORT DE SYNTHÈSE — Analyse IRIS Socio × Élections 2022")
+    report.append("=" * 70)
+    report.append(f"\nDataset : {df.shape[0]} IRIS × {len(var_names)} variables")
+    report.append(f"PCA : {pca_results['n_retain']} composantes retenues "
+                  f"({pca_results['explained_ratio'][:pca_results['n_retain']].sum()*100:.1f}% variance)")
+    report.append(f"LDA : accuracy CV = {lda_results['cv_accuracy']:.1%}")
+
+    report.append("\n\nCLIVAGES STRUCTURANTS IDENTIFIÉS :")
+    report.append("-" * 40)
+    report.append("1. Urbain/Rural (PC1) : oppose centres-villes denses (HLM, transports,")
+    report.append("   immigrés, petits logements) aux zones pavillonnaires (maison, voiture,")
+    report.append("   grands logements). C'est l'axe dominant de la variance socio.")
+    report.append("2. Aisé/Précaire (PC2) : oppose quartiers aisés (cadres, BAC+5, revenus")
+    report.append("   élevés) aux quartiers populaires (chômage, prestations sociales).")
+    report.append("3. Gauche-populaire/Droite-bourgeoise : Mélenchon/quartiers immigrés et")
+    report.append("   HLM vs Macron-Pécresse/quartiers cadres et patrimoine.")
+    report.append("4. Périphérie/Métropole : Le Pen-Zemmour/zones pavillonnaires-automobiles")
+    report.append("   vs Macron-Jadot/centres-villes connectés.")
+
+    report.append("\n\nVARIABLES LES PLUS IMPORTANTES (consensus multi-méthodes) :")
+    report.append("-" * 40)
+    for _, r in df_consensus.head(15).iterrows():
+        report.append(f"  {r['variable']:35s}  importance={r['consensus_importance']:.3f}")
+
+    report_text = '\n'.join(report)
+    with open(os.path.join(OUTPUT_DIR, '22_synthesis_report.txt'), 'w', encoding='utf-8') as f:
+        f.write(report_text)
+
+    print(f"\n  → Fichiers : 22_synthesis_report.txt, 22_consensus_importance.csv, 22_candidate_signatures.csv")
+    return df_consensus
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 #  MAIN
 # ═══════════════════════════════════════════════════════════════════════════════
 
@@ -1735,6 +3272,7 @@ def main():
 
     print("=" * 70)
     print("  ANALYSE IRIS — Socio-démographie × Présidentielles 2022")
+    print("  (version enrichie — ~60 fichiers output)")
     print("=" * 70)
 
     # ── Data loading ──
@@ -1752,6 +3290,13 @@ def main():
     nonlinear_exploration(df, var_names, pca_results)
     norm_recs = normalization_analysis(df, var_names)
 
+    # ── Extensions agnostiques ──
+    umap_exploration(df, var_names, pca_results)
+    km_results = clustering_analysis(df, var_names, pca_results)
+    core_vars = redundancy_analysis(df, var_names, corr_matrix, redundant_pairs, pca_results)
+    mi_results = mutual_information_analysis(df, var_names)
+    icc_results = geographic_variance_analysis(df, var_names)
+
     # ═══════════════════════════════════════════════════════════════════════
     print("\n" + "=" * 70)
     print("  PARTIE 2 — ANALYSE CONDITIONNÉE (Présidentielles 2022 T1)")
@@ -1764,9 +3309,27 @@ def main():
     party_scores, party_scores_df = party_informed_scores(
         df, var_names, lda_results, corr_by_cand)
 
+    # ── Extensions conditionnées ──
+    rf_importance = random_forest_analysis(df, var_names)
+    pairwise_results = pairwise_contrasts(df, var_names)
+    wls_results = wls_regression(df, var_names)
+    abst_results = abstention_analysis(df, var_names)
+
     # ═══════════════════════════════════════════════════════════════════════
     print("\n" + "=" * 70)
-    print("  SYNTHÈSE")
+    print("  PARTIE 3 — SYNTHÈSE ET RECOMMANDATIONS")
+    print("=" * 70)
+
+    axis_pairs = recommend_axis_pairs(df, var_names, proposed_scores, party_scores,
+                                       scores_df, party_scores_df)
+    fiches = score_fiches(df, var_names, proposed_scores, party_scores,
+                          scores_df, party_scores_df)
+    consensus = synthesis_report(df, var_names, pca_results, lda_results,
+                                 rf_importance, wls_results, corr_by_cand)
+
+    # ═══════════════════════════════════════════════════════════════════════
+    print("\n" + "=" * 70)
+    print("  SYNTHÈSE FINALE")
     print("=" * 70)
 
     print(f"\n  Dataset : {df.shape[0]} IRIS × {len(var_names)} variables")
@@ -1780,6 +3343,9 @@ def main():
     for f in sorted(os.listdir(OUTPUT_DIR)):
         size = os.path.getsize(os.path.join(OUTPUT_DIR, f))
         print(f"    {f} ({size / 1024:.1f} KB)")
+
+    total_files = len(os.listdir(OUTPUT_DIR))
+    print(f"\n  Total : {total_files} fichiers générés")
 
     print("\n" + "=" * 70)
     print("  ANALYSE TERMINÉE")

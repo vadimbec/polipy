@@ -1,0 +1,151 @@
+GUIDE D'IMPLÉMENTATION — Scores recommandés pour rebuild_vizu_iris.py
+======================================================================
+
+Scores nouveaux (max|r| < 0.5 avec existants) : 3
+
+  'score_pca_pc6_équipements_diplômes': {
+      'pos_vars': ['pct_inactif', 'bpe_sport_indoor_pour1000', 'bpe_ecole_privee_pour1000', 'bpe_C_enseignement_pour1000', 'pct_hors_menage', 'pct_etudiants'],
+      'neg_vars': ['bpe_E_transports_pour1000', 'pct_immigres', 'pct_etrangers', 'pct_cdi', 'pct_actifs_transports', 'pct_actifs_2roues', 'pct_csp_independant', 'DISP_S80S2021'],
+  },
+
+  'score_pca_pc7_logement_csp': {
+      'pos_vars': ['DISP_S80S2021', 'pct_logements_recents', 'DISP_GI21', 'bpe_A_services_pour1000', 'bpe_total_pour1000', 'pct_csp_sans_emploi', 'pct_inactif', 'pct_csp_independant', 'pct_0_19', 'DISP_PPAT21'],
+      'neg_vars': ['pct_logvac', 'pct_logements_anciens', 'pct_csp_agriculteur', 'pct_20_64', 'pct_actifs_velo'],
+  },
+
+  'score_lda_axe2': {
+      'pos_vars': ['pct_bac_plus', 'pct_locataires', 'DISP_PPLOGT21', 'age_moyen', 'pct_proprietaires', 'pct_logements_5p_plus', 'pct_appart', 'pct_etrangers'],
+      'neg_vars': ['pct_csp_retraite', 'pct_csp_sans_emploi', 'pct_csp_plus', 'pct_csp_ouvrier', 'pct_csp_intermediaire', 'pct_csp_employe', 'pct_chauffage_gaz_ville', 'pct_chauffage_autre'],
+  },
+
+
+============================================================
+SCORE : score_pca_pc1_logement_confort
+============================================================
+Description : PC1
+Variables positives (9) : pct_grands_logements, pct_garage, pct_actifs_voiture, pct_logements_5p_plus, nb_pieces_moyen, pct_voiture_2plus, pct_proprietaires, pct_maison, surface_moyenne
+Variables négatives (8) : pct_appart, pct_locataires, pct_voiture_0, pct_immigres, pct_petits_logements, pct_actifs_transports, pct_etrangers, pct_studios
+Distribution : mean=14.2, std=24.2, range=[-49.1, 48.2]
+Orthogonalité : max|r| avec existants = 0.978 (REDONDANT)
+Corrélations candidats : {'MACRON': np.float64(-0.042), 'LE_PEN': np.float64(0.517), 'MELENCHON': np.float64(-0.626), 'ZEMMOUR': np.float64(-0.043), 'PECRESSE': np.float64(0.097), 'JADOT': np.float64(-0.22), 'ROUSSEL': np.float64(0.02), 'HIDALGO': np.float64(-0.017), 'DUPONT_AIGNAN': np.float64(0.282), 'AUTRE': np.float64(0.322)}
+Barycentres candidats : {'MACRON': np.float64(0.48), 'LE_PEN': np.float64(6.17), 'MELENCHON': np.float64(-8.21), 'ZEMMOUR': np.float64(-0.32), 'PECRESSE': np.float64(0.79), 'JADOT': np.float64(-2.21), 'ROUSSEL': np.float64(1.39), 'HIDALGO': np.float64(0.33), 'DUPONT_AIGNAN': np.float64(5.08), 'AUTRE': np.float64(6.39)}
+
+
+============================================================
+SCORE : score_pca_pc2_composition_diplômes
+============================================================
+Description : PC2
+Variables positives (11) : pct_capbep, pct_interim, pct_chomage, pct_csp_ouvrier, DISP_TP6021, DISP_PPLOGT21, DISP_PPMINI21, DISP_PPFAM21, DISP_PPSOC21, pct_sans_diplome, DISP_PIMPOT21
+Variables négatives (6) : DISP_MED21, pct_bac_plus, pct_csp_plus, pct_sup5, DISP_PACT21, DISP_PTSA21
+Distribution : mean=3.49, std=19.38, range=[-49.0, 47.6]
+Orthogonalité : max|r| avec existants = 0.941 (REDONDANT)
+Corrélations candidats : {'MACRON': np.float64(-0.506), 'LE_PEN': np.float64(0.423), 'MELENCHON': np.float64(0.096), 'ZEMMOUR': np.float64(-0.246), 'PECRESSE': np.float64(-0.247), 'JADOT': np.float64(-0.534), 'ROUSSEL': np.float64(0.152), 'HIDALGO': np.float64(-0.034), 'DUPONT_AIGNAN': np.float64(0.026), 'AUTRE': np.float64(0.178)}
+Barycentres candidats : {'MACRON': np.float64(-3.63), 'LE_PEN': np.float64(4.6), 'MELENCHON': np.float64(2.36), 'ZEMMOUR': np.float64(-3.06), 'PECRESSE': np.float64(-5.28), 'JADOT': np.float64(-6.96), 'ROUSSEL': np.float64(2.83), 'HIDALGO': np.float64(-1.0), 'DUPONT_AIGNAN': np.float64(0.23), 'AUTRE': np.float64(2.48)}
+
+
+============================================================
+SCORE : score_pca_pc3_équipements_démographie
+============================================================
+Description : PC3
+Variables positives (4) : pct_csp_intermediaire, DISP_PACT21, DISP_PTSA21, pct_0_19
+Variables négatives (10) : pct_65_plus, age_moyen, DISP_PPEN21, bpe_total_pour1000, pct_csp_retraite, bpe_B_commerces_pour1000, bpe_G_tourisme_pour1000, bpe_D_sante_pour1000, pct_actifs_marche, bpe_A_services_pour1000
+Distribution : mean=-0.83, std=17.11, range=[-49.2, 45.2]
+Orthogonalité : max|r| avec existants = 0.676 (REDONDANT)
+Corrélations candidats : {'MACRON': np.float64(-0.001), 'LE_PEN': np.float64(0.036), 'MELENCHON': np.float64(0.139), 'ZEMMOUR': np.float64(-0.115), 'PECRESSE': np.float64(-0.11), 'JADOT': np.float64(0.097), 'ROUSSEL': np.float64(-0.123), 'HIDALGO': np.float64(-0.11), 'DUPONT_AIGNAN': np.float64(0.003), 'AUTRE': np.float64(-0.244)}
+Barycentres candidats : {'MACRON': np.float64(-0.23), 'LE_PEN': np.float64(-1.31), 'MELENCHON': np.float64(2.93), 'ZEMMOUR': np.float64(-1.65), 'PECRESSE': np.float64(-1.44), 'JADOT': np.float64(1.17), 'ROUSSEL': np.float64(-1.03), 'HIDALGO': np.float64(-0.88), 'DUPONT_AIGNAN': np.float64(-0.7), 'AUTRE': np.float64(-2.86)}
+
+
+============================================================
+SCORE : score_pca_pc4_démographie_chauffage
+============================================================
+Description : PC4
+Variables positives (6) : age_moyen, pct_csp_retraite, pct_65_plus, DISP_PPEN21, pct_chauffage_gaz_ville, pct_femmes
+Variables négatives (9) : pct_logements_anciens, bpe_A_services_pour1000, pct_20_64, pct_chauffage_autre, pct_chauffage_gaz_bouteille, pct_csp_agriculteur, bpe_total_pour1000, bpe_F_sports_culture_pour1000, pct_chauffage_fioul
+Distribution : mean=-5.75, std=13.09, range=[-43.1, 44.1]
+Orthogonalité : max|r| avec existants = 0.553 (REDONDANT)
+Corrélations candidats : {'MACRON': np.float64(0.158), 'LE_PEN': np.float64(-0.29), 'MELENCHON': np.float64(0.269), 'ZEMMOUR': np.float64(0.042), 'PECRESSE': np.float64(-0.036), 'JADOT': np.float64(0.081), 'ROUSSEL': np.float64(0.056), 'HIDALGO': np.float64(0.051), 'DUPONT_AIGNAN': np.float64(-0.198), 'AUTRE': np.float64(-0.236)}
+Barycentres candidats : {'MACRON': np.float64(0.35), 'LE_PEN': np.float64(-1.32), 'MELENCHON': np.float64(1.2), 'ZEMMOUR': np.float64(0.3), 'PECRESSE': np.float64(0.11), 'JADOT': np.float64(0.16), 'ROUSSEL': np.float64(0.57), 'HIDALGO': np.float64(0.39), 'DUPONT_AIGNAN': np.float64(-1.58), 'AUTRE': np.float64(-2.04)}
+
+
+============================================================
+SCORE : score_pca_pc5_équipements_csp
+============================================================
+Description : PC5
+Variables positives (6) : pct_grands_logements, pct_csp_sans_emploi, DISP_S80S2021, pct_temps_partiel, pct_inactif, pct_etudiants
+Variables négatives (8) : bpe_total_pour1000, bpe_A_services_pour1000, bpe_B_commerces_pour1000, pct_csp_employe, bpe_D_sante_pour1000, pct_chauffage_elec, pct_logements_recents, pct_csp_intermediaire
+Distribution : mean=3.05, std=11.14, range=[-39.1, 43.3]
+Orthogonalité : max|r| avec existants = 0.567 (REDONDANT)
+Corrélations candidats : {'MACRON': np.float64(-0.09), 'LE_PEN': np.float64(0.015), 'MELENCHON': np.float64(0.062), 'ZEMMOUR': np.float64(-0.081), 'PECRESSE': np.float64(0.06), 'JADOT': np.float64(-0.13), 'ROUSSEL': np.float64(0.014), 'HIDALGO': np.float64(-0.03), 'DUPONT_AIGNAN': np.float64(0.004), 'AUTRE': np.float64(0.06)}
+Barycentres candidats : {'MACRON': np.float64(-0.17), 'LE_PEN': np.float64(-0.69), 'MELENCHON': np.float64(1.44), 'ZEMMOUR': np.float64(-0.65), 'PECRESSE': np.float64(-0.11), 'JADOT': np.float64(-0.35), 'ROUSSEL': np.float64(0.17), 'HIDALGO': np.float64(-0.19), 'DUPONT_AIGNAN': np.float64(-0.99), 'AUTRE': np.float64(-0.92)}
+
+
+============================================================
+SCORE : score_pca_pc6_équipements_diplômes
+============================================================
+Description : PC6
+Variables positives (6) : pct_inactif, bpe_sport_indoor_pour1000, bpe_ecole_privee_pour1000, bpe_C_enseignement_pour1000, pct_hors_menage, pct_etudiants
+Variables négatives (8) : bpe_E_transports_pour1000, pct_immigres, pct_etrangers, pct_cdi, pct_actifs_transports, pct_actifs_2roues, pct_csp_independant, DISP_S80S2021
+Distribution : mean=0.58, std=10.15, range=[-37.5, 39.7]
+Orthogonalité : max|r| avec existants = 0.375 (NOUVEAU)
+Corrélations candidats : {'MACRON': np.float64(-0.029), 'LE_PEN': np.float64(0.287), 'MELENCHON': np.float64(-0.187), 'ZEMMOUR': np.float64(-0.207), 'PECRESSE': np.float64(-0.114), 'JADOT': np.float64(-0.149), 'ROUSSEL': np.float64(0.096), 'HIDALGO': np.float64(0.051), 'DUPONT_AIGNAN': np.float64(0.019), 'AUTRE': np.float64(0.057)}
+Barycentres candidats : {'MACRON': np.float64(-0.17), 'LE_PEN': np.float64(1.88), 'MELENCHON': np.float64(-1.4), 'ZEMMOUR': np.float64(-1.38), 'PECRESSE': np.float64(-0.88), 'JADOT': np.float64(-0.99), 'ROUSSEL': np.float64(1.25), 'HIDALGO': np.float64(0.84), 'DUPONT_AIGNAN': np.float64(0.51), 'AUTRE': np.float64(1.46)}
+
+
+============================================================
+SCORE : score_pca_pc7_logement_csp
+============================================================
+Description : PC7
+Variables positives (10) : DISP_S80S2021, pct_logements_recents, DISP_GI21, bpe_A_services_pour1000, bpe_total_pour1000, pct_csp_sans_emploi, pct_inactif, pct_csp_independant, pct_0_19, DISP_PPAT21
+Variables négatives (5) : pct_logvac, pct_logements_anciens, pct_csp_agriculteur, pct_20_64, pct_actifs_velo
+Distribution : mean=-1.94, std=8.87, range=[-35.0, 34.1]
+Orthogonalité : max|r| avec existants = 0.362 (NOUVEAU)
+Corrélations candidats : {'MACRON': np.float64(0.027), 'LE_PEN': np.float64(-0.263), 'MELENCHON': np.float64(0.201), 'ZEMMOUR': np.float64(0.211), 'PECRESSE': np.float64(-0.006), 'JADOT': np.float64(0.111), 'ROUSSEL': np.float64(-0.045), 'HIDALGO': np.float64(-0.002), 'DUPONT_AIGNAN': np.float64(-0.106), 'AUTRE': np.float64(-0.05)}
+Barycentres candidats : {'MACRON': np.float64(-0.01), 'LE_PEN': np.float64(-0.72), 'MELENCHON': np.float64(0.54), 'ZEMMOUR': np.float64(1.23), 'PECRESSE': np.float64(0.41), 'JADOT': np.float64(-0.04), 'ROUSSEL': np.float64(-0.68), 'HIDALGO': np.float64(-0.6), 'DUPONT_AIGNAN': np.float64(-0.48), 'AUTRE': np.float64(-0.54)}
+
+
+============================================================
+SCORE : score_pca_pc8_équipements_logement
+============================================================
+Description : PC8
+Variables positives (3) : pct_cdd, pct_logements_recents, pct_chauffage_elec
+Variables négatives (8) : bpe_sport_indoor_pour1000, bpe_C_enseignement_pour1000, bpe_ecole_privee_pour1000, pct_chauffage_gaz_ville, bpe_F_sports_culture_pour1000, pct_logvac, bpe_total_pour1000, bpe_D_sante_pour1000
+Distribution : mean=2.95, std=11.89, range=[-38.9, 42.1]
+Orthogonalité : max|r| avec existants = 0.690 (REDONDANT)
+Corrélations candidats : {'MACRON': np.float64(-0.139), 'LE_PEN': np.float64(0.142), 'MELENCHON': np.float64(-0.089), 'ZEMMOUR': np.float64(0.011), 'PECRESSE': np.float64(0.004), 'JADOT': np.float64(-0.067), 'ROUSSEL': np.float64(-0.024), 'HIDALGO': np.float64(-0.032), 'DUPONT_AIGNAN': np.float64(0.083), 'AUTRE': np.float64(0.122)}
+Barycentres candidats : {'MACRON': np.float64(-0.37), 'LE_PEN': np.float64(0.16), 'MELENCHON': np.float64(0.37), 'ZEMMOUR': np.float64(0.07), 'PECRESSE': np.float64(-0.66), 'JADOT': np.float64(0.05), 'ROUSSEL': np.float64(-0.13), 'HIDALGO': np.float64(-0.26), 'DUPONT_AIGNAN': np.float64(0.14), 'AUTRE': np.float64(0.15)}
+
+
+============================================================
+SCORE : score_lda_axe1
+============================================================
+Description : Axe LDA 1 — Discrimination électorale principale
+Variables positives (8) : pct_proprietaires, pct_chauffage_gaz_ville, pct_chauffage_fioul, pct_locataires, surface_moyenne, pct_chauffage_autre, pct_chauffage_elec, pct_maison
+Variables négatives (8) : pct_csp_retraite, pct_csp_sans_emploi, pct_csp_plus, pct_csp_ouvrier, pct_csp_intermediaire, pct_csp_employe, pct_csp_agriculteur, nb_pieces_moyen
+Distribution : mean=2.07, std=4.17, range=[-15.7, 20.1]
+Orthogonalité : max|r| avec existants = 0.654 (REDONDANT)
+Corrélations candidats : {'MACRON': np.float64(0.011), 'LE_PEN': np.float64(0.268), 'MELENCHON': np.float64(-0.452), 'ZEMMOUR': np.float64(0.055), 'PECRESSE': np.float64(0.182), 'JADOT': np.float64(-0.155), 'ROUSSEL': np.float64(0.016), 'HIDALGO': np.float64(0.007), 'DUPONT_AIGNAN': np.float64(0.183), 'AUTRE': np.float64(0.279)}
+Barycentres candidats : {'MACRON': np.float64(0.18), 'LE_PEN': np.float64(0.51), 'MELENCHON': np.float64(-1.07), 'ZEMMOUR': np.float64(0.24), 'PECRESSE': np.float64(0.53), 'JADOT': np.float64(-0.18), 'ROUSSEL': np.float64(0.01), 'HIDALGO': np.float64(-0.02), 'DUPONT_AIGNAN': np.float64(0.55), 'AUTRE': np.float64(0.77)}
+
+
+============================================================
+SCORE : score_lda_axe2
+============================================================
+Description : Axe LDA 2 — Discrimination électorale secondaire
+Variables positives (8) : pct_bac_plus, pct_locataires, DISP_PPLOGT21, age_moyen, pct_proprietaires, pct_logements_5p_plus, pct_appart, pct_etrangers
+Variables négatives (8) : pct_csp_retraite, pct_csp_sans_emploi, pct_csp_plus, pct_csp_ouvrier, pct_csp_intermediaire, pct_csp_employe, pct_chauffage_gaz_ville, pct_chauffage_autre
+Distribution : mean=-0.38, std=4.75, range=[-17.4, 20.7]
+Orthogonalité : max|r| avec existants = 0.393 (NOUVEAU)
+Corrélations candidats : {'MACRON': np.float64(0.146), 'LE_PEN': np.float64(-0.492), 'MELENCHON': np.float64(0.209), 'ZEMMOUR': np.float64(0.144), 'PECRESSE': np.float64(0.182), 'JADOT': np.float64(0.195), 'ROUSSEL': np.float64(-0.004), 'HIDALGO': np.float64(0.136), 'DUPONT_AIGNAN': np.float64(-0.127), 'AUTRE': np.float64(0.122)}
+Barycentres candidats : {'MACRON': np.float64(0.3), 'LE_PEN': np.float64(-1.08), 'MELENCHON': np.float64(0.39), 'ZEMMOUR': np.float64(0.52), 'PECRESSE': np.float64(0.72), 'JADOT': np.float64(0.69), 'ROUSSEL': np.float64(-0.37), 'HIDALGO': np.float64(0.28), 'DUPONT_AIGNAN': np.float64(-0.56), 'AUTRE': np.float64(-0.22)}
+
+
+============================================================
+SCORE : score_peripherie_metropole
+============================================================
+Description : Périphérie (Le Pen/Zemmour) vs Métropole (Macron/Jadot)
+Variables positives (6) : pct_capbep, pct_actifs_voiture, pct_maison, pct_voiture_2plus, nb_pieces_moyen, pct_chauffage_fioul
+Variables négatives (10) : pct_bac_plus, pct_sup5, pct_csp_plus, DISP_GI21, DISP_PACT21, DISP_RD21, pct_actifs_velo, DISP_PTSA21, pct_studios, pct_petits_logements
+Distribution : mean=12.75, std=20.36, range=[-48.6, 44.0]
+Orthogonalité : max|r| avec existants = 0.886 (REDONDANT)
+Corrélations candidats : {'MACRON': np.float64(-0.285), 'LE_PEN': np.float64(0.673), 'MELENCHON': np.float64(-0.522), 'ZEMMOUR': np.float64(-0.134), 'PECRESSE': np.float64(-0.007), 'JADOT': np.float64(-0.481), 'ROUSSEL': np.float64(0.086), 'HIDALGO': np.float64(-0.047), 'DUPONT_AIGNAN': np.float64(0.277), 'AUTRE': np.float64(0.365)}
+Barycentres candidats : {'MACRON': np.float64(-1.49), 'LE_PEN': np.float64(6.99), 'MELENCHON': np.float64(-5.01), 'ZEMMOUR': np.float64(-1.52), 'PECRESSE': np.float64(-1.75), 'JADOT': np.float64(-5.53), 'ROUSSEL': np.float64(2.35), 'HIDALGO': np.float64(-0.6), 'DUPONT_AIGNAN': np.float64(4.07), 'AUTRE': np.float64(5.87)}

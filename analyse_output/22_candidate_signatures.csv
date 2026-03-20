@@ -1,0 +1,51 @@
+candidat,variable,label,correlation,consensus_rank
+MACRON,DISP_MED21,Revenu médian €/UC,0.5479,19
+MACRON,DISP_PIMPOT21,% impôts (négatif),-0.5403,32
+MACRON,pct_bac_plus,% BAC+,0.4689,37
+MACRON,pct_sup5,% BAC+5,0.4493,34
+MACRON,DISP_PPFAM21,% prestations familiales,-0.4346,29
+LE_PEN,pct_capbep,% CAP/BEP,0.6433,36
+LE_PEN,pct_bac_plus,% BAC+,-0.6282,37
+LE_PEN,pct_sup5,% BAC+5,-0.6242,34
+LE_PEN,DISP_GI21,Indice Gini,-0.5404,21
+LE_PEN,pct_maison,% maisons,0.5356,54
+MELENCHON,pct_immigres,% immigrés,0.688,2
+MELENCHON,pct_etrangers,% étrangers,0.6515,1
+MELENCHON,pct_locataires,% locataires,0.6133,51
+MELENCHON,pct_proprietaires,% propriétaires,-0.6106,50
+MELENCHON,surface_moyenne,Surface moy. m²,-0.5891,62
+ZEMMOUR,DISP_PIMPOT21,% impôts (négatif),-0.3274,32
+ZEMMOUR,DISP_PPAT21,% patrimoine,0.3248,25
+ZEMMOUR,DISP_MED21,Revenu médian €/UC,0.2885,19
+ZEMMOUR,DISP_PPFAM21,% prestations familiales,-0.2842,29
+ZEMMOUR,DISP_GI21,Indice Gini,0.2744,21
+PECRESSE,DISP_PIMPOT21,% impôts (négatif),-0.3327,32
+PECRESSE,DISP_MED21,Revenu médian €/UC,0.3271,19
+PECRESSE,DISP_PPFAM21,% prestations familiales,-0.3007,29
+PECRESSE,DISP_PPAT21,% patrimoine,0.2954,25
+PECRESSE,DISP_PPSOC21,% prestations sociales,-0.2776,27
+JADOT,pct_bac_plus,% BAC+,0.6216,37
+JADOT,pct_sup5,% BAC+5,0.5523,34
+JADOT,pct_csp_plus,% cadres sup.,0.5176,13
+JADOT,pct_sans_diplome,% sans diplôme,-0.4754,35
+JADOT,DISP_PIMPOT21,% impôts (négatif),-0.4619,32
+ROUSSEL,DISP_PPEN21,% pensions,0.185,26
+ROUSSEL,DISP_PIMPOT21,% impôts (négatif),0.1756,32
+ROUSSEL,DISP_MED21,Revenu médian €/UC,-0.1691,19
+ROUSSEL,DISP_PACT21,% revenus activité,-0.1587,33
+ROUSSEL,pct_65_plus,% 65+ ans,0.1526,10
+HIDALGO,pct_0_19,% 0-19 ans,-0.136,8
+HIDALGO,age_moyen,Âge moyen,0.1197,3
+HIDALGO,DISP_PPEN21,% pensions,0.1164,26
+HIDALGO,pct_sans_diplome,% sans diplôme,-0.1149,35
+HIDALGO,pct_csp_ouvrier,% ouvriers,-0.1138,16
+DUPONT_AIGNAN,surface_moyenne,Surface moy. m²,0.2783,62
+DUPONT_AIGNAN,pct_voiture_0,% 0 voiture,-0.2739,60
+DUPONT_AIGNAN,pct_chauffage_autre,% chauffage autre,0.2734,68
+DUPONT_AIGNAN,pct_locataires,% locataires,-0.2704,51
+DUPONT_AIGNAN,pct_proprietaires,% propriétaires,0.2698,50
+AUTRE,pct_chauffage_autre,% chauffage autre,0.4722,68
+AUTRE,pct_chauffage_gaz_ville,% chauffage gaz ville,-0.4118,66
+AUTRE,age_moyen,Âge moyen,0.3548,3
+AUTRE,pct_logements_anciens,% logements anciens,0.3527,58
+AUTRE,pct_actifs_transports,% transports en commun,-0.3511,46

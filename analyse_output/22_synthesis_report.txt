@@ -1,0 +1,38 @@
+RAPPORT DE SYNTHÈSE — Analyse IRIS Socio × Élections 2022
+======================================================================
+
+Dataset : 45566 IRIS × 84 variables
+PCA : 13 composantes retenues (77.0% variance)
+LDA : accuracy CV = 65.9%
+
+
+CLIVAGES STRUCTURANTS IDENTIFIÉS :
+----------------------------------------
+1. Urbain/Rural (PC1) : oppose centres-villes denses (HLM, transports,
+   immigrés, petits logements) aux zones pavillonnaires (maison, voiture,
+   grands logements). C'est l'axe dominant de la variance socio.
+2. Aisé/Précaire (PC2) : oppose quartiers aisés (cadres, BAC+5, revenus
+   élevés) aux quartiers populaires (chômage, prestations sociales).
+3. Gauche-populaire/Droite-bourgeoise : Mélenchon/quartiers immigrés et
+   HLM vs Macron-Pécresse/quartiers cadres et patrimoine.
+4. Périphérie/Métropole : Le Pen-Zemmour/zones pavillonnaires-automobiles
+   vs Macron-Jadot/centres-villes connectés.
+
+
+VARIABLES LES PLUS IMPORTANTES (consensus multi-méthodes) :
+----------------------------------------
+  pct_csp_retraite                     importance=0.434
+  bpe_ecole_privee_pour1000            importance=0.403
+  pct_65_plus                          importance=0.392
+  pct_immigres                         importance=0.383
+  pct_csp_plus                         importance=0.383
+  pct_csp_sans_emploi                  importance=0.378
+  pct_csp_ouvrier                      importance=0.356
+  DISP_PCHO21                          importance=0.343
+  pct_bac_plus                         importance=0.329
+  DISP_TP6021                          importance=0.320
+  pct_chauffage_elec                   importance=0.305
+  pct_0_19                             importance=0.304
+  pct_csp_employe                      importance=0.297
+  pct_20_64                            importance=0.287
+  pct_sup5                             importance=0.283
