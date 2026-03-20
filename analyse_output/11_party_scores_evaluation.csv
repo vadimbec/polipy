@@ -1,0 +1,4 @@
+score,description,n_pos,n_neg,range,weighted_std,max_r_with_existing,most_similar_to,novel
+score_lda_axe1,Axe LDA 1 — Discrimination électorale principale,8,8,"[-15.7, 20.1]",4.1,0.654,score_urbanite,False
+score_lda_axe2,Axe LDA 2 — Discrimination électorale secondaire,8,8,"[-17.4, 20.7]",4.57,0.393,score_rentier,True
+score_peripherie_metropole,Périphérie (Le Pen/Zemmour) vs Métropole (Macron/Jadot),6,10,"[-48.6, 44.0]",21.28,0.886,score_ruralite,False

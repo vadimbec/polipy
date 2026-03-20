@@ -1,0 +1,85 @@
+variable,label,type,category,n_valid,pct_nan,wmean,wstd,min,max,p1,p5,p25,p50,p75,p95,p99,skew,kurtosis,wcv,flag_outlier,flag_low_var
+pct_etrangers,% étrangers,pct,Démographie,45566,0.0,7.093,7.496,0.0,98.198,0.0,0.0,1.144,2.66,6.217,18.728,30.279,2.63,9.74,1.057,False,False
+pct_immigres,% immigrés,pct,Démographie,45566,0.0,9.701,8.877,0.0,98.198,0.0,0.633,2.07,4.146,8.532,23.523,35.784,2.27,6.48,0.915,False,False
+age_moyen,Âge moyen,years,Démographie,45566,0.0,42.135,4.885,21.688,74.554,32.512,35.808,40.112,43.123,46.546,52.617,56.79,0.37,0.52,0.116,False,False
+pct_femmes,% femmes,pct,Démographie,45566,0.0,51.546,2.495,0.0,74.433,42.647,46.032,49.057,50.628,52.197,54.957,57.154,-1.04,11.02,0.048,False,True
+taille_menage_moy,Taille ménage moy.,count,Démographie,45563,0.0,1.032,1.528,1.0,485.0,1.0,1.0,1.0,1.0,1.011,1.086,1.233,156.95,26638.8,1.481,True,False
+pct_hors_menage,% hors ménage,pct,Démographie,45566,0.0,2.153,4.222,0.0,100.0,0.0,0.0,0.0,0.0,1.135,7.919,19.03,7.92,106.13,1.961,True,False
+ecart_csp_plus_hf,Écart CSP+ H/F,pct,Démographie,45562,0.0,3.74,4.256,-66.667,66.667,-15.15,-6.667,0.0,2.177,5.562,12.29,18.69,-0.21,6.32,1.138,False,False
+pct_0_19,% 0-19 ans,pct,Démographie,45566,0.0,23.544,4.824,0.0,64.233,9.524,13.811,19.433,22.857,26.027,30.838,35.405,-0.06,0.81,0.205,False,False
+pct_20_64,% 20-64 ans,pct,Démographie,45566,0.0,55.658,5.405,10.928,99.296,41.795,46.759,51.948,54.952,57.785,63.306,69.606,0.22,2.5,0.097,False,False
+pct_65_plus,% 65+ ans,pct,Démographie,45566,0.0,20.797,7.477,0.0,75.0,7.655,11.346,16.971,21.422,26.875,36.568,44.444,0.71,0.97,0.36,False,False
+pct_csp_agriculteur,% agriculteurs,pct,CSP,45564,0.0,0.755,1.809,0.0,50.0,0.0,0.0,0.0,0.337,2.789,10.133,19.048,3.42,17.09,2.395,True,False
+pct_csp_independant,% indépendants,pct,CSP,45564,0.0,3.706,1.984,0.0,55.556,0.0,0.0,2.19,3.575,5.448,9.993,15.719,1.96,8.93,0.536,False,False
+pct_csp_plus,% cadres sup.,pct,CSP,45564,0.0,10.119,8.079,0.0,50.0,0.0,0.0,3.193,5.99,10.207,22.409,35.51,1.87,4.52,0.798,False,False
+pct_csp_intermediaire,% prof. intermédiaires,pct,CSP,45564,0.0,14.561,4.442,0.0,80.0,0.0,4.525,10.0,13.827,17.471,23.149,29.412,0.4,1.99,0.305,False,False
+pct_csp_employe,% employés,pct,CSP,45564,0.0,15.55,4.284,0.0,72.854,0.0,6.25,11.76,15.0,18.038,23.556,29.949,0.43,3.3,0.276,False,False
+pct_csp_ouvrier,% ouvriers,pct,CSP,45564,0.0,11.832,5.58,0.0,66.667,0.0,3.208,8.478,12.659,17.311,25.0,33.333,0.71,1.31,0.472,False,False
+pct_csp_retraite,% retraités,pct,CSP,45564,0.0,27.12,9.267,0.0,91.667,8.118,13.828,22.562,28.923,35.72,47.799,58.366,0.51,0.9,0.342,False,False
+pct_csp_sans_emploi,% sans emploi,pct,CSP,45564,0.0,16.356,7.141,0.0,93.018,0.0,4.668,10.0,13.148,17.163,27.273,38.162,1.55,6.44,0.437,False,False
+DISP_MED21,Revenu médian €/UC,euro,Revenus,42860,5.9,23717.631,4859.231,10920.0,65140.0,14595.9,17710.0,21000.0,22780.0,25000.0,30570.0,38394.1,1.61,6.78,0.205,False,False
+DISP_TP6021,Taux pauvreté %,ratio,Revenus,45566,0.0,14.956,9.397,2.722,77.0,4.229,6.0,9.0,11.91,17.234,29.764,45.0,2.01,5.91,0.628,False,False
+DISP_GI21,Indice Gini,ratio,Revenus,45566,0.0,0.261,0.049,0.163,0.784,0.2,0.209,0.222,0.237,0.262,0.329,0.401,2.79,14.67,0.187,False,False
+DISP_RD21,Rapport interdécile D9/D1,ratio,Revenus,45566,0.0,3.134,0.87,2.0,17.4,2.221,2.269,2.416,2.603,2.942,4.1,5.644,4.78,43.49,0.277,True,False
+DISP_S80S2021,Ratio S80/S20,ratio,Revenus,45566,0.0,4.058,1.63,1.735,44.3,2.357,2.783,3.3,3.999,4.881,6.563,8.4,5.85,90.24,0.402,True,False
+DISP_PTSA21,% salaires,share,Composition revenus,45566,0.0,64.662,11.1,18.6,111.5,40.8,47.259,55.318,60.9,65.684,78.269,87.235,0.45,0.99,0.172,False,False
+DISP_PPAT21,% patrimoine,share,Composition revenus,45566,0.0,8.366,5.272,0.6,84.5,1.9,3.7,6.629,7.677,8.991,14.608,25.8,4.57,39.0,0.63,True,False
+DISP_PPEN21,% pensions,share,Composition revenus,45566,0.0,28.041,8.419,-0.4,69.4,11.823,15.6,23.2,28.829,34.867,42.354,48.9,0.16,-0.14,0.3,False,False
+DISP_PPSOC21,% prestations sociales,share,Composition revenus,45566,0.0,6.149,4.559,0.2,51.4,1.1,2.2,3.877,5.009,6.9,12.5,21.698,3.08,15.83,0.741,True,False
+DISP_PCHO21,% allocations chômage,share,Composition revenus,45566,0.0,3.04,0.877,0.6,10.8,1.8,2.1,2.55,2.976,3.299,4.3,5.5,1.45,4.74,0.288,False,False
+DISP_PPFAM21,% prestations familiales,share,Composition revenus,45566,0.0,2.087,1.308,0.1,15.7,0.4,0.8,1.545,1.919,2.273,3.7,6.4,3.17,18.6,0.627,True,False
+DISP_PPLOGT21,% aides logement,share,Composition revenus,45566,0.0,1.228,1.109,0.0,11.5,0.2,0.311,0.51,0.754,1.272,2.7,5.0,3.26,15.99,0.903,True,False
+DISP_PPMINI21,% minimas sociaux,share,Composition revenus,45566,0.0,2.747,2.378,0.065,33.5,0.4,0.735,1.199,1.757,2.939,6.035,11.0,3.19,16.32,0.866,True,False
+DISP_PIMPOT21,% impôts (négatif),share,Composition revenus,45566,0.0,-15.992,4.374,-50.6,-4.0,-29.1,-22.3,-16.283,-14.467,-13.4,-11.4,-8.6,-2.08,7.8,0.273,False,False
+DISP_PACT21,% revenus activité,share,Composition revenus,45566,0.0,72.727,11.358,21.8,113.2,48.2,56.017,62.932,68.337,74.776,86.7,96.335,0.48,0.94,0.156,False,False
+pct_sup5,% BAC+5,pct,Diplômes / Emploi,45566,0.0,11.77,10.566,0.0,77.242,0.45,1.84,3.937,6.144,10.0,27.048,46.792,2.74,8.85,0.898,False,False
+pct_sans_diplome,% sans diplôme,pct,Diplômes / Emploi,45566,0.0,19.766,8.325,0.0,97.368,5.612,8.914,14.682,19.308,24.712,34.314,42.952,0.8,1.56,0.421,False,False
+pct_capbep,% CAP/BEP,pct,Diplômes / Emploi,45566,0.0,24.203,7.533,0.0,65.854,5.882,12.728,23.167,28.129,32.044,37.28,41.716,-0.67,0.74,0.311,False,False
+pct_bac_plus,% BAC+,pct,Diplômes / Emploi,45566,0.0,33.064,14.577,0.0,94.086,9.802,13.83,20.445,26.395,34.414,55.234,72.765,1.36,2.28,0.441,False,False
+pct_chomage,% chômage,pct,Diplômes / Emploi,45566,0.0,11.745,5.766,0.0,95.42,1.887,4.031,6.928,9.407,12.912,20.998,30.323,1.73,6.08,0.491,False,False
+pct_cdi,% CDI,pct,Diplômes / Emploi,45565,0.0,84.321,6.012,10.714,100.0,62.599,72.936,81.818,85.714,88.785,92.49,95.455,-1.8,8.04,0.071,False,False
+pct_cdd,% CDD,pct,Diplômes / Emploi,45565,0.0,9.67,4.442,0.0,85.904,0.0,3.846,6.462,8.701,11.7,18.774,28.571,2.59,15.34,0.459,False,False
+pct_interim,% intérim,pct,Diplômes / Emploi,45565,0.0,2.253,1.675,0.0,32.143,0.0,0.0,0.875,1.84,3.041,5.624,8.824,2.11,10.73,0.744,False,False
+pct_temps_partiel,% temps partiel,pct,Diplômes / Emploi,45565,0.0,16.737,4.677,0.0,100.0,6.522,9.736,13.846,16.861,20.404,28.571,38.462,1.64,7.57,0.279,False,False
+pct_inactif,% inactifs,pct,Diplômes / Emploi,45566,0.0,24.875,6.275,0.0,90.537,12.5,15.901,20.045,23.051,26.721,34.615,44.284,1.57,7.02,0.252,False,False
+pct_etudiants,% étudiants,pct,Diplômes / Emploi,45566,0.0,10.125,4.906,0.0,90.017,1.429,3.636,6.444,8.106,10.04,14.744,24.953,3.89,35.81,0.485,True,False
+pct_actifs_voiture,% voiture,pct,Transport,45566,0.0,71.25,22.627,0.0,233.333,10.092,32.65,69.588,82.88,91.434,106.062,123.219,-0.87,1.84,0.318,False,False
+pct_actifs_transports,% transports en commun,pct,Transport,45566,0.0,14.214,17.602,0.0,98.866,0.0,0.0,0.0,2.425,8.282,43.64,64.634,2.52,6.3,1.238,False,False
+pct_actifs_velo,% vélo,pct,Transport,45566,0.0,3.012,4.0,0.0,77.124,0.0,0.0,0.0,0.0,2.366,8.502,16.752,3.72,23.28,1.328,True,False
+pct_actifs_2roues,% 2 roues,pct,Transport,45566,0.0,1.712,1.981,0.0,55.263,0.0,0.0,0.0,0.393,1.858,5.338,10.254,4.64,44.2,1.157,True,False
+pct_actifs_marche,% marche,pct,Transport,45566,0.0,6.033,5.923,0.0,122.707,0.0,0.0,0.0,2.887,6.713,17.292,28.559,2.99,18.56,0.982,False,False
+pct_proprietaires,% propriétaires,pct,Logement,45544,0.0,60.005,21.439,0.0,100.0,7.88,27.434,63.146,77.521,84.446,91.2,94.872,-1.37,1.34,0.357,False,False
+pct_locataires,% locataires,pct,Logement,45544,0.0,37.942,21.381,0.0,100.0,3.409,6.818,13.278,20.0,34.249,70.376,90.461,1.42,1.48,0.564,False,False
+pct_hlm,% HLM,pct,Logement,45544,0.0,14.047,17.47,0.0,100.0,0.0,0.0,0.0,2.046,8.783,39.314,77.3,3.09,10.86,1.244,True,False
+pct_logvac,% logements vacants,pct,Logement,45544,0.0,7.585,4.073,0.0,66.667,0.205,2.22,5.009,7.42,10.6,16.968,22.77,1.24,3.44,0.537,False,False
+pct_maison,% maisons,pct,Logement,45544,0.0,58.598,34.487,0.0,100.0,0.088,3.185,66.621,91.779,97.359,100.0,100.0,-1.38,0.47,0.589,False,False
+pct_appart,% appartements,pct,Logement,45544,0.0,40.434,34.186,0.0,100.0,0.0,0.0,2.011,7.37,32.4,95.024,99.186,1.38,0.49,0.845,False,False
+pct_petits_logements,% petits logements,pct,Logement,45544,0.0,9.426,11.357,0.0,100.0,0.0,0.0,1.065,2.5,6.073,25.348,45.615,3.24,13.47,1.205,True,False
+pct_grands_logements,% grands logements,pct,Logement,45544,0.0,17.521,12.309,0.0,100.0,0.299,2.002,14.56,25.0,33.704,47.2,56.737,0.16,-0.33,0.703,False,False
+pct_logements_anciens,% logements anciens,pct,Logement,45544,0.0,11.537,12.033,0.0,100.0,0.0,0.566,6.795,17.28,30.135,51.019,65.448,0.86,0.34,1.043,False,False
+pct_logements_recents,% logements récents,pct,Logement,45544,0.0,15.67,11.719,0.0,100.0,0.0,1.389,7.228,12.829,19.319,31.497,45.494,1.59,6.25,0.748,False,False
+pct_voiture_0,% 0 voiture,pct,Logement,45544,0.0,16.687,15.64,0.0,93.962,0.0,1.734,3.978,6.552,12.667,40.085,65.813,2.53,7.18,0.937,False,False
+pct_voiture_2plus,% 2+ voitures,pct,Logement,45544,0.0,36.968,17.887,0.0,100.0,3.492,10.938,35.66,48.968,57.143,65.737,71.047,-0.78,-0.19,0.484,False,False
+surface_moyenne,Surface moy. m²,count,Logement,45544,0.0,86.304,17.298,21.898,140.0,49.955,61.85,86.886,99.666,106.875,115.435,120.903,-0.96,0.39,0.2,False,False
+pct_suroccupation,% suroccupation,pct,Logement,40612,10.9,34.779,26.774,0.0,100.0,0.0,0.0,0.0,20.951,44.047,100.0,100.0,1.05,0.2,0.77,False,False
+pct_chauffage_elec,% chauffage élec.,pct,Chauffage,45544,0.0,35.951,16.479,0.0,100.0,4.0,9.412,20.89,30.959,41.469,59.798,74.276,0.56,0.32,0.458,False,False
+pct_chauffage_fioul,% chauffage fioul,pct,Chauffage,45544,0.0,9.001,8.718,0.0,100.0,0.0,0.739,5.246,13.725,22.366,34.838,43.419,0.63,-0.07,0.969,False,False
+pct_chauffage_gaz_ville,% chauffage gaz ville,pct,Chauffage,45544,0.0,38.998,27.476,0.0,100.0,0.0,0.0,0.0,2.216,44.798,76.728,90.28,0.92,-0.57,0.705,False,False
+pct_chauffage_gaz_bouteille,% chauffage gaz bout.,pct,Chauffage,45544,0.0,1.575,2.076,0.0,100.0,0.0,0.0,0.44,1.728,4.082,8.511,12.776,2.4,28.77,1.318,True,False
+pct_chauffage_autre,% chauffage autre,pct,Chauffage,45544,0.0,14.475,14.692,0.0,98.039,0.0,0.587,8.802,28.588,43.332,61.765,74.17,0.26,-0.85,1.015,False,False
+pct_garage,% garage,pct,Confort logement,45544,0.0,68.841,19.842,0.0,100.0,15.192,34.03,67.906,78.889,85.294,91.707,95.238,-1.56,2.25,0.288,False,False
+nb_pieces_moyen,Nb pièces moy.,count,Confort logement,45544,0.0,4.097,0.785,1.131,8.0,2.412,2.944,4.167,4.695,4.999,5.384,5.69,-1.03,0.7,0.192,False,False
+pct_studios,% studios,pct,Confort logement,45544,0.0,4.953,7.6,0.0,88.744,0.0,0.0,0.0,0.72,2.358,14.988,28.87,4.24,26.42,1.534,True,False
+pct_logements_5p_plus,% 5+ pièces,pct,Confort logement,45544,0.0,38.054,19.38,0.0,100.0,4.021,10.049,37.304,52.174,61.441,72.177,79.332,-0.69,-0.31,0.509,False,False
+bpe_total_pour1000,Équip. totaux /1000,rate,Équipements BPE,45566,0.0,40.094,24.158,0.0,184.667,9.35,14.706,24.39,33.019,45.622,84.39,157.67,2.7,10.27,0.603,False,False
+bpe_A_services_pour1000,Services /1000,rate,Équipements BPE,45566,0.0,18.717,11.109,0.0,83.551,3.92,6.657,12.376,17.677,24.712,42.497,71.429,2.04,6.44,0.594,False,False
+bpe_B_commerces_pour1000,Commerces /1000,rate,Équipements BPE,45566,0.0,5.406,6.916,0.0,48.119,0.0,0.0,0.0,2.396,5.097,14.791,39.695,3.81,18.72,1.279,True,False
+bpe_C_enseignement_pour1000,Enseignement /1000,rate,Équipements BPE,45566,0.0,1.145,1.013,0.0,7.314,0.0,0.0,0.0,0.877,1.719,3.937,6.897,1.83,4.23,0.884,False,False
+bpe_D_sante_pour1000,Santé /1000,rate,Équipements BPE,45566,0.0,9.004,8.172,0.0,45.718,0.0,0.0,0.0,3.378,8.421,21.469,41.357,2.31,6.81,0.908,False,False
+bpe_E_transports_pour1000,Transports /1000,rate,Équipements BPE,45566,0.0,1.247,1.801,0.0,8.755,0.0,0.0,0.0,0.0,0.934,4.333,8.475,2.86,8.79,1.444,False,False
+bpe_F_sports_culture_pour1000,Sports/culture /1000,rate,Équipements BPE,45566,0.0,3.595,3.671,0.0,38.462,0.0,0.0,1.279,4.013,7.547,17.91,37.736,2.43,7.67,1.021,False,False
+bpe_G_tourisme_pour1000,Tourisme /1000,rate,Équipements BPE,45566,0.0,0.636,1.337,0.0,12.811,0.0,0.0,0.0,0.0,0.544,4.115,11.987,4.11,19.03,2.103,True,False
+bpe_educ_prioritaire_pour1000,Éduc. prioritaire /1000,rate,Équipements BPE,45566,0.0,0.09,0.284,0.0,1.632,0.0,0.0,0.0,0.0,0.0,0.466,1.508,4.79,23.43,3.148,True,False
+bpe_ecole_privee_pour1000,Écoles privées /1000,rate,Équipements BPE,45566,0.0,30.303,82.998,0.0,462.147,0.0,0.0,0.0,0.0,0.0,102.296,441.844,5.16,28.69,2.739,True,False
+bpe_sport_indoor_pour1000,Sport indoor /1000,rate,Équipements BPE,45566,0.0,1.034,1.056,0.0,7.99,0.0,0.0,0.0,0.414,1.547,3.868,7.576,2.21,6.0,1.021,False,False
+pct_sport_accessible,% sport accessible,pct,Équipements BPE,37191,18.4,24.236,14.117,0.0,50.0,0.0,0.0,8.696,23.684,33.333,50.0,50.0,0.11,-1.08,0.582,False,False

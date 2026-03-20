@@ -1,0 +1,9 @@
+score,pc_origin,pct_var_explained,n_pos_vars,n_neg_vars,weighted_variance,score_range,max_r_with_existing,most_correlated_with,keep
+score_pca_pc1_logement_confort,PC1,27.24,9,8,647.78,"[-49.1, 48.2]",0.978,score_urbanite,False
+score_pca_pc2_composition_diplômes,PC2,16.96,11,6,482.2,"[-49.0, 47.6]",0.941,score_domination,False
+score_pca_pc3_équipements_démographie,PC3,9.5,4,10,324.31,"[-49.2, 45.2]",0.676,score_rentier,False
+score_pca_pc4_démographie_chauffage,PC4,4.69,6,9,163.77,"[-43.1, 44.1]",0.553,score_urbanite,False
+score_pca_pc5_équipements_csp,PC5,3.49,6,8,129.95,"[-39.1, 43.3]",0.567,score_equipement_public,False
+score_pca_pc6_équipements_diplômes,PC6,2.96,6,8,125.25,"[-37.5, 39.7]",0.375,score_cap_cult,True
+score_pca_pc7_logement_csp,PC7,2.49,10,5,73.05,"[-35.0, 34.1]",0.362,score_equipement_public,True
+score_pca_pc8_équipements_logement,PC8,2.11,3,8,125.72,"[-38.9, 42.1]",0.69,score_equipement_public,False
