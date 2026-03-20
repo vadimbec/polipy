@@ -361,24 +361,24 @@ AXIS_PRESETS = [
         'id': 'energie', 'label': 'Transition \u00e9nerg\u00e9tique', 'emoji': '\u26a1',
         'xVar': 'pct_chauffage_fioul', 'xInvert': False,
         'yVar': 'pct_chauffage_elec',
-        'xTitle': '\u2190 Beaucoup de fioul \u2500\u2500\u2500 Chauffage fioul \u2500\u2500\u2500 Peu de fioul \u2192',
+        'xTitle': '\u2190 Peu de fioul \u2500\u2500\u2500 Chauffage fioul \u2500\u2500\u2500 Beaucoup de fioul \u2192',
         'yTitle': '\u2190 Peu \u00e9lectrique \u2500\u2500\u2500 Chauffage \u00e9lectrique \u2500\u2500\u2500 Tr\u00e8s \u00e9lectrique \u2192',
         'xRange': [0, 60], 'yRange': [0, 80],
         'corners': [
-            {'pos': 'tl', 'text': 'FIOUL +<br>\u00c9LEC', 'color': '#C49A30'},
-            {'pos': 'tr', 'text': 'PEU FIOUL<br>\u00c9LEC', 'color': '#60B87A'},
-            {'pos': 'bl', 'text': 'FIOUL<br>GAZ/AUTRE', 'color': '#E87070'},
-            {'pos': 'br', 'text': 'PEU FIOUL<br>GAZ/AUTRE', 'color': '#6B8FD4'},
+            {'pos': 'tl', 'text': 'PEU FIOUL<br>\u00c9LEC', 'color': '#C49A30'},
+            {'pos': 'tr', 'text': 'FIOUL +<br>\u00c9LEC', 'color': '#60B87A'},
+            {'pos': 'bl', 'text': 'PEU FIOUL<br>GAZ/AUTRE', 'color': '#E87070'},
+            {'pos': 'br', 'text': 'FIOUL<br>GAZ/AUTRE', 'color': '#6B8FD4'},
         ],
         'desc': {
             'title': 'Transition \u00e9nerg\u00e9tique \u2014 Fioul \u00d7 \u00c9lectricit\u00e9',
             'x': '<b>Axe X \u2014 Chauffage fioul</b> : % des RP chauff\u00e9es au fioul (invers\u00e9). Gauche = forte d\u00e9pendance fioul, droite = transition effectu\u00e9e.',
             'y': '<b>Axe Y \u2014 Chauffage \u00e9lectrique</b> : % des RP chauff\u00e9es \u00e0 l\'\u00e9lectricit\u00e9.',
             'quadrants': {
-                'tl': '<b>Fioul + \u00e9lectricit\u00e9</b> \u2014 Zones mixtes, habitat ancien en partie r\u00e9nov\u00e9.',
-                'tr': '<b>\u00c9lectrique, peu de fioul</b> \u2014 Logements r\u00e9cents ou r\u00e9nov\u00e9s, transition avanc\u00e9e.',
-                'bl': '<b>Fioul, peu d\'\u00e9lectricit\u00e9</b> \u2014 Rural ancien, passoires thermiques, gaz ou bois.',
-                'br': '<b>Peu de fioul ni d\'\u00e9lectricit\u00e9</b> \u2014 Urbain dense au gaz de ville ou r\u00e9seau de chaleur.',
+                'tl': '<b>\u00c9lectrique, peu de fioul</b> \u2014 Logements r\u00e9cents ou r\u00e9nov\u00e9s, transition avanc\u00e9e.',
+                'tr': '<b>Fioul + \u00e9lectricit\u00e9</b> \u2014 Zones mixtes, habitat ancien en partie r\u00e9nov\u00e9.',
+                'bl': '<b>Peu de fioul ni d\'\u00e9lectricit\u00e9</b> \u2014 Urbain dense au gaz de ville ou r\u00e9seau de chaleur.',
+                'br': '<b>Fioul, peu d\'\u00e9lectricit\u00e9</b> \u2014 Rural ancien, passoires thermiques, gaz ou bois.',
             }
         }
     },
