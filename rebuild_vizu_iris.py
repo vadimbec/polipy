@@ -298,6 +298,8 @@ VARS_BY_CAT = {
     ],
     'Démographie': [
         'pct_etrangers', 'age_moyen',
+        'pct_femmes', 'taille_menage_moy', 'pct_hors_menage', 'ecart_csp_plus_hf',
+        'pct_0_19', 'pct_20_64', 'pct_65_plus', 'pct_immigres',
     ],
     'Revenus et inégalités': [
         'DISP_MED21', 'DISP_TP6021',
@@ -478,6 +480,92 @@ VAR_LABELS = {
     'P21_ACT_SUP2':             'Actifs 15-64 ans titulaires BAC+2',
     'P21_ACT_SUP34':            'Actifs 15-64 ans titulaires BAC+3 ou BAC+4',
     'P21_ACT_SUP5':             'Actifs 15-64 ans titulaires BAC+5 ou plus',
+    # ── Structure démographique 2020 (base-ic-evol-struct-pop-2020) ────────────
+    'pop_totale':               'Population totale (2020)',
+    'age_moyen':                'Âge moyen de la population (2020)',
+    'pct_0_19':                 '% population 0-19 ans (2020)',
+    'pct_20_64':                '% population 20-64 ans (2020)',
+    'pct_65_plus':              '% population 65 ans et plus (2020)',
+    'pct_etrangers':            '% population de nationalité étrangère (2020)',
+    'pct_immigres':             '% population immigrée (2020)',
+    'pct_femmes':               '% population féminine (2020)',
+    'taille_menage_moy':        'Taille moyenne des ménages (2020)',
+    'pct_hors_menage':          '% vivant hors ménage (institutions, EHPAD, prisons…) (2020)',
+    'ecart_csp_plus_hf':        'Écart H/F dans les cadres CSP+ (pts %, positif = plus d\'hommes) (2020)',
+    # ── Effectifs bruts population 2020 ────────────────────────────────────────
+    'P20_POP':                  'Population en 2020',
+    'P20_POP0002':              'Nombre de personnes de 0 à 2 ans (2020)',
+    'P20_POP0305':              'Nombre de personnes de 3 à 5 ans (2020)',
+    'P20_POP0610':              'Nombre de personnes de 6 à 10 ans (2020)',
+    'P20_POP1117':              'Nombre de personnes de 11 à 17 ans (2020)',
+    'P20_POP1824':              'Nombre de personnes de 18 à 24 ans (2020)',
+    'P20_POP2539':              'Nombre de personnes de 25 à 39 ans (2020)',
+    'P20_POP4054':              'Nombre de personnes de 40 à 54 ans (2020)',
+    'P20_POP5564':              'Nombre de personnes de 55 à 64 ans (2020)',
+    'P20_POP6579':              'Nombre de personnes de 65 à 79 ans (2020)',
+    'P20_POP80P':               'Nombre de personnes de 80 ans ou plus (2020)',
+    'P20_POP0014':              'Nombre de personnes de 0 à 14 ans (2020)',
+    'P20_POP1529':              'Nombre de personnes de 15 à 29 ans (2020)',
+    'P20_POP3044':              'Nombre de personnes de 30 à 44 ans (2020)',
+    'P20_POP4559':              'Nombre de personnes de 45 à 59 ans (2020)',
+    'P20_POP6074':              'Nombre de personnes de 60 à 74 ans (2020)',
+    'P20_POP75P':               'Nombre de personnes de 75 ans ou plus (2020)',
+    'P20_POP0019':              'Nombre de personnes de 0 à 19 ans (2020)',
+    'P20_POP2064':              'Nombre de personnes de 20 à 64 ans (2020)',
+    'P20_POP65P':               'Nombre de personnes de 65 ans ou plus (2020)',
+    'P20_POPH':                 'Nombre d\'hommes (2020)',
+    'P20_H0014':                'Nombre d\'hommes de 0 à 14 ans (2020)',
+    'P20_H1529':                'Nombre d\'hommes de 15 à 29 ans (2020)',
+    'P20_H3044':                'Nombre d\'hommes de 30 à 44 ans (2020)',
+    'P20_H4559':                'Nombre d\'hommes de 45 à 59 ans (2020)',
+    'P20_H6074':                'Nombre d\'hommes de 60 à 74 ans (2020)',
+    'P20_H75P':                 'Nombre d\'hommes de 75 ans ou plus (2020)',
+    'P20_H0019':                'Nombre d\'hommes de 0 à 19 ans (2020)',
+    'P20_H2064':                'Nombre d\'hommes de 20 à 64 ans (2020)',
+    'P20_H65P':                 'Nombre d\'hommes de 65 ans ou plus (2020)',
+    'P20_POPF':                 'Nombre de femmes (2020)',
+    'P20_F0014':                'Nombre de femmes de 0 à 14 ans (2020)',
+    'P20_F1529':                'Nombre de femmes de 15 à 29 ans (2020)',
+    'P20_F3044':                'Nombre de femmes de 30 à 44 ans (2020)',
+    'P20_F4559':                'Nombre de femmes de 45 à 59 ans (2020)',
+    'P20_F6074':                'Nombre de femmes de 60 à 74 ans (2020)',
+    'P20_F75P':                 'Nombre de femmes de 75 ans ou plus (2020)',
+    'P20_F0019':                'Nombre de femmes de 0 à 19 ans (2020)',
+    'P20_F2064':                'Nombre de femmes de 20 à 64 ans (2020)',
+    'P20_F65P':                 'Nombre de femmes de 65 ans ou plus (2020)',
+    'P20_POP_FR':               'Nombre de personnes de nationalité française (2020)',
+    'P20_POP_ETR':              'Nombre de personnes étrangères (2020)',
+    'P20_POP_IMM':              'Nombres de personnes immigrées (2020)',
+    'P20_PMEN':                 'Population des ménages (2020)',
+    'P20_PHORMEN':              'Population hors ménages (2020)',
+    # ── CSP population 15 ans et plus 2020 (C20_) ──────────────────────────────
+    'C20_POP15P':               'Nombre de personnes de 15 ans ou plus (2020)',
+    'C20_POP15P_CS1':           'Nombre de personnes 15+ agriculteurs exploitants (2020)',
+    'C20_POP15P_CS2':           'Nombre de personnes 15+ artisans, commerçants, chefs d\'entreprise (2020)',
+    'C20_POP15P_CS3':           'Nombre de personnes 15+ cadres et professions intellectuelles supérieures (2020)',
+    'C20_POP15P_CS4':           'Nombre de personnes 15+ professions intermédiaires (2020)',
+    'C20_POP15P_CS5':           'Nombre de personnes 15+ employés (2020)',
+    'C20_POP15P_CS6':           'Nombre de personnes 15+ ouvriers (2020)',
+    'C20_POP15P_CS7':           'Nombre de personnes 15+ retraités (2020)',
+    'C20_POP15P_CS8':           'Nombre de personnes 15+ autres sans activité professionnelle (2020)',
+    'C20_H15P':                 'Nombre d\'hommes de 15 ans ou plus (2020)',
+    'C20_H15P_CS1':             'Nombre d\'hommes 15+ agriculteurs exploitants (2020)',
+    'C20_H15P_CS2':             'Nombre d\'hommes 15+ artisans, commerçants, chefs d\'entreprise (2020)',
+    'C20_H15P_CS3':             'Nombre d\'hommes 15+ cadres et professions intellectuelles supérieures (2020)',
+    'C20_H15P_CS4':             'Nombre d\'hommes 15+ professions intermédiaires (2020)',
+    'C20_H15P_CS5':             'Nombre d\'hommes 15+ employés (2020)',
+    'C20_H15P_CS6':             'Nombre d\'hommes 15+ ouvriers (2020)',
+    'C20_H15P_CS7':             'Nombre d\'hommes 15+ retraités (2020)',
+    'C20_H15P_CS8':             'Nombre d\'hommes 15+ autres sans activité professionnelle (2020)',
+    'C20_F15P':                 'Nombre de femmes de 15 ans ou plus (2020)',
+    'C20_F15P_CS1':             'Nombre de femmes 15+ agriculteurs exploitants (2020)',
+    'C20_F15P_CS2':             'Nombre de femmes 15+ artisans, commerçants, chefs d\'entreprise (2020)',
+    'C20_F15P_CS3':             'Nombre de femmes 15+ cadres et professions intellectuelles supérieures (2020)',
+    'C20_F15P_CS4':             'Nombre de femmes 15+ professions intermédiaires (2020)',
+    'C20_F15P_CS5':             'Nombre de femmes 15+ employés (2020)',
+    'C20_F15P_CS6':             'Nombre de femmes 15+ ouvriers (2020)',
+    'C20_F15P_CS7':             'Nombre de femmes 15+ retraités (2020)',
+    'C20_F15P_CS8':             'Nombre de femmes 15+ autres sans activité professionnelle (2020)',
 }
 
 ALL_VARS = []
@@ -488,8 +576,7 @@ for cat_vars in VARS_BY_CAT.values():
 
 # ── 1. CHARGEMENT DES DONNÉES ─────────────────────────────────────────────────
 # Source unique : iris_final_socio_politique.csv contient toutes les colonnes nécessaires
-df_socio = pd.read_csv("iris/iris_final_socio_politique.csv", low_memory=False)
-
+df_socio = pd.read_csv("iris/iris_final_socio_politique_bis.csv", low_memory=False)
 # On garde aussi les coordonnées pour AXE_X / AXE_Y (optionnel)
 # mais toutes les variables clés sont dans df_socio
 df = df_socio.copy()
@@ -592,15 +679,15 @@ for score_name, cfg in SCORES_CONFIG.items():
 
 # ── 4. PARTI DOMINANT PAR IRIS ────────────────────────────────────────────────
 score_party_cols = [c for c in df.columns if c.startswith('score_') and c[6:] in ALL_ORDER]
-score_party_cols = [c for c in score_party_cols if c in df.columns]
-for c in score_party_cols:
-    df[c] = pd.to_numeric(df[c], errors='coerce').fillna(0.0)
-
-party_map = {c: c[6:] for c in score_party_cols}  # 'score_RN' → 'RN'
-df['parti_dominant'] = df[score_party_cols].idxmax(axis=1).map(party_map).fillna('AUTRE')
-# IRIS with all-zero scores → AUTRE
-all_zero = (df[score_party_cols] == 0).all(axis=1)
-df.loc[all_zero, 'parti_dominant'] = 'AUTRE'
+if score_party_cols:
+    for c in score_party_cols:
+        df[c] = pd.to_numeric(df[c], errors='coerce').fillna(0.0)
+    party_map = {c: c[6:] for c in score_party_cols}  # 'score_RN' → 'RN'
+    df['parti_dominant'] = df[score_party_cols].idxmax(axis=1).map(party_map).fillna('AUTRE')
+    all_zero = (df[score_party_cols] == 0).all(axis=1)
+    df.loc[all_zero, 'parti_dominant'] = 'AUTRE'
+else:
+    df['parti_dominant'] = 'AUTRE'
 
 print("Distribution partis dominants (initial):")
 print(df['parti_dominant'].value_counts().to_dict())

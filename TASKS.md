@@ -43,7 +43,22 @@
 
 ---
 
+## UPDATE 5 — ✅ Terminée
+
+| # | Tâche | Statut |
+|---|-------|--------|
+| T12 | Remplacer jolivet (iris-stats.geojson) par base-ic-evol-struct-pop-2020.CSV dans le pipeline | ✅ Fait |
+| T13 | Audit fallback commune FILOSOFI (nouvelle cellule notebook) | ✅ Fait |
+| T14 | Ajouter variables démographiques et genre dans VAR_LABELS + VARS_BY_CAT | ✅ Fait |
+
+---
+
 ## Historique
+
+### 2026-03-19 — T12/T13/T14 : Remplacement jolivet + audit + nouvelles variables
+- **T12** : Cellule finale `eda_iris.ipynb` (id `54ad0c7f`) réécrite. Suppression de la dépendance à `iris-stats.geojson` (jolivet). Les variables démographiques (`pop_totale`, `pct_0_19/20_64/65_plus`, `pct_etrangers`, `pct_immigres`, `age_moyen`, `pct_csp_*`) sont maintenant calculées directement depuis `iris/base-ic-evol-struct-pop-2020.CSV` avec les mêmes formules que `template_merge_iris_bv/utils.py`. La fusion est une LEFT join au lieu d'une INNER join → passage de 45 650 à ~49 280 IRIS conservés (+3 630). `nom_commune` récupéré via `cog_ensemble_2026_csv/v_commune_2026.csv`. Correction du bug `utils.py` : `pct_0_19/20_64/65_plus` utilisaient `P20_F*` (femmes seulement) au lieu de `P20_POP*` — valeurs ~2× plus correctes. Toutes les colonnes brutes `P20_*/C20_*` incluses dans `iris_final_socio_politique.csv`.
+- **T13** : Nouvelle cellule d'audit FILOSOFI insérée après la cellule ML. Compare les NaN à 3 étapes : (A) IRIS FILO seul, (B) + fallback commune, (C) + imputation ML. Quantifie si le fallback commune est utile (hypothèse : Gain B-A faible car communes petites aussi censurées).
+- **T14** : `rebuild_vizu_iris.py` mis à jour : ajout de 80+ entrées dans `VAR_LABELS` pour toutes les colonnes `P20_*/C20_*` de `base-ic-evol-struct-pop-2020.CSV`. Nouvelles variables calculées (`pct_femmes`, `taille_menage_moy`, `pct_hors_menage`, `ecart_csp_plus_hf`) ajoutées à `VARS_BY_CAT['Démographie']` et à `VAR_LABELS`. Variables `pct_0_19`, `pct_20_64`, `pct_65_plus`, `pct_immigres` également ajoutées à `VARS_BY_CAT['Démographie']`.
 
 ### 2026-03-19 — T4 : Feature parity mobile ↔ desktop
 - **Architecture** : refactorisation complète de `build_mobile_html()`. Remplacement de `groupDataX/Y` + ~10 traces Plotly par la même architecture que le desktop : `IRIS_X/Y`, `IRIS_ELECTION_DATA`, `IRIS_INFO`, `IRIS_POPS`, `MARKER_SIZES`, `ELECTIONS_META`, `GROUP_INDICES` + 2 traces Plotly (barycentres + IRIS unique).
