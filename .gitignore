@@ -1,0 +1,10 @@
+# Tout ignorer sauf les fichiers du site
+*
+
+# Exceptions : fichiers du site GitHub Pages
+!.gitignore
+!index.html
+!carte.html
+!carte-mobile.html
+!data/
+!data/*.json
