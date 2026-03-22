@@ -877,24 +877,29 @@ chartDiv.addEventListener('touchcancel', function() {
 
 // ── Axis controls ─────────────────────────────────────────────────────────
 const presetBtnsDiv = document.getElementById('presetBtns');
-PRESETS.forEach(p => {
-  if (p.id === 'tsne' && !(IRIS_X && IRIS_X['tsne_x'])) return;
-  if (p.id === 'umap' && !(IRIS_X && IRIS_X['umap_x'])) return;
-  const btn = document.createElement('button');
-  btn.className = 'preset-btn' + (p.id === 'saint_graphique' ? ' active' : '');
-  btn.dataset.id = p.id;
-  btn.textContent = p.emoji + ' ' + p.label;
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    currentPresetId = p.id;
-    document.getElementById('xSelect').value = p.xVar;
-    document.getElementById('ySelect').value = p.yVar;
-    document.getElementById('xInvertChk').checked = p.xInvert;
-    applyAxes(p.xVar, p.xInvert, p.yVar, p);
+function buildPresetButtons() {
+  presetBtnsDiv.innerHTML = '';
+  PRESETS.forEach(p => {
+    if (p.id === 'tsne' && !(IRIS_X && IRIS_X['tsne_x'])) return;
+    if (p.id === 'umap' && !(IRIS_X && IRIS_X['umap_x'])) return;
+    const btn = document.createElement('button');
+    btn.className = 'preset-btn' + (p.id === currentPresetId ? ' active' : '');
+    btn.dataset.id = p.id;
+    btn.textContent = p.emoji + ' ' + p.label;
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentPresetId = p.id;
+      document.getElementById('xSelect').value = p.xVar;
+      document.getElementById('ySelect').value = p.yVar;
+      document.getElementById('xInvertChk').checked = p.xInvert;
+      applyAxes(p.xVar, p.xInvert, p.yVar, p);
+    });
+    presetBtnsDiv.appendChild(btn);
   });
-  presetBtnsDiv.appendChild(btn);
-});
+}
+// Boutons sans tsne/umap au démarrage (IRIS_X pas encore chargé)
+buildPresetButtons();
 
 const customToggle = document.getElementById('customToggle');
 const customPanel = document.getElementById('customPanel');
@@ -1092,6 +1097,7 @@ resetBtn.addEventListener('click', () => {
   IRIS_X = xData;
   IRIS_Y = yData;
 
+  buildPresetButtons();
   buildSelect('xSelect', PRESETS[0].xVar);
   buildSelect('ySelect', PRESETS[0].yVar);
   document.getElementById('xSelect').disabled = false;
