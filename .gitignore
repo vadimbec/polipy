@@ -38,18 +38,18 @@ contours/
 communes/
 resultats_elections/
 
-# Large iris files (keep elections + small CSVs)
-iris/iris_final_socio_politique.csv
-iris/iris_final_socio_politique_bis.csv
+# Large iris files
+iris/*base-ic*.csv
+iris/*base-ic*.CSV
+iris/*bpe*.csv
+iris/*bpe*.CSV
+iris/*iris_final*.csv
+iris/*iris_final*.CSV
 iris/iris_coordonnees_finales.csv
 iris/iris_database_machine_learning.csv
 iris/iris_coordonnees_classes.csv
 iris/iris_database_complete.csv
 iris/iris_database_hybride_parfaite.csv
-iris/base-ic-activite-residents-2021.CSV
-iris/base-ic-diplomes-formation-2021.CSV
-iris/meta_base-ic-activite-residents-2021.CSV
-iris/meta_base-ic-diplomes-formation-2021.CSV
 iris/resultats_elections_par_iris.csv
 
 # Other large CSVs at root
