@@ -3,9 +3,10 @@ build_iris_final.py
 Script autonome qui recrée iris/iris_final_socio_politique_bis.csv
 depuis les fichiers sources bruts INSEE.
 
-Usage : conda run -n vadim_env python build_iris_final.py
+Usage : conda run -n vadim_env python build_iris_final.py [--with-embeddings]
 """
 
+import argparse
 import pandas as pd
 import numpy as np
 import os
@@ -258,6 +259,144 @@ def build_ml(hybride_path):
 
 
 # =============================================================================
+# Fonctions de scoring (rang centile pondéré par population)
+# =============================================================================
+def _rang_pondere(series, pop):
+    """Centile pondéré par population, centré à 0 (range ~ -50 à +50)."""
+    s = series.copy().astype(float)
+    p = pop.copy().astype(float)
+    valid = s.notna() & p.notna() & (p > 0)
+    if valid.sum() < 10:
+        return pd.Series(0.0, index=s.index)
+    s_v = s[valid]
+    p_v = p[valid]
+    order = s_v.argsort()
+    p_sorted = p_v.iloc[order]
+    cumsum = p_sorted.cumsum()
+    total = p_sorted.sum()
+    centile = (cumsum - p_sorted / 2) / total * 100
+    result = pd.Series(np.nan, index=s.index)
+    orig_positions = np.where(valid.values)[0][order.values]
+    result.iloc[orig_positions] = centile.values
+    return result.fillna(50.0) - 50.0
+
+
+def make_score(df, pos_vars, neg_vars, pop_col='pop_totale'):
+    """Score composite par rang centile pondéré par population."""
+    parts = []
+    pop = df[pop_col]
+    for v in pos_vars:
+        if v not in df.columns:
+            continue
+        parts.append(_rang_pondere(df[v], pop))
+    for v in neg_vars:
+        if v not in df.columns:
+            continue
+        parts.append(-_rang_pondere(df[v], pop))
+    if not parts:
+        return pd.Series(0.0, index=df.index)
+    return pd.concat(parts, axis=1).mean(axis=1)
+
+
+# Configuration de tous les scores composites
+SCORES_CONFIG = {
+    # ── Scores sociologiques existants ──
+    'score_exploitation': {
+        'pos_vars': ['DISP_PPAT21', 'P21_NSAL15P_EMPLOY', 'pct_csp_plus', 'pct_csp_retraite', 'DISP_MED21', 'DISP_PPEN21', 'DISP_PBEN21'],
+        'neg_vars': ['DISP_TP6021', 'DISP_PTSA21', 'P21_NSAL15P_AIDFAM', 'DISP_PPLOGT21'],
+    },
+    'score_domination': {
+        'pos_vars': ['pct_csp_plus', 'pct_csp_intermediaire', 'pct_sup5', 'pct_cdi', 'P21_NSAL15P_EMPLOY'],
+        'neg_vars': ['pct_csp_ouvrier', 'pct_csp_sans_emploi', 'pct_csp_employe', 'pct_csp_independant', 'pct_sans_diplome', 'pct_capbep', 'pct_cdd', 'pct_interim', 'pct_temps_partiel', 'pct_chomage', 'DISP_TP6021', 'DISP_PPSOC21', 'DISP_PPMINI21'],
+    },
+    'score_cap_cult': {
+        'pos_vars': ['pct_csp_plus', 'pct_csp_intermediaire', 'pct_sup5', 'pct_actifs_velo'],
+        'neg_vars': ['pct_csp_ouvrier', 'pct_sans_diplome', 'pct_csp_sans_emploi', 'pct_capbep', 'pct_interim', 'pct_temps_partiel', 'pct_chomage'],
+    },
+    'score_cap_eco': {
+        'pos_vars': ['DISP_PPAT21', 'P21_NSAL15P_EMPLOY', 'pct_csp_plus', 'pct_csp_retraite', 'DISP_MED21', 'DISP_PPEN21', 'DISP_PBEN21'],
+        'neg_vars': ['DISP_TP6021', 'DISP_PTSA21', 'P21_NSAL15P_AIDFAM', 'DISP_PPLOGT21', 'DISP_PCHO21'],
+    },
+    'score_precarite': {
+        'pos_vars': ['DISP_TP6021', 'pct_csp_sans_emploi', 'DISP_PPSOC21', 'DISP_PPMINI21', 'pct_chomage'],
+        'neg_vars': ['DISP_MED21', 'DISP_PPAT21'],
+    },
+    'score_rentier': {
+        'pos_vars': ['DISP_PPAT21', 'DISP_PPEN21', 'pct_csp_retraite'],
+        'neg_vars': ['DISP_PACT21', 'DISP_PPSOC21', 'pct_csp_employe'],
+    },
+    'score_ruralite': {
+        'pos_vars': ['pct_csp_agriculteur', 'pct_sans_diplome', 'pct_actifs_voiture', 'P21_ACTOCC15P_ILT3'],
+        'neg_vars': ['pct_immigres', 'pct_actifs_velo', 'pct_actifs_transports', 'pct_actifs_marche', 'pct_etudiants', 'P21_ACTOCC15P_ILT1'],
+    },
+    'score_urbanite': {
+        'pos_vars': ['pct_appart', 'pct_locataires', 'pct_petits_logements', 'pct_voiture_0', 'pct_chauffage_gaz_ville', 'bpe_E_transports_pour1000', 'bpe_total_pour1000'],
+        'neg_vars': ['pct_maison', 'pct_voiture_2plus', 'pct_chauffage_fioul', 'pct_grands_logements', 'surface_moyenne', 'pct_garage'],
+    },
+    'score_confort_residentiel': {
+        'pos_vars': ['pct_proprietaires', 'pct_grands_logements', 'surface_moyenne', 'pct_garage', 'nb_pieces_moyen', 'pct_logements_5p_plus'],
+        'neg_vars': ['pct_suroccupation', 'pct_petits_logements', 'pct_hlm', 'pct_logvac', 'pct_studios'],
+    },
+    'score_equipement_public': {
+        'pos_vars': ['bpe_total_pour1000', 'bpe_D_sante_pour1000', 'bpe_C_enseignement_pour1000', 'bpe_F_sports_culture_pour1000', 'bpe_A_services_pour1000', 'bpe_B_commerces_pour1000'],
+        'neg_vars': [],
+    },
+    # ── Scores ACP (composantes principales) ──
+    'score_pca_pc1_logement_confort': {
+        'pos_vars': ['pct_grands_logements', 'pct_garage', 'pct_actifs_voiture', 'pct_logements_5p_plus', 'nb_pieces_moyen', 'pct_voiture_2plus', 'pct_proprietaires', 'pct_maison', 'surface_moyenne'],
+        'neg_vars': ['pct_appart', 'pct_locataires', 'pct_voiture_0', 'pct_immigres', 'pct_petits_logements', 'pct_actifs_transports', 'pct_etrangers', 'pct_studios'],
+    },
+    'score_pca_pc2_composition_diplomes': {
+        'pos_vars': ['pct_capbep', 'pct_interim', 'pct_chomage', 'pct_csp_ouvrier', 'DISP_TP6021', 'DISP_PPLOGT21', 'DISP_PPMINI21', 'DISP_PPFAM21', 'DISP_PPSOC21', 'pct_sans_diplome', 'DISP_PIMPOT21'],
+        'neg_vars': ['DISP_MED21', 'pct_bac_plus', 'pct_csp_plus', 'pct_sup5', 'DISP_PACT21', 'DISP_PTSA21'],
+    },
+    'score_pca_pc3_equipements_demographie': {
+        'pos_vars': ['pct_csp_intermediaire', 'DISP_PACT21', 'DISP_PTSA21', 'pct_0_19'],
+        'neg_vars': ['pct_65_plus', 'age_moyen', 'DISP_PPEN21', 'bpe_total_pour1000', 'pct_csp_retraite', 'bpe_B_commerces_pour1000', 'bpe_G_tourisme_pour1000', 'bpe_D_sante_pour1000', 'pct_actifs_marche', 'bpe_A_services_pour1000'],
+    },
+    'score_pca_pc4_demographie_chauffage': {
+        'pos_vars': ['age_moyen', 'pct_csp_retraite', 'pct_65_plus', 'DISP_PPEN21', 'pct_chauffage_gaz_ville', 'pct_femmes'],
+        'neg_vars': ['pct_logements_anciens', 'bpe_A_services_pour1000', 'pct_20_64', 'pct_chauffage_autre', 'pct_chauffage_gaz_bouteille', 'pct_csp_agriculteur', 'bpe_total_pour1000', 'bpe_F_sports_culture_pour1000', 'pct_chauffage_fioul'],
+    },
+    'score_pca_pc5_equipements_csp': {
+        'pos_vars': ['pct_grands_logements', 'pct_csp_sans_emploi', 'DISP_S80S2021', 'pct_temps_partiel', 'pct_inactif', 'pct_etudiants'],
+        'neg_vars': ['bpe_total_pour1000', 'bpe_A_services_pour1000', 'bpe_B_commerces_pour1000', 'pct_csp_employe', 'bpe_D_sante_pour1000', 'pct_chauffage_elec', 'pct_logements_recents', 'pct_csp_intermediaire'],
+    },
+    'score_pca_pc6_equipements_diplomes': {
+        'pos_vars': ['pct_inactif', 'bpe_sport_indoor_pour1000', 'bpe_ecole_privee_pour1000', 'bpe_C_enseignement_pour1000', 'pct_hors_menage', 'pct_etudiants'],
+        'neg_vars': ['bpe_E_transports_pour1000', 'pct_immigres', 'pct_etrangers', 'pct_cdi', 'pct_actifs_transports', 'pct_actifs_2roues', 'pct_csp_independant', 'DISP_S80S2021'],
+    },
+    'score_pca_pc7_logement_csp': {
+        'pos_vars': ['DISP_S80S2021', 'pct_logements_recents', 'DISP_GI21', 'bpe_A_services_pour1000', 'bpe_total_pour1000', 'pct_csp_sans_emploi', 'pct_inactif', 'pct_csp_independant', 'pct_0_19', 'DISP_PPAT21'],
+        'neg_vars': ['pct_logvac', 'pct_logements_anciens', 'pct_csp_agriculteur', 'pct_20_64', 'pct_actifs_velo'],
+    },
+    'score_pca_pc8_equipements_logement': {
+        'pos_vars': ['pct_cdd', 'pct_logements_recents', 'pct_chauffage_elec'],
+        'neg_vars': ['bpe_sport_indoor_pour1000', 'bpe_C_enseignement_pour1000', 'bpe_ecole_privee_pour1000', 'pct_chauffage_gaz_ville', 'bpe_F_sports_culture_pour1000', 'pct_logvac', 'bpe_total_pour1000', 'bpe_D_sante_pour1000'],
+    },
+    # ── Score parti-informé ──
+    'score_peripherie_metropole': {
+        'pos_vars': ['pct_capbep', 'pct_actifs_voiture', 'pct_maison', 'pct_voiture_2plus', 'nb_pieces_moyen', 'pct_chauffage_fioul'],
+        'neg_vars': ['pct_bac_plus', 'pct_sup5', 'pct_csp_plus', 'DISP_GI21', 'DISP_PACT21', 'DISP_RD21', 'pct_actifs_velo', 'DISP_PTSA21', 'pct_studios', 'pct_petits_logements'],
+    },
+}
+
+
+def compute_scores(df):
+    """Calcule tous les scores composites par rang centile pondéré."""
+    print("\n" + "=" * 60)
+    print("SCORES : Calcul des scores composites")
+    print("=" * 60)
+
+    for score_name, cfg in SCORES_CONFIG.items():
+        df[score_name] = make_score(df, cfg['pos_vars'], cfg['neg_vars'])
+        print(f"  {score_name}: min={df[score_name].min():.1f} max={df[score_name].max():.1f}")
+
+    print(f"  {len(SCORES_CONFIG)} scores calculés")
+    return df
+
+
+# =============================================================================
 # ÉTAPE 4 : Calcul variables démographiques dérivées (sur df déjà fusionné)
 # =============================================================================
 def compute_demographics(df):
@@ -385,17 +524,151 @@ def compute_demographics(df):
     sport_tot = df['bpe_sport_total'].replace(0, np.nan)
     df['pct_sport_accessible'] = (df['bpe_sport_accessible'] / sport_tot * 100).clip(0, 100)
 
-    n_computed = 20 + 23 + len(bpe_cols)
-    print(f"  {n_computed} variables dérivées calculées (démo + logement + énergie + BPE)")
+    # ── Diplômes ──
+    _nscol = df['P21_NSCOL15P'].replace(0, np.nan)
+    df['pct_sup5']         = (df['P21_NSCOL15P_SUP5'] / _nscol * 100).clip(0, 100)
+    df['pct_sans_diplome'] = (df['P21_NSCOL15P_DIPLMIN'] / _nscol * 100).clip(0, 100)
+    df['pct_bac_plus']     = ((df['P21_NSCOL15P_SUP2'] + df['P21_NSCOL15P_SUP34'] + df['P21_NSCOL15P_SUP5']) / _nscol * 100).clip(0, 100)
+    df['pct_capbep']       = (df['P21_NSCOL15P_CAPBEP'] / _nscol * 100).clip(0, 100)
+
+    # ── Emploi ──
+    df['pct_chomage']   = (df['P21_CHOM1564'] / df['P21_ACT1564'].replace(0, np.nan) * 100).clip(0, 100)
+    df['pct_inactif']   = (df['P21_INACT1564'] / df['P21_POP1564'].replace(0, np.nan) * 100).clip(0, 100)
+    df['pct_etudiants'] = (df['P21_ETUD1564'] / df['P21_POP1564'].replace(0, np.nan) * 100).clip(0, 100)
+
+    _sal = df['P21_SAL15P'].replace(0, np.nan)
+    df['pct_cdi']           = (df['P21_SAL15P_CDI'] / _sal * 100).clip(0, 100)
+    df['pct_cdd']           = (df['P21_SAL15P_CDD'] / _sal * 100).clip(0, 100)
+    df['pct_interim']       = (df['P21_SAL15P_INTERIM'] / _sal * 100).clip(0, 100)
+    df['pct_temps_partiel'] = (df['P21_SAL15P_TP'] / _sal * 100).clip(0, 100)
+
+    # ── Transport des actifs ──
+    _actocc = df['P21_ACTOCC15P'].replace(0, np.nan)
+    df['pct_actifs_voiture']    = (df['C21_ACTOCC15P_VOIT'] / _actocc * 100).clip(0, 100)
+    df['pct_actifs_transports'] = (df['C21_ACTOCC15P_TCOM'] / _actocc * 100).clip(0, 100)
+    df['pct_actifs_velo']       = (df['C21_ACTOCC15P_VELO'] / _actocc * 100).clip(0, 100)
+    df['pct_actifs_2roues']     = (df['C21_ACTOCC15P_2ROUESMOT'] / _actocc * 100).clip(0, 100)
+    df['pct_actifs_marche']     = (df['C21_ACTOCC15P_MAR'] / _actocc * 100).clip(0, 100)
+
+    n_computed = 20 + 23 + len(bpe_cols) + 21
+    print(f"  {n_computed} variables dérivées calculées (démo + logement + énergie + BPE + diplômes + emploi + transport)")
+    return df
+
+
+# =============================================================================
+# Embeddings t-SNE / UMAP (optionnel, via --with-embeddings)
+# =============================================================================
+# Variables socio utilisées pour les embeddings (même liste que analyse_iris.py)
+EMBEDDING_VARS = [
+    'pct_etrangers', 'pct_immigres', 'age_moyen', 'pct_femmes',
+    'taille_menage_moy', 'pct_hors_menage', 'ecart_csp_plus_hf',
+    'pct_0_19', 'pct_20_64', 'pct_65_plus',
+    'pct_csp_agriculteur', 'pct_csp_independant', 'pct_csp_plus',
+    'pct_csp_intermediaire', 'pct_csp_employe', 'pct_csp_ouvrier',
+    'pct_csp_retraite', 'pct_csp_sans_emploi',
+    'DISP_MED21', 'DISP_TP6021', 'DISP_GI21', 'DISP_RD21', 'DISP_S80S2021',
+    'DISP_PTSA21', 'DISP_PPAT21', 'DISP_PPEN21', 'DISP_PPSOC21',
+    'DISP_PCHO21', 'DISP_PPFAM21', 'DISP_PPLOGT21', 'DISP_PPMINI21',
+    'DISP_PIMPOT21', 'DISP_PACT21',
+    'pct_sup5', 'pct_sans_diplome', 'pct_capbep', 'pct_bac_plus',
+    'pct_chomage', 'pct_cdi', 'pct_cdd', 'pct_interim',
+    'pct_temps_partiel', 'pct_inactif', 'pct_etudiants',
+    'pct_actifs_voiture', 'pct_actifs_transports', 'pct_actifs_velo',
+    'pct_actifs_2roues', 'pct_actifs_marche',
+    'pct_proprietaires', 'pct_locataires', 'pct_hlm', 'pct_logvac',
+    'pct_maison', 'pct_appart', 'pct_petits_logements', 'pct_grands_logements',
+    'pct_logements_anciens', 'pct_logements_recents',
+    'pct_voiture_0', 'pct_voiture_2plus', 'surface_moyenne', 'pct_suroccupation',
+    'pct_chauffage_elec', 'pct_chauffage_fioul', 'pct_chauffage_gaz_ville',
+    'pct_chauffage_gaz_bouteille', 'pct_chauffage_autre',
+    'pct_garage', 'nb_pieces_moyen', 'pct_studios', 'pct_logements_5p_plus',
+    'bpe_total_pour1000', 'bpe_A_services_pour1000', 'bpe_B_commerces_pour1000',
+    'bpe_C_enseignement_pour1000', 'bpe_D_sante_pour1000',
+    'bpe_E_transports_pour1000', 'bpe_F_sports_culture_pour1000',
+    'bpe_G_tourisme_pour1000', 'bpe_educ_prioritaire_pour1000',
+    'bpe_ecole_privee_pour1000', 'bpe_sport_indoor_pour1000',
+    'pct_sport_accessible',
+]
+
+
+def compute_embeddings(df):
+    """Calcule les coordonnées t-SNE et UMAP sur tous les IRIS."""
+    from sklearn.manifold import TSNE
+    try:
+        import umap
+        HAS_UMAP = True
+    except ImportError:
+        HAS_UMAP = False
+        print("  WARNING: umap-learn non installé, UMAP ignoré")
+
+    print("\n" + "=" * 60)
+    print("EMBEDDINGS : t-SNE + UMAP sur tous les IRIS")
+    print("=" * 60)
+
+    # Sélectionner les variables disponibles
+    var_names = [v for v in EMBEDDING_VARS if v in df.columns]
+    print(f"  {len(var_names)} variables socio disponibles sur {len(EMBEDDING_VARS)}")
+
+    pop = df['pop_totale'].values.astype(float)
+    X = df[var_names].values.astype(float)
+
+    # Remplacer pop NaN/0 par 1 (poids minimal)
+    pop = np.where(np.isfinite(pop) & (pop > 0), pop, 1.0)
+
+    # Imputer les NaN par la médiane
+    for j in range(X.shape[1]):
+        col = X[:, j]
+        nans = ~np.isfinite(col)
+        if nans.any():
+            valid_mask = np.isfinite(col)
+            med = np.median(col[valid_mask]) if valid_mask.sum() > 0 else 0.0
+            col[nans] = med
+
+    # Standardisation pondérée par population
+    w_norm = pop / pop.sum()
+    w_means = (X * w_norm[:, None]).sum(axis=0)
+    X_c = X - w_means
+    w_stds = np.sqrt((X_c ** 2 * w_norm[:, None]).sum(axis=0))
+    w_stds[w_stds < 1e-10] = 1e-10
+    X_std = X_c / w_stds
+
+    # PCA réduction à 20 composantes
+    C = (X_std * w_norm[:, None]).T @ X_std
+    eigenvalues, eigenvectors = np.linalg.eigh(C)
+    idx = eigenvalues.argsort()[::-1]
+    eigenvectors = eigenvectors[:, idx]
+    n_pca_dims = min(20, X_std.shape[1])
+    X_pca = X_std @ eigenvectors[:, :n_pca_dims]
+    print(f"  PCA : réduction à {n_pca_dims} composantes")
+
+    # t-SNE
+    print("  t-SNE en cours (peut prendre quelques minutes)...")
+    tsne = TSNE(n_components=2, perplexity=30, max_iter=1000,
+                random_state=42, init='pca', learning_rate='auto')
+    tsne_coords = tsne.fit_transform(X_pca)
+    df['tsne_x'] = tsne_coords[:, 0]
+    df['tsne_y'] = tsne_coords[:, 1]
+    print(f"  t-SNE terminé : x=[{tsne_coords[:, 0].min():.1f}, {tsne_coords[:, 0].max():.1f}]")
+
+    # UMAP
+    if HAS_UMAP:
+        print("  UMAP en cours...")
+        reducer = umap.UMAP(n_neighbors=15, min_dist=0.1, n_components=2,
+                            random_state=42, metric='euclidean')
+        umap_coords = reducer.fit_transform(X_pca)
+        df['umap_x'] = umap_coords[:, 0]
+        df['umap_y'] = umap_coords[:, 1]
+        print(f"  UMAP terminé : x=[{umap_coords[:, 0].min():.1f}, {umap_coords[:, 0].max():.1f}]")
+
     return df
 
 
 # =============================================================================
 # ÉTAPE 5-6 : Fusion finale + nom_commune + sauvegarde
 # =============================================================================
-def build_final(ml_path):
+def build_final(ml_path, with_embeddings=False):
     print("\n" + "=" * 60)
-    print("ÉTAPE 5-6 : Variables démo + nom_commune + sauvegarde")
+    print("ÉTAPE 5-6 : Variables démo + scores + nom_commune + sauvegarde")
     print("=" * 60)
 
     df_final = pd.read_csv(ml_path, dtype={'IRIS': str, 'COM': str}, low_memory=False)
@@ -403,6 +676,13 @@ def build_final(ml_path):
 
     # Calcul des variables démographiques dérivées (colonnes P21_/C21_ déjà présentes)
     df_final = compute_demographics(df_final)
+
+    # Calcul des scores composites (nécessite les variables dérivées)
+    df_final = compute_scores(df_final)
+
+    # Calcul optionnel des embeddings t-SNE / UMAP
+    if with_embeddings:
+        df_final = compute_embeddings(df_final)
 
     # Noms de communes (COG 2026)
     df_cog = pd.read_csv(
@@ -441,6 +721,11 @@ def build_final(ml_path):
         'pct_garage', 'pct_studios',
         'bpe_educ_prioritaire_pour1000', 'bpe_ecole_privee_pour1000',
         'bpe_sport_indoor_pour1000', 'pct_sport_accessible',
+        # Variables dérivées ajoutées
+        'pct_bac_plus', 'pct_chomage', 'pct_actifs_voiture',
+        # Scores composites
+        'score_exploitation', 'score_precarite', 'score_peripherie_metropole',
+        'score_pca_pc1_logement_confort', 'score_peripherie_metropole',
     ]
     for col in cols_verif:
         if col in df_final.columns:
@@ -455,12 +740,19 @@ def build_final(ml_path):
 # MAIN
 # =============================================================================
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Reconstruction du CSV IRIS final")
+    parser.add_argument('--with-embeddings', action='store_true',
+                        help="Calculer les coordonnées t-SNE et UMAP (ajoute ~3-5 min)")
+    args = parser.parse_args()
+
     print("=" * 60)
     print("  build_iris_final.py — Reconstruction complète")
+    if args.with_embeddings:
+        print("  (avec embeddings t-SNE / UMAP)")
     print("=" * 60)
 
     hybride_path = build_hybride()
     ml_path = build_ml(hybride_path)
-    build_final(ml_path)
+    build_final(ml_path, with_embeddings=args.with_embeddings)
 
     print("\nTerminé.")

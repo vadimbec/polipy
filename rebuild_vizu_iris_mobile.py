@@ -149,6 +149,56 @@ SCORES_CONFIG = {
         'pos_vars': ['pct_csp_agriculteur', 'pct_sans_diplome', 'pct_actifs_voiture', 'P21_ACTOCC15P_ILT3'],
         'neg_vars': ['pct_immigres', 'pct_actifs_velo', 'pct_actifs_transports', 'pct_actifs_marche', 'pct_etudiants', 'P21_ACTOCC15P_ILT1'],
     },
+    'score_urbanite': {
+        'pos_vars': ['pct_appart', 'pct_locataires', 'pct_petits_logements', 'pct_voiture_0', 'pct_chauffage_gaz_ville', 'bpe_E_transports_pour1000', 'bpe_total_pour1000'],
+        'neg_vars': ['pct_maison', 'pct_voiture_2plus', 'pct_chauffage_fioul', 'pct_grands_logements', 'surface_moyenne', 'pct_garage'],
+    },
+    'score_confort_residentiel': {
+        'pos_vars': ['pct_proprietaires', 'pct_grands_logements', 'surface_moyenne', 'pct_garage', 'nb_pieces_moyen', 'pct_logements_5p_plus'],
+        'neg_vars': ['pct_suroccupation', 'pct_petits_logements', 'pct_hlm', 'pct_logvac', 'pct_studios'],
+    },
+    'score_equipement_public': {
+        'pos_vars': ['bpe_total_pour1000', 'bpe_D_sante_pour1000', 'bpe_C_enseignement_pour1000', 'bpe_F_sports_culture_pour1000', 'bpe_A_services_pour1000', 'bpe_B_commerces_pour1000'],
+        'neg_vars': [],
+    },
+    # ── Scores ACP (composantes principales) ──
+    'score_pca_pc1_logement_confort': {
+        'pos_vars': ['pct_grands_logements', 'pct_garage', 'pct_actifs_voiture', 'pct_logements_5p_plus', 'nb_pieces_moyen', 'pct_voiture_2plus', 'pct_proprietaires', 'pct_maison', 'surface_moyenne'],
+        'neg_vars': ['pct_appart', 'pct_locataires', 'pct_voiture_0', 'pct_immigres', 'pct_petits_logements', 'pct_actifs_transports', 'pct_etrangers', 'pct_studios'],
+    },
+    'score_pca_pc2_composition_diplomes': {
+        'pos_vars': ['pct_capbep', 'pct_interim', 'pct_chomage', 'pct_csp_ouvrier', 'DISP_TP6021', 'DISP_PPLOGT21', 'DISP_PPMINI21', 'DISP_PPFAM21', 'DISP_PPSOC21', 'pct_sans_diplome', 'DISP_PIMPOT21'],
+        'neg_vars': ['DISP_MED21', 'pct_bac_plus', 'pct_csp_plus', 'pct_sup5', 'DISP_PACT21', 'DISP_PTSA21'],
+    },
+    'score_pca_pc3_equipements_demographie': {
+        'pos_vars': ['pct_csp_intermediaire', 'DISP_PACT21', 'DISP_PTSA21', 'pct_0_19'],
+        'neg_vars': ['pct_65_plus', 'age_moyen', 'DISP_PPEN21', 'bpe_total_pour1000', 'pct_csp_retraite', 'bpe_B_commerces_pour1000', 'bpe_G_tourisme_pour1000', 'bpe_D_sante_pour1000', 'pct_actifs_marche', 'bpe_A_services_pour1000'],
+    },
+    'score_pca_pc4_demographie_chauffage': {
+        'pos_vars': ['age_moyen', 'pct_csp_retraite', 'pct_65_plus', 'DISP_PPEN21', 'pct_chauffage_gaz_ville', 'pct_femmes'],
+        'neg_vars': ['pct_logements_anciens', 'bpe_A_services_pour1000', 'pct_20_64', 'pct_chauffage_autre', 'pct_chauffage_gaz_bouteille', 'pct_csp_agriculteur', 'bpe_total_pour1000', 'bpe_F_sports_culture_pour1000', 'pct_chauffage_fioul'],
+    },
+    'score_pca_pc5_equipements_csp': {
+        'pos_vars': ['pct_grands_logements', 'pct_csp_sans_emploi', 'DISP_S80S2021', 'pct_temps_partiel', 'pct_inactif', 'pct_etudiants'],
+        'neg_vars': ['bpe_total_pour1000', 'bpe_A_services_pour1000', 'bpe_B_commerces_pour1000', 'pct_csp_employe', 'bpe_D_sante_pour1000', 'pct_chauffage_elec', 'pct_logements_recents', 'pct_csp_intermediaire'],
+    },
+    'score_pca_pc6_equipements_diplomes': {
+        'pos_vars': ['pct_inactif', 'bpe_sport_indoor_pour1000', 'bpe_ecole_privee_pour1000', 'bpe_C_enseignement_pour1000', 'pct_hors_menage', 'pct_etudiants'],
+        'neg_vars': ['bpe_E_transports_pour1000', 'pct_immigres', 'pct_etrangers', 'pct_cdi', 'pct_actifs_transports', 'pct_actifs_2roues', 'pct_csp_independant', 'DISP_S80S2021'],
+    },
+    'score_pca_pc7_logement_csp': {
+        'pos_vars': ['DISP_S80S2021', 'pct_logements_recents', 'DISP_GI21', 'bpe_A_services_pour1000', 'bpe_total_pour1000', 'pct_csp_sans_emploi', 'pct_inactif', 'pct_csp_independant', 'pct_0_19', 'DISP_PPAT21'],
+        'neg_vars': ['pct_logvac', 'pct_logements_anciens', 'pct_csp_agriculteur', 'pct_20_64', 'pct_actifs_velo'],
+    },
+    'score_pca_pc8_equipements_logement': {
+        'pos_vars': ['pct_cdd', 'pct_logements_recents', 'pct_chauffage_elec'],
+        'neg_vars': ['bpe_sport_indoor_pour1000', 'bpe_C_enseignement_pour1000', 'bpe_ecole_privee_pour1000', 'pct_chauffage_gaz_ville', 'bpe_F_sports_culture_pour1000', 'pct_logvac', 'bpe_total_pour1000', 'bpe_D_sante_pour1000'],
+    },
+    # ── Score parti-informé ──
+    'score_peripherie_metropole': {
+        'pos_vars': ['pct_capbep', 'pct_actifs_voiture', 'pct_maison', 'pct_voiture_2plus', 'nb_pieces_moyen', 'pct_chauffage_fioul'],
+        'neg_vars': ['pct_bac_plus', 'pct_sup5', 'pct_csp_plus', 'DISP_GI21', 'DISP_PACT21', 'DISP_RD21', 'pct_actifs_velo', 'DISP_PTSA21', 'pct_studios', 'pct_petits_logements'],
+    },
 }
 
 # ── PRESETS D'AXES ────────────────────────────────────────────────────────────
@@ -288,6 +338,94 @@ AXIS_PRESETS = [
             }
         }
     },
+    {
+        'id': 'precarite_peripherie',
+        'label': 'Fractures territoriales',
+        'emoji': '🏘️',
+        'xVar': 'score_peripherie_metropole', 'xInvert': False,
+        'yVar': 'score_precarite',
+        'xTitle': '← Metropole (Macron/Jadot) ─── Peripherie-Metropole ─── Peripherie (Le Pen) →',
+        'yTitle': '← Aise ─── Precarite sociale ─── Precaire →',
+        'xRange': [-50, 50], 'yRange': [-50, 50],
+        'corners': [
+            {'pos': 'tl', 'text': 'BANLIEUE<br>POPULAIRE', 'color': '#DC2626'},
+            {'pos': 'tr', 'text': 'PERIPHERIE<br>PRECAIRE', 'color': '#374151'},
+            {'pos': 'bl', 'text': 'METROPOLE<br>AISEE', 'color': '#F59E0B'},
+            {'pos': 'br', 'text': 'PERIURBAIN<br>CONFORTABLE', 'color': '#3B82F6'},
+        ],
+        'desc': {
+            'title': 'Fractures territoriales — Precarite x Peripherie-Metropole',
+            'x': "<b>Axe X — Score peripherie-metropole</b> : construit a partir des variables qui separent le mieux les electorats Le Pen/Zemmour (peripherie) de ceux de Macron/Jadot (metropole). A droite : zones periurbaines (voiture, maison, CAP-BEP, fioul). A gauche : centres-villes connectes (BAC+5, cadres, velo, petits logements).",
+            'y': "<b>Axe Y — Score precarite</b> : composite chomage, minimas sociaux, taux de pauvrete vs revenu median et patrimoine. En haut : zones precaires. En bas : zones aisees.",
+            'quadrants': {
+                'tr': '<b>Peripherie precaire</b> — Zones rurales ou periurbaines en difficulte economique. Terre d\'election du RN.',
+                'tl': '<b>Banlieue populaire</b> — Grands ensembles et quartiers denses en difficulte. Fort vote LFI.',
+                'br': '<b>Periurbain confortable</b> — Lotissements pavillonnaires aises. Vote droite traditionnelle ou RN modere.',
+                'bl': '<b>Metropole aisee</b> — Centres-villes bourgeois et quartiers connectes. Vote Macron/EELV.',
+            }
+        }
+    },
+    {
+        'id': 'acp',
+        'label': 'ACP (PC1 x PC2)',
+        'emoji': '📊',
+        'xVar': 'score_pca_pc1_logement_confort', 'xInvert': False,
+        'yVar': 'score_pca_pc2_composition_diplomes',
+        'xTitle': '← Locatif dense ─── ACP PC1 : Logement & confort ─── Proprietaire pavillonnaire →',
+        'yTitle': '← Diplome aise ─── ACP PC2 : Composition sociale ─── Ouvrier precaire →',
+        'xRange': [-50, 50], 'yRange': [-50, 50],
+        'corners': [
+            {'pos': 'tl', 'text': 'HLM<br>PRECAIRE', 'color': '#DC2626'},
+            {'pos': 'tr', 'text': 'PAVILLONNAIRE<br>OUVRIER', 'color': '#374151'},
+            {'pos': 'bl', 'text': 'URBAIN<br>DIPLOME', 'color': '#F59E0B'},
+            {'pos': 'br', 'text': 'RESIDENTIEL<br>BOURGEOIS', 'color': '#3B82F6'},
+        ],
+        'desc': {
+            'title': 'Analyse en Composantes Principales — PC1 \u00d7 PC2',
+            'x': "<b>Axe X — ACP PC1 : Logement & confort</b> (1\u00e8re composante). L'ACP cherche les axes de plus grande variabilit\u00e9 sans utiliser l'information \u00e9lectorale. PC1 r\u00e9sume l'opposition entre habitat pavillonnaire et habitat collectif dense. <br><b>+</b> grands logements, garage, voiture, maison, propri\u00e9taires. <br><b>\u2212</b> appartements, locataires, immigr\u00e9s, transports, studios.",
+            'y': "<b>Axe Y — ACP PC2 : Composition sociale</b> (2\u00e8me composante, orthogonale \u00e0 PC1). S\u00e9pare zones ouvri\u00e8res pr\u00e9caires des zones de cadres dipl\u00f4m\u00e9s. <br><b>+</b> CAP-BEP, ch\u00f4mage, ouvriers, minimas sociaux, sans dipl\u00f4me. <br><b>\u2212</b> revenu m\u00e9dian, BAC+, cadres, BAC+5, revenus d'activit\u00e9.",
+            'quadrants': {
+                'tr': '<b>Pavillonnaire ouvrier</b> — Lotissements p\u00e9riurbains peu qualifi\u00e9s. Vote RN.',
+                'tl': '<b>HLM pr\u00e9caire</b> — Grands ensembles avec forte pr\u00e9carit\u00e9. Vote LFI.',
+                'br': '<b>R\u00e9sidentiel bourgeois</b> — Grandes propri\u00e9t\u00e9s, cadres sup\u00e9rieurs. Vote Macron.',
+                'bl': '<b>Urbain dipl\u00f4m\u00e9</b> — Centres-villes, jeunes actifs. \u00c9lectorat EELV/Macron.',
+            }
+        }
+    },
+    {
+        'id': 'tsne',
+        'label': 't-SNE',
+        'emoji': '🔬',
+        'xVar': 'tsne_x', 'xInvert': False,
+        'yVar': 'tsne_y',
+        'xTitle': 't-SNE dimension 1',
+        'yTitle': 't-SNE dimension 2',
+        'xRange': None, 'yRange': None,
+        'corners': [],
+        'desc': {
+            'title': 't-SNE \u2014 Carte des similarit\u00e9s entre IRIS',
+            'x': "<b>Technique : t-SNE</b> (t-distributed Stochastic Neighbor Embedding) : projette les ~80 variables socio-\u00e9conomiques en 2D en pr\u00e9servant les <em>voisinages locaux</em>. Deux IRIS proches sur cette carte ont des profils sociologiques similaires.",
+            'y': "<b>Comment lire</b> : les axes X et Y n'ont aucune signification propre. Ce qui compte, ce sont les <em>regroupements visuels</em>. Les couleurs r\u00e9v\u00e8lent comment le vote s'organise dans cet espace.",
+            'quadrants': {}
+        }
+    },
+    {
+        'id': 'umap',
+        'label': 'UMAP',
+        'emoji': '🌐',
+        'xVar': 'umap_x', 'xInvert': False,
+        'yVar': 'umap_y',
+        'xTitle': 'UMAP dimension 1',
+        'yTitle': 'UMAP dimension 2',
+        'xRange': None, 'yRange': None,
+        'corners': [],
+        'desc': {
+            'title': 'UMAP \u2014 Topologie des territoires',
+            'x': "<b>Technique : UMAP</b> (Uniform Manifold Approximation and Projection) : comme le t-SNE mais pr\u00e9serve aussi la structure <em>globale</em>. Deux amas \u00e9loign\u00e9s = territoires v\u00e9ritablement diff\u00e9rents.",
+            'y': "<b>Comment lire</b> : les axes n'ont pas de signification propre. L'int\u00e9r\u00eat est dans la topologie : forme des amas, s\u00e9paration, ponts entre types de territoires.",
+            'quadrants': {}
+        }
+    },
 ]
 
 # Variables disponibles dans les dropdowns custom
@@ -295,6 +433,15 @@ VARS_BY_CAT = {
     'Scores composites': [
         'score_exploitation', 'score_domination', 'score_cap_eco', 'score_cap_cult',
         'score_precarite', 'score_rentier', 'score_ruralite',
+        'score_urbanite', 'score_confort_residentiel', 'score_equipement_public',
+        'score_pca_pc1_logement_confort', 'score_pca_pc2_composition_diplomes',
+        'score_pca_pc3_equipements_demographie', 'score_pca_pc4_demographie_chauffage',
+        'score_pca_pc5_equipements_csp', 'score_pca_pc6_equipements_diplomes',
+        'score_pca_pc7_logement_csp', 'score_pca_pc8_equipements_logement',
+        'score_peripherie_metropole',
+    ],
+    'Réductions dimensionnelles': [
+        'tsne_x', 'tsne_y', 'umap_x', 'umap_y',
     ],
     'Démographie': [
         'pct_0_19', 'pct_20_64', 'pct_65_plus',
@@ -329,6 +476,22 @@ VAR_LABELS = {
     'score_precarite':          'Score précarité sociale — chômage, minimas, pauvreté',
     'score_rentier':            'Score rentier — part patrimoine/capital dans les revenus',
     'score_ruralite':           'Score ruralité — profils agricoles/retraités vs urbains',
+    'score_urbanite':           'Score urbanité — habitat dense, transports vs pavillonnaire, voiture',
+    'score_confort_residentiel':'Score confort résidentiel — propriété, surface, garage vs HLM, suroccupation',
+    'score_equipement_public':  'Score équipement public — densité santé, enseignement, commerces, services',
+    'score_pca_pc1_logement_confort':       'Score ACP-PC1 — Logement & confort. <b>+</b> grands logements, garage, voiture, maison, propriétaires, surface. <b>−</b> appartements, locataires, sans-voiture, immigrés, transports, studios.',
+    'score_pca_pc2_composition_diplomes':   'Score ACP-PC2 — Composition sociale. <b>+</b> CAP-BEP, intérim, chômage, ouvriers, taux pauvreté, minimas sociaux, sans diplôme. <b>−</b> revenu médian, BAC+, cadres, BAC+5, revenus d\'activité.',
+    'score_pca_pc3_equipements_demographie':'Score ACP-PC3 — Équipements & démographie. <b>+</b> professions intermédiaires, revenus d\'activité, 0-19 ans. <b>−</b> 65+ ans, âge moyen, pensions, BPE total, retraités, commerces, tourisme, santé, marche, services.',
+    'score_pca_pc4_demographie_chauffage':  'Score ACP-PC4 — Démographie & chauffage. <b>+</b> âge moyen, retraités, 65+, pensions, gaz de ville, femmes. <b>−</b> logements anciens, services, 20-64 ans, chauffage autre/bouteille/fioul, agriculteurs, BPE total, sport-culture.',
+    'score_pca_pc5_equipements_csp':        'Score ACP-PC5 — Équipements & CSP. <b>+</b> grands logements, sans-emploi, inégalités S80/S20, temps partiel, inactifs, étudiants. <b>−</b> BPE total/services/commerces/santé, employés, chauffage élec, logements récents, prof. intermédiaires.',
+    'score_pca_pc6_equipements_diplomes':   'Score ACP-PC6 — Éducation privée & diplômes. <b>+</b> inactifs, sport indoor, écoles privées, enseignement, hors-ménage, étudiants. <b>−</b> transports BPE, immigrés, étrangers, CDI, transports commun, 2-roues, indépendants, inégalités.',
+    'score_pca_pc7_logement_csp':           'Score ACP-PC7 — Logement récent & inégalités. <b>+</b> inégalités S80/S20 et Gini, logements récents, services BPE, sans-emploi, inactifs, indépendants, 0-19 ans, patrimoine. <b>−</b> logements vacants/anciens, agriculteurs, 20-64 ans, vélo.',
+    'score_pca_pc8_equipements_logement':   'Score ACP-PC8 — CDD & logements récents. <b>+</b> CDD, logements récents, chauffage élec. <b>−</b> sport indoor, enseignement, écoles privées, gaz de ville, sport-culture BPE, logements vacants, BPE total, santé.',
+    'score_peripherie_metropole':           'Score périphérie-métropole — Périurbain voiture (Le Pen) vs métropole diplômée (Macron/Jadot)',
+    'tsne_x':                               'Coordonnée t-SNE X (réduction non-linéaire)',
+    'tsne_y':                               'Coordonnée t-SNE Y (réduction non-linéaire)',
+    'umap_x':                               'Coordonnée UMAP X (réduction non-linéaire)',
+    'umap_y':                               'Coordonnée UMAP Y (réduction non-linéaire)',
     'pct_csp_agriculteur':      '% agriculteurs exploitants (CSP 1)',
     'pct_csp_independant':      '% artisans, commerçants, chefs d\'entreprise (CSP 2)',
     'pct_csp_plus':             '% cadres et professions intellectuelles supérieures (CSP 3)',
@@ -498,7 +661,8 @@ for cat_vars in VARS_BY_CAT.values():
 
 # ── 1. CHARGEMENT DES DONNÉES ─────────────────────────────────────────────────
 # Source unique : iris_final_socio_politique.csv contient toutes les colonnes nécessaires
-df_socio = pd.read_csv("iris/iris_final_socio_politique.csv", low_memory=False)
+# df_socio = pd.read_csv("iris/iris_final_socio_politique.csv", low_memory=False)
+df_socio = pd.read_csv("iris/iris_final_socio_politique_bis.csv", low_memory=False)
 
 # On garde aussi les coordonnées pour AXE_X / AXE_Y (optionnel)
 # mais toutes les variables clés sont dans df_socio
@@ -606,11 +770,14 @@ score_party_cols = [c for c in score_party_cols if c in df.columns]
 for c in score_party_cols:
     df[c] = pd.to_numeric(df[c], errors='coerce').fillna(0.0)
 
-party_map = {c: c[6:] for c in score_party_cols}  # 'score_RN' → 'RN'
-df['parti_dominant'] = df[score_party_cols].idxmax(axis=1).map(party_map).fillna('AUTRE')
-# IRIS with all-zero scores → AUTRE
-all_zero = (df[score_party_cols] == 0).all(axis=1)
-df.loc[all_zero, 'parti_dominant'] = 'AUTRE'
+if score_party_cols:
+    party_map = {c: c[6:] for c in score_party_cols}  # 'score_RN' → 'RN'
+    df['parti_dominant'] = df[score_party_cols].idxmax(axis=1).map(party_map).fillna('AUTRE')
+    # IRIS with all-zero scores → AUTRE
+    all_zero = (df[score_party_cols] == 0).all(axis=1)
+    df.loc[all_zero, 'parti_dominant'] = 'AUTRE'
+else:
+    df['parti_dominant'] = 'AUTRE'
 
 print("Distribution partis dominants (initial):")
 print(df['parti_dominant'].value_counts().to_dict())
@@ -757,7 +924,7 @@ pop = df['_pop'].copy()
 q5  = pop.quantile(0.05)
 q95 = pop.quantile(0.95)
 pop_clipped = pop.clip(q5, q95)
-marker_size = 3 + (pop_clipped - q5) / (q95 - q5) * (9 - 3)  # 3–9px
+marker_size = 2.5 + (pop_clipped - q5) / (q95 - q5) * (4 - 2.5)  # 2.5–4px
 
 # ── 6. JITTER ET DONNÉES PAR VARIABLE ─────────────────────────────────────────
 np.random.seed(42)
@@ -960,7 +1127,7 @@ def _round_bary(bm):
     return result
 
 # Composite score vars get 3 decimals; age_moyen gets 1 decimal; pct vars get 0 (integer %)
-_COMPOSITE_VARS = set(VARS_BY_CAT.get('Scores composites', []))
+_COMPOSITE_VARS = set(VARS_BY_CAT.get('Scores composites', [])) | {'tsne_x', 'tsne_y', 'umap_x', 'umap_y'}
 _ONE_DECIMAL_VARS = {'age_moyen', 'pct_etrangers', 'pct_immigres'}
 
 def _build_js_data():
@@ -991,7 +1158,9 @@ def _build_js_data():
 # [0] LAB_IRIS, [1] nom_commune, [2] pop_totale, [3] DISP_MED21,
 # [4] pct_csp_plus, [5] pct_csp_ouvrier, [6] pct_csp_intermediaire,
 # [7] DISP_PPAT21, [8] inscrits, [9] votants, [10] pct_abstention,
-# [11] score_blanc, [12] score_nul
+# [11] score_blanc, [12] score_nul,
+# [13] pct_proprietaires, [14] pct_hlm,
+# [15] pct_chomage, [16] pct_bac_plus, [17] pct_sans_diplome, [18] age_moyen
 
 _CD_PARTY_SCORES = [f'score_{g}' for g in ALL_ORDER]
 
@@ -1002,7 +1171,9 @@ def _make_customdata(sub):
     cd_cols = ['LAB_IRIS', commune_col, pop_col, 'DISP_MED21',
                'pct_csp_plus', 'pct_csp_ouvrier', 'pct_csp_intermediaire',
                'DISP_PPAT21', 'inscrits', 'votants', 'pct_abstention',
-               'score_blanc', 'score_nul']
+               'score_blanc', 'score_nul',
+               'pct_proprietaires', 'pct_hlm',
+               'pct_chomage', 'pct_bac_plus', 'pct_sans_diplome', 'age_moyen']
 
     # Only keep cols that exist
     existing = [c for c in cd_cols if c in sub.columns]
@@ -1307,6 +1478,11 @@ html, body {{ background: #FAF9F7; font-family: 'Helvetica Neue', system-ui, san
 .info-card .vote-bar-bg {{ flex: 1; background: #F0F0F0; border-radius: 2px; height: 5px; overflow: hidden; }}
 .info-card .vote-bar-fill {{ height: 100%; border-radius: 2px; }}
 .info-card .vote-score {{ min-width: 34px; text-align: right; color: #444; font-size: 9.5px; }}
+.info-card .stat-row {{ display: flex; align-items: center; gap: 4px; margin-bottom: 3px; font-size: 10px; }}
+.info-card .stat-lbl {{ min-width: 70px; color: #999; font-size: 9px; flex-shrink: 0; }}
+.info-card .stat-bar-bg {{ flex: 1; background: #F0F0F0; border-radius: 2px; height: 4px; overflow: hidden; }}
+.info-card .stat-bar-fill {{ height: 100%; border-radius: 2px; }}
+.info-card .stat-pct {{ min-width: 30px; text-align: right; color: #444; font-size: 9.5px; }}
 .footer {{ text-align: center; padding: 6px 12px 4px; font-size: 8px; color: #AAA; line-height: 1.6; }}
 
 .axis-desc {{ padding: 12px 14px 20px; font-size: 11px; color: #555; line-height: 1.6;
@@ -1400,9 +1576,14 @@ html, body {{ background: #FAF9F7; font-family: 'Helvetica Neue', system-ui, san
   <span class="close" id="closeCard">×</span>
   <div class="name" id="cardName"></div>
   <div class="party" id="cardParty"></div>
-  <div class="row"><span class="lbl">Population :</span> <b id="cardPop"></b> &nbsp;·&nbsp; <span class="lbl">Revenu médian :</span> <b id="cardRev"></b></div>
-  <div class="row"><span class="lbl">% Cadres :</span> <b id="cardCad"></b> &nbsp;·&nbsp; <span class="lbl">% Ouvriers :</span> <b id="cardOuv"></b></div>
-  <div class="row"><span class="lbl">Abstention :</span> <b id="cardAbs"></b> &nbsp;·&nbsp; <span class="lbl">% Patrimoine :</span> <b id="cardPat"></b></div>
+  <div class="row"><span class="lbl">Population :</span> <b id="cardPop"></b> &nbsp;·&nbsp; <span class="lbl">Âge moyen :</span> <b id="cardAge"></b></div>
+  <div class="row"><span class="lbl">Revenu médian :</span> <b id="cardRev"></b></div>
+  <div class="section-title">CSP</div>
+  <div id="cardCSP"></div>
+  <div class="section-title">Formation &amp; Emploi</div>
+  <div id="cardFormation"></div>
+  <div class="section-title">Logement</div>
+  <div id="cardHousing"></div>
   <div class="section-title" id="cardElecLabel"></div>
   <div class="row" id="cardAbstElecRow" style="display:none"><span class="lbl">Abst. élec. :</span> <b id="cardAbstElec"></b></div>
   <div class="vote-grid" id="cardVotes"></div>
@@ -1552,14 +1733,23 @@ function showCard(irisGlobalIdx) {{
   }}
 
   document.getElementById('cardName').textContent = cd[0] || 'IRIS inconnu';
-  document.getElementById('cardParty').textContent = (currentParti || '').replace('_',' ');
-  document.getElementById('cardParty').style.color = currentColor;
+  const partyEl = document.getElementById('cardParty');
+  partyEl.textContent = ((currentParti || '').replace('_',' ')) + (cd[1] ? ' · ' + cd[1] : '');
+  partyEl.style.color = currentColor;
   document.getElementById('cardPop').textContent = fmtNum(cd[2], ' hab.');
+  document.getElementById('cardAge').textContent = cd[18] !== '' && cd[18] != null ? Number(cd[18]).toFixed(1) + ' ans' : '—';
   document.getElementById('cardRev').textContent = fmtNum(cd[3], ' €/UC');
-  document.getElementById('cardCad').textContent = fmtPct(cd[4]);
-  document.getElementById('cardOuv').textContent = fmtPct(cd[5]);
-  document.getElementById('cardAbs').textContent = fmtPct(cd[10]);
-  document.getElementById('cardPat').textContent = fmtPct(cd[7]);
+  document.getElementById('cardCSP').innerHTML =
+    `<div class="stat-row"><span class="stat-lbl">Cadres sup.</span><div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${{Math.min(100,cd[4]||0)}}%;background:#5B8DB8"></div></div><span class="stat-pct">${{fmtPct(cd[4])}}</span></div>` +
+    `<div class="stat-row"><span class="stat-lbl">Prof. interm.</span><div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${{Math.min(100,cd[6]||0)}}%;background:#82AAC8"></div></div><span class="stat-pct">${{fmtPct(cd[6])}}</span></div>` +
+    `<div class="stat-row"><span class="stat-lbl">Ouvriers</span><div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${{Math.min(100,cd[5]||0)}}%;background:#C97A5A"></div></div><span class="stat-pct">${{fmtPct(cd[5])}}</span></div>`;
+  document.getElementById('cardFormation').innerHTML =
+    `<div class="stat-row"><span class="stat-lbl">Bac+</span><div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${{Math.min(100,cd[16]||0)}}%;background:#7AAD8F"></div></div><span class="stat-pct">${{fmtPct(cd[16])}}</span></div>` +
+    `<div class="stat-row"><span class="stat-lbl">Sans diplôme</span><div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${{Math.min(100,cd[17]||0)}}%;background:#C9A45A"></div></div><span class="stat-pct">${{fmtPct(cd[17])}}</span></div>` +
+    `<div class="stat-row"><span class="stat-lbl">Chômage</span><div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${{Math.min(100,cd[15]||0)}}%;background:#C95A5A"></div></div><span class="stat-pct">${{fmtPct(cd[15])}}</span></div>`;
+  document.getElementById('cardHousing').innerHTML =
+    `<div class="stat-row"><span class="stat-lbl">Propriétaires</span><div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${{Math.min(100,cd[13]||0)}}%;background:#7AA7D0"></div></div><span class="stat-pct">${{fmtPct(cd[13])}}</span></div>` +
+    `<div class="stat-row"><span class="stat-lbl">HLM</span><div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${{Math.min(100,cd[14]||0)}}%;background:#E8975A"></div></div><span class="stat-pct">${{fmtPct(cd[14])}}</span></div>`;
   document.getElementById('cardElecLabel').textContent = currentMeta ? currentMeta.label : currentElectionId;
   const abstElecRow = document.getElementById('cardAbstElecRow');
   if (abstElec != null) {{
@@ -1581,6 +1771,15 @@ document.getElementById('closeCard').addEventListener('click', () => {{
   document.getElementById('infoCard').classList.remove('show');
   currentClickedGlobalIdx = null;
 }});
+(function() {{
+  const card = document.getElementById('infoCard');
+  let startY = 0;
+  card.addEventListener('touchstart', e => {{ startY = e.touches[0].clientY; }}, {{passive: true}});
+  card.addEventListener('touchend', e => {{
+    const dy = e.changedTouches[0].clientY - startY;
+    if (dy > 60) {{ card.classList.remove('show'); currentClickedGlobalIdx = null; }}
+  }}, {{passive: true}});
+}})();
 
 function computeButtonPcts(electionId) {{
   const data = IRIS_ELECTION_DATA[electionId];
@@ -1858,8 +2057,8 @@ function applyAxes(xVar, xInvert, yVar, preset) {{
   currentYVar = yVar;
   currentXInvert = xInvert;
   if (preset) {{
-    currentXRange = preset.xRange.slice();
-    currentYRange = preset.yRange.slice();
+    currentXRange = preset.xRange ? preset.xRange.slice() : computeDataRange(xVar, xInvert);
+    currentYRange = preset.yRange ? preset.yRange.slice() : computeDataRange(yVar, false);
     currentCorners = preset.corners;
   }} else {{
     currentXRange = computeDataRange(xVar, xInvert);
@@ -2050,6 +2249,8 @@ chartDiv.addEventListener('touchcancel', function() {{
 // ── Axis controls ─────────────────────────────────────────────────────────
 const presetBtnsDiv = document.getElementById('presetBtns');
 PRESETS.forEach(p => {{
+  if (p.id === 'tsne' && !IRIS_X['tsne_x']) return;
+  if (p.id === 'umap' && !IRIS_X['umap_x']) return;
   const btn = document.createElement('button');
   btn.className = 'preset-btn' + (p.id === 'saint_graphique' ? ' active' : '');
   btn.dataset.id = p.id;
@@ -2078,9 +2279,11 @@ function buildSelect(selectId, selectedVar) {{
   const sel = document.getElementById(selectId);
   sel.innerHTML = '';
   for (const [cat, vars] of Object.entries(VARS)) {{
+    const availVars = vars.filter(v => IRIS_X[v] !== undefined);
+    if (!availVars.length) continue;
     const og = document.createElement('optgroup');
     og.label = cat;
-    vars.forEach(v => {{
+    availVars.forEach(v => {{
       const opt = document.createElement('option');
       opt.value = v;
       opt.textContent = v + (varLabels[v] ? ' — ' + varLabels[v].substring(0, 50) : '');
