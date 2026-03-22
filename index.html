@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sociologie des IRIS</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #FAF9F7; font-family: 'Helvetica Neue', system-ui, sans-serif; color: #1a1a1a;
+       display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+.container { text-align: center; padding: 40px 20px; max-width: 480px; }
+h1 { font-size: 28px; font-weight: 900; letter-spacing: -0.5px; margin-bottom: 8px; }
+p { font-size: 13px; color: #888; margin-bottom: 36px; }
+.btns { display: flex; flex-direction: column; gap: 12px; }
+a.btn { display: block; padding: 16px 24px; border-radius: 12px; text-decoration: none;
+        font-size: 15px; font-weight: 700; transition: opacity 0.15s; }
+a.btn:hover { opacity: 0.85; }
+.btn-desktop { background: #1a1a1a; color: #fff; }
+.btn-mobile  { background: #F97316; color: #fff; }
+.hint { font-size: 11px; color: #BBB; margin-top: 24px; }
+</style>
+<script>
+if (/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) {
+  window.location.replace('carte-mobile.html');
+} else {
+  window.location.replace('carte.html');
+}
+</script>
+</head>
+<body>
+<div class="container">
+  <h1>Sociologie des IRIS</h1>
+  <p>Visualisation interactive des zones IRIS · données INSEE 2021</p>
+  <div class="btns">
+    <a class="btn btn-desktop" href="carte.html">Version bureau</a>
+    <a class="btn btn-mobile"  href="carte-mobile.html">Version mobile</a>
+  </div>
+  <p class="hint">Redirection automatique en cours…</p>
+</div>
+</body>
+</html>

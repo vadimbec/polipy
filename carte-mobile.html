@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Sociologie des IRIS — Mobile</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { background: #FAF9F7; font-family: 'Helvetica Neue', system-ui, sans-serif;
+               color: #1a1a1a; overflow-x: hidden; -webkit-text-size-adjust: 100%; }
+.header { text-align: center; padding: 12px 12px 4px; }
+.header h1 { font-size: 17px; font-weight: 900; letter-spacing: -0.5px; margin-bottom: 2px; }
+.header p { font-size: 9px; color: #888; line-height: 1.4; }
+
+.axis-bar { padding: 6px 10px; background: #fff; border-bottom: 1px solid #EEE; }
+.axis-bar-label { font-size: 10px; font-weight: 700; color: #666; margin-bottom: 4px; }
+.preset-btns { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 4px; }
+.preset-btn { padding: 4px 8px; border-radius: 14px; border: 1.5px solid #D0D0D0;
+               background: transparent; font-size: 10px; font-weight: 600; color: #555;
+               font-family: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent;
+               white-space: nowrap; }
+.preset-btn.active { background: #1a1a1a; border-color: #1a1a1a; color: #fff; }
+.custom-toggle { padding: 4px 10px; border-radius: 14px; border: 1.5px dashed #C0C0C0;
+                  background: transparent; font-size: 10px; font-weight: 600; color: #888;
+                  font-family: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.custom-panel { display: none; padding: 6px 0 2px; gap: 8px; flex-direction: column; }
+.custom-panel.open { display: flex; }
+.custom-panel select { padding: 4px 6px; border-radius: 6px; border: 1px solid #D0D0D0;
+                        background: #fff; font-size: 11px; font-family: inherit; width: 100%; }
+.custom-panel label { font-size: 10px; font-weight: 600; color: #555; }
+
+.filters { display: flex; flex-wrap: wrap; gap: 4px; padding: 4px 10px; justify-content: center; }
+.toggle-all { display: block; width: calc(100% - 20px); margin: 2px 10px 4px;
+               padding: 3px 0; border-radius: 8px; border: 1.5px solid #CCC;
+               background: transparent; font-size: 9px; font-weight: 700; color: #888;
+               font-family: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; text-align: center; }
+.fbtn { display: inline-flex; align-items: center; gap: 3px; padding: 2px 8px; border-radius: 12px;
+         border: 2px solid; font-size: 9px; font-weight: 700; font-family: inherit;
+         cursor: pointer; transition: all 0.12s; -webkit-tap-highlight-color: transparent; }
+.fbtn.on { color: #fff; }
+.fbtn.off { background: transparent !important; opacity: 0.3; }
+
+#chartWrap { position: relative; width: 100%; }
+#chart { width: 100%; aspect-ratio: 9 / 11; touch-action: none; }
+.corner-label { position: absolute; font-size: 8px; font-weight: 800; line-height: 1.2;
+                 pointer-events: none; opacity: 0.65; }
+.corner-tl { top: 8px; left: 56px; text-align: left; }
+.corner-tr { top: 8px; right: 8px; text-align: right; }
+.corner-bl { bottom: 40px; left: 56px; text-align: left; }
+.corner-br { bottom: 40px; right: 8px; text-align: right; }
+
+#resetBtn { position: absolute; top: 6px; right: 6px; z-index: 50;
+             background: rgba(255,255,255,0.92); border: 1px solid #DDD;
+             border-radius: 6px; padding: 3px 8px; font-size: 9px; font-weight: 700;
+             color: #888; font-family: inherit; cursor: pointer; display: none;
+             -webkit-tap-highlight-color: transparent; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+#resetBtn.show { display: block; }
+
+.info-card { position: fixed; bottom: 0; left: 0; right: 0;
+              background: rgba(255,255,255,0.98); border-top: 1px solid #E0E0E0;
+              padding: 12px 16px calc(env(safe-area-inset-bottom, 8px) + 12px);
+              font-size: 11px; line-height: 1.55; box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+              transform: translateY(100%); transition: transform 0.25s ease; z-index: 100;
+              backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+              max-height: 65vh; overflow-y: auto; }
+.info-card.show { transform: translateY(0); }
+.info-card .name { font-size: 14px; font-weight: 900; }
+.info-card .party { font-weight: 700; font-size: 10px; margin-bottom: 4px; }
+.info-card .row { color: #555; margin-bottom: 1px; }
+.info-card .row b { color: #1a1a1a; }
+.info-card .lbl { color: #999; }
+.info-card .close { position: absolute; top: 8px; right: 14px; font-size: 22px; color: #BBB;
+                     cursor: pointer; -webkit-tap-highlight-color: transparent; padding: 4px 8px; }
+.info-card .dynamic-row { color: #555; border-top: 1px solid #F0F0F0; padding-top: 4px; margin-top: 4px; }
+.info-card .section-title { font-size: 9px; font-weight: 800; text-transform: uppercase;
+                              letter-spacing: 0.5px; color: #BBB; margin: 6px 0 3px; }
+.info-card .vote-grid { display: flex; flex-direction: column; gap: 3px; margin-top: 4px; font-size: 10px; }
+.info-card .vote-cell { display: flex; align-items: center; gap: 4px; }
+.info-card .vote-parti { min-width: 52px; font-weight: 700; font-size: 9.5px; flex-shrink: 0; }
+.info-card .vote-bar-bg { flex: 1; background: #F0F0F0; border-radius: 2px; height: 5px; overflow: hidden; }
+.info-card .vote-bar-fill { height: 100%; border-radius: 2px; }
+.info-card .vote-score { min-width: 34px; text-align: right; color: #444; font-size: 9.5px; }
+.info-card .stat-row { display: flex; align-items: center; gap: 4px; margin-bottom: 3px; font-size: 10px; }
+.info-card .stat-lbl { min-width: 70px; color: #999; font-size: 9px; flex-shrink: 0; }
+.info-card .stat-bar-bg { flex: 1; background: #F0F0F0; border-radius: 2px; height: 4px; overflow: hidden; }
+.info-card .stat-bar-fill { height: 100%; border-radius: 2px; }
+.info-card .stat-pct { min-width: 30px; text-align: right; color: #444; font-size: 9.5px; }
+.footer { text-align: center; padding: 6px 12px 4px; font-size: 8px; color: #AAA; line-height: 1.6; }
+
+.axis-desc { padding: 12px 14px 20px; font-size: 11px; color: #555; line-height: 1.6;
+              border-top: 1px solid #EEE; background: #FDFCFA; }
+.axis-desc:empty { display: none; }
+.axis-desc .desc-title { font-size: 13px; font-weight: 900; color: #1a1a1a; margin-bottom: 8px; }
+.axis-desc .desc-ax { background: #fff; border: 1px solid #E8E8E8; border-radius: 8px;
+                        padding: 8px 10px; margin-bottom: 8px; }
+.axis-desc .desc-quadrants { background: #fff; border: 1px solid #E8E8E8; border-radius: 8px;
+                               padding: 8px 10px; }
+.axis-desc .desc-q-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px; }
+.axis-desc .desc-q { font-size: 10px; padding: 5px 7px; border-radius: 6px; background: #F8F8F8; }
+.axis-desc .desc-q-label { font-size: 8px; font-weight: 800; text-transform: uppercase;
+                              letter-spacing: 0.4px; opacity: 0.6; margin-bottom: 2px; }
+
+.election-bar { display: flex; align-items: center; gap: 6px; padding: 5px 10px;
+                 background: #F8F7F5; border-bottom: 1px solid #E8E8E8; flex-wrap: wrap; }
+.election-bar-label { font-size: 9px; font-weight: 700; color: #888; white-space: nowrap; }
+.election-type-btns { display: flex; gap: 3px; flex-wrap: wrap; }
+.elec-type-btn { padding: 2px 7px; border-radius: 12px; border: 1.5px solid #D0D0D0;
+                  background: transparent; font-size: 9px; font-weight: 600; color: #777;
+                  font-family: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; white-space: nowrap; }
+.elec-type-btn.active { background: #3B3B3B; border-color: #3B3B3B; color: #fff; }
+.elec-year-btns { display: flex; gap: 3px; flex-wrap: wrap; }
+.elec-year-btn { padding: 2px 7px; border-radius: 12px; border: 1.5px solid #D0D0D0;
+                  background: transparent; font-size: 9px; font-weight: 600; color: #777;
+                  font-family: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; white-space: nowrap; }
+.elec-year-btn.active { background: #555; border-color: #555; color: #fff; }
+.tour-btns { display: flex; gap: 3px; }
+.tour-btn { padding: 2px 7px; border-radius: 12px; border: 1.5px solid #D0D0D0;
+             background: transparent; font-size: 9px; font-weight: 700; color: #777;
+             font-family: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.tour-btn.active { background: #1a1a1a; border-color: #1a1a1a; color: #fff; }
+.tour-btn:disabled { opacity: 0.3; cursor: default; }
+.election-current-label { font-size: 8px; color: #AAA; font-style: italic; }
+
+#abst-stats-panel { padding: 4px 10px; font-size: 9px; color: #555;
+                     border-top: 1px solid #E8E8E8; display: none; line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Sociologie des IRIS</h1>
+  <p>Sociologie des 49303 zones IRIS · données INSEE 2021</p>
+</div>
+
+<div class="axis-bar">
+  <div class="axis-bar-label">Axes :</div>
+  <div class="preset-btns" id="presetBtns"></div>
+  <button class="custom-toggle" id="customToggle">Personnaliser ▾</button>
+  <div class="custom-panel" id="customPanel">
+    <div>
+      <label>Axe X :</label>
+      <select id="xSelect"></select>
+    </div>
+    <div>
+      <label>Axe Y :</label>
+      <select id="ySelect"></select>
+    </div>
+    <label style="font-size:10px; display:flex; align-items:center; gap:4px;">
+      <input type="checkbox" id="xInvertChk"> Inverser X
+    </label>
+  </div>
+</div>
+
+<div class="election-bar" id="electionBar">
+  <span class="election-bar-label">Couleur :</span>
+  <div class="election-type-btns" id="elecTypeBtns"></div>
+  <div class="elec-year-btns" id="elecYearBtns"></div>
+  <div class="tour-btns">
+    <button class="tour-btn" id="tourBtn1">T1</button>
+    <button class="tour-btn" id="tourBtn2">T2</button>
+  </div>
+  <span class="election-current-label" id="electionCurrentLabel"></span>
+  <span id="elecSpinner" style="display:none;font-size:10px;color:#888;margin-left:4px">…</span>
+</div>
+
+<button class="toggle-all" id="toggleAll">Tout décocher</button>
+<div class="filters" id="filters"></div>
+
+<div id="chartWrap">
+  <div id="chart"></div>
+  <div class="corner-label corner-tl" id="cornerTL" style="color:#E87070"></div>
+  <div class="corner-label corner-tr" id="cornerTR" style="color:#6B8FD4"></div>
+  <div class="corner-label corner-bl" id="cornerBL" style="color:#60B87A"></div>
+  <div class="corner-label corner-br" id="cornerBR" style="color:#C49A30"></div>
+  <button id="resetBtn">↺ Zoom</button>
+</div>
+
+<div class="info-card" id="infoCard">
+  <span class="close" id="closeCard">×</span>
+  <div class="name" id="cardName"></div>
+  <div class="party" id="cardParty"></div>
+  <div class="row"><span class="lbl">Population :</span> <b id="cardPop"></b> &nbsp;·&nbsp; <span class="lbl">Âge moyen :</span> <b id="cardAge"></b></div>
+  <div class="row"><span class="lbl">Revenu médian :</span> <b id="cardRev"></b></div>
+  <div class="section-title">CSP</div>
+  <div id="cardCSP"></div>
+  <div class="section-title">Formation &amp; Emploi</div>
+  <div id="cardFormation"></div>
+  <div class="section-title">Logement</div>
+  <div id="cardHousing"></div>
+  <div class="section-title" id="cardElecLabel"></div>
+  <div class="row" id="cardAbstElecRow" style="display:none"><span class="lbl">Abst. élec. :</span> <b id="cardAbstElec"></b></div>
+  <div class="vote-grid" id="cardVotes"></div>
+  <div class="dynamic-row"><span class="lbl">Axe X (<span id="cardXVar"></span>) :</span> <b id="cardXVal"></b> &nbsp;·&nbsp; <span class="lbl">Axe Y (<span id="cardYVar"></span>) :</span> <b id="cardYVal"></b></div>
+</div>
+
+<div class="footer">⊕ = barycentre · taille = population IRIS · couleur = parti dominant · N=49303</div>
+<div id="abst-stats-panel"></div>
+<div class="axis-desc" id="axisDesc"></div>
+
+<div id="loadingOverlay" style="position:fixed;inset:0;background:rgba(250,249,247,0.96);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;font-family:'Helvetica Neue',system-ui,sans-serif">
+  <div style="font-size:13px;color:#555;margin-bottom:12px" id="loadingMsg">Chargement des données…</div>
+  <div style="width:240px;height:4px;background:#EEE;border-radius:2px">
+    <div id="loadingBar" style="height:4px;background:#F97316;border-radius:2px;width:0%;transition:width 0.4s ease"></div>
+  </div>
+  <div style="font-size:10px;color:#AAA;margin-top:8px" id="loadingDetail"></div>
+</div>
+
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<script>
+const figData = {"data":[{"hovertemplate":"\u003cb\u003eBarycentre %{text}\u003c\u002fb\u003e\u003cbr\u003eX : \u003cb\u003e%{x:.3f}\u003c\u002fb\u003e\u003cbr\u003eY : \u003cb\u003e%{y:.3f}\u003c\u002fb\u003e\u003cextra\u003e\u003c\u002fextra\u003e","marker":{"color":[],"line":{"color":[],"width":3},"size":[],"symbol":"cross-thin"},"mode":"markers+text","name":"barycentres","opacity":0.9,"showlegend":false,"text":[],"textfont":{"color":[],"family":"Helvetica Neue, sans-serif","size":9},"textposition":"top right","x":[],"y":[],"type":"scattergl"},{"customdata":[],"hoverinfo":"none","marker":{"color":[],"line":{"color":"rgba(255,255,255,0.4)","width":0.4},"opacity":0.75,"size":[]},"mode":"markers","name":"iris","showlegend":false,"x":[],"y":[],"type":"scattergl"}],"layout":{"template":{"data":{"histogram2dcontour":[{"type":"histogram2dcontour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"choropleth":[{"type":"choropleth","colorbar":{"outlinewidth":0,"ticks":""}}],"histogram2d":[{"type":"histogram2d","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"heatmap":[{"type":"heatmap","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"contourcarpet":[{"type":"contourcarpet","colorbar":{"outlinewidth":0,"ticks":""}}],"contour":[{"type":"contour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"surface":[{"type":"surface","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"mesh3d":[{"type":"mesh3d","colorbar":{"outlinewidth":0,"ticks":""}}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"parcoords":[{"type":"parcoords","line":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolargl":[{"type":"scatterpolargl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"scattergeo":[{"type":"scattergeo","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolar":[{"type":"scatterpolar","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"scattergl":[{"type":"scattergl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatter3d":[{"type":"scatter3d","line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermap":[{"type":"scattermap","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermapbox":[{"type":"scattermapbox","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterternary":[{"type":"scatterternary","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattercarpet":[{"type":"scattercarpet","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"type":"carpet"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}],"barpolar":[{"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"pie":[{"automargin":true,"type":"pie"}]},"layout":{"autotypenumbers":"strict","colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"hovermode":"closest","hoverlabel":{"align":"left"},"paper_bgcolor":"white","plot_bgcolor":"#E5ECF6","polar":{"bgcolor":"#E5ECF6","angularaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"radialaxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"ternary":{"bgcolor":"#E5ECF6","aaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"baxis":{"gridcolor":"white","linecolor":"white","ticks":""},"caxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]]},"xaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"yaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"scene":{"xaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"yaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"zaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"geo":{"bgcolor":"white","landcolor":"#E5ECF6","subunitcolor":"white","showland":true,"showlakes":true,"lakecolor":"white"},"title":{"x":0.05},"mapbox":{"style":"light"}}},"shapes":[{"line":{"color":"#CCC","dash":"dot","width":1},"type":"line","x0":0,"x1":0,"xref":"x","y0":0,"y1":1,"yref":"y domain"},{"line":{"color":"#CCC","dash":"dot","width":1},"type":"line","x0":0,"x1":1,"xref":"x domain","y0":0,"y1":0,"yref":"y"}],"margin":{"t":8,"b":8,"l":52,"r":10},"xaxis":{"tickfont":{"size":8,"color":"#AAA"},"title":{"font":{"size":8.5,"color":"#888","family":"Helvetica Neue, sans-serif"},"text":"\u2190 Exploit\u00e9 (prol\u00e9taire) \u2500\u2500\u2500 Position dans le rapport capital\u002ftravail \u2500\u2500\u2500 Exploiteur (bourgeois) \u2192","standoff":4},"range":[-50,50],"showgrid":true,"gridcolor":"#EBEBEB","gridwidth":0.5,"zeroline":false,"linecolor":"#DDD","fixedrange":false},"yaxis":{"tickfont":{"size":8,"color":"#AAA"},"title":{"font":{"size":8.5,"color":"#888","family":"Helvetica Neue, sans-serif"},"text":"\u2190 Domin\u00e9 \u2500\u2500\u2500 Domination sociale (Bourdieu) \u2500\u2500\u2500 Dominant \u2192","standoff":2},"range":[-50,50],"showgrid":true,"gridcolor":"#EBEBEB","gridwidth":0.5,"zeroline":false,"linecolor":"#DDD","fixedrange":false},"paper_bgcolor":"#FAF9F7","plot_bgcolor":"#FEFDFB","dragmode":false,"hovermode":"closest","showlegend":false}};
+
+// ── Métadonnées inline (petites, <500 KB) ────────────────────────────────
+const ELECTIONS_META = {"2022_legi_t1":{"type":"legi","year":2022,"tour":1,"label":"Législatives 2022 — 1er tour"},"2022_legi_t2":{"type":"legi","year":2022,"tour":2,"label":"Législatives 2022 — 2e tour"},"2024_legi_t1":{"type":"legi","year":2024,"tour":1,"label":"Législatives 2024 — 1er tour"},"2024_legi_t2":{"type":"legi","year":2024,"tour":2,"label":"Législatives 2024 — 2e tour"},"2017_legi_t1":{"type":"legi","year":2017,"tour":1,"label":"Législatives 2017 — 1er tour"},"2017_legi_t2":{"type":"legi","year":2017,"tour":2,"label":"Législatives 2017 — 2e tour"},"2024_euro_t1":{"type":"euro","year":2024,"tour":1,"label":"Européennes 2024"},"2022_pres_t1":{"type":"pres","year":2022,"tour":1,"label":"Présidentielles 2022 — 1er tour"},"2022_pres_t2":{"type":"pres","year":2022,"tour":2,"label":"Présidentielles 2022 — 2e tour"},"2017_pres_t1":{"type":"pres","year":2017,"tour":1,"label":"Présidentielles 2017 — 1er tour"},"2017_pres_t2":{"type":"pres","year":2017,"tour":2,"label":"Présidentielles 2017 — 2e tour"},"2020_muni_t1":{"type":"muni","year":2020,"tour":1,"label":"Municipales 2020 — 1er tour"},"2020_muni_t2":{"type":"muni","year":2020,"tour":2,"label":"Municipales 2020 — 2e tour"}};
+const DEFAULT_ELECTION_ID = "2022_legi_t1";
+const PRESETS    = [{"id": "saint_graphique", "label": "Saint-Graphique", "emoji": "⚒️", "xVar": "score_exploitation", "xInvert": false, "yVar": "score_domination", "xTitle": "← Exploité (prolétaire) ─── Position dans le rapport capital/travail ─── Exploiteur (bourgeois) →", "yTitle": "← Dominé ─── Domination sociale (Bourdieu) ─── Dominant →", "xRange": [-50, 50], "yRange": [-50, 50], "corners": [{"pos": "tl", "text": "ASCENSION<br>SOCIALE", "color": "#E87070"}, {"pos": "tr", "text": "REPRODUCTION<br>DU CAPITAL", "color": "#6B8FD4"}, {"pos": "bl", "text": "PROLÉTARIAT", "color": "#60B87A"}, {"pos": "br", "text": "PETITE<br>BOURGEOISIE", "color": "#C49A30"}], "desc": {"title": "Le Saint-Graphique — Marx × Bourdieu", "x": "<b>Axe X — Position dans le rapport capital/travail (Marx)</b> : d'où vient le revenu de l'IRIS ? À droite : zones <em>exploiteuses</em> (bourgeoisie, rentiers). À gauche : zones <em>exploitées</em> (prolétariat). Variables : % ouvriers, % employés, taux pauvreté, % sans diplôme.", "y": "<b>Axe Y — Domination sociale (Bourdieu)</b> : position dans la hiérarchie sociale totale (capital économique + culturel). En haut : dominants (riches, diplômés, cadres sup.). En bas : dominés.", "quadrants": {"tr": "<b>Reproduction du capital</b> — Zones exploiteuses ET dominantes : beaux quartiers, arrondissements bourgeois.", "tl": "<b>Ascension sociale</b> — Zones exploitées mais dominantes : cadres salariés issus de milieux populaires.", "bl": "<b>Prolétariat</b> — Zones exploitées ET dominées : quartiers ouvriers, banlieues populaires.", "br": "<b>Petite bourgeoisie</b> — Zones exploiteuses mais dominées : petits commerçants, artisans propriétaires."}}}, {"id": "bourdieu", "label": "Bourdieu", "emoji": "🎓", "xVar": "score_cap_eco", "xInvert": false, "yVar": "score_cap_cult", "xTitle": "← Pauvre ─── Capital Economique ─── Riche →", "yTitle": "← Peu diplômé · ouvrier ─── Capital culturel ─── Diplômé · cadre →", "xRange": [-50, 50], "yRange": [-50, 50], "corners": [{"pos": "tl", "text": "PAUVRE<br>DIPLOME", "color": "#E87070"}, {"pos": "tr", "text": "RICHE<br>DIPLOME", "color": "#6B8FD4"}, {"pos": "bl", "text": "PAUVRE<br>NON DIPLOME", "color": "#60B87A"}, {"pos": "br", "text": "RICHE<br>NON DIPLOME", "color": "#C49A30"}], "desc": {"title": "Espace bourdieusien — Capital culturel × Domination", "x": "<b>Axe X — Capital culturel</b> : diplômes (BAC+5), % cadres sup. et professions intermédiaires. À droite : forte proportion de diplômés et cadres. À gauche : zones peu qualifiées.", "y": "<b>Axe Y — Domination sociale</b> : hiérarchie totale combinant capital économique et culturel.", "quadrants": {"tl": "<b>Noblesse du capital</b> — Riches mais peu diplômés : héritiers, propriétaires fonciers.", "tr": "<b>Élite intégrée</b> — Riches ET diplômés : grandes écoles, hauts fonctionnaires.", "bl": "<b>Classe populaire</b> — Pauvres ET peu diplômés : prolétariat classique.", "br": "<b>Intellectuels déclassés</b> — Diplômés mais peu riches : enseignants, chercheurs."}}}, {"id": "rentier", "label": "Rentier", "emoji": "💰", "xVar": "score_rentier", "xInvert": false, "yVar": "score_domination", "xTitle": "← Revenu du travail (salaires) ─── Rentier vs Travailleur ─── Revenu du capital →", "yTitle": "← Dominé ─── Domination sociale (Bourdieu) ─── Dominant →", "xRange": [-50, 50], "yRange": [-50, 50], "corners": [{"pos": "tl", "text": "INTELLECTUELS<br>FONCTIONNAIRES", "color": "#E87070"}, {"pos": "tr", "text": "ÉLITE<br>RENTIÈRE", "color": "#6B8FD4"}, {"pos": "bl", "text": "SALARIÉS<br>PRÉCAIRES", "color": "#60B87A"}, {"pos": "br", "text": "PETITS<br>RENTIERS", "color": "#C49A30"}], "desc": {"title": "Rente vs Travail × Domination sociale", "x": "<b>Axe X — Score rentier</b> : part du revenu tirée du capital (patrimoine, pensions, retraites) vs travail salarié. À droite : les rentiers. À gauche : les travailleurs.", "y": "<b>Axe Y — Domination sociale</b> : même axe que le Saint-Graphique.", "quadrants": {"tl": "<b>Intellectuels / Fonctionnaires</b> — Dominants mais non-rentiers : hauts fonctionnaires, médecins.", "tr": "<b>Élite rentière</b> — Dominant ET rentier : vieille bourgeoisie, héritiers parisiens.", "bl": "<b>Salariés précaires</b> — Dominé ET non-rentier : classe laborieuse sans patrimoine.", "br": "<b>Petits rentiers</b> — Rentier mais pas dominant : retraités propriétaires provinciaux."}}}, {"id": "demographie", "label": "Démographie", "emoji": "👥", "xVar": "pct_etrangers", "xInvert": false, "yVar": "age_moyen", "xTitle": "← Peu d'étrangers ─── % population étrangère ─── Beaucoup d'étrangers →", "yTitle": "← Jeune ─── Âge moyen ─── Vieux →", "xRange": [-1.0, 45.0], "yRange": [25.0, 55.0], "corners": [{"pos": "tl", "text": "VIEUX<br>NATIFS", "color": "#6B7280"}, {"pos": "tr", "text": "VIEUX<br>IMMIGRÉS", "color": "#9CA3AF"}, {"pos": "bl", "text": "JEUNES<br>NATIFS", "color": "#3B82F6"}, {"pos": "br", "text": "JEUNES<br>IMMIGRÉS", "color": "#EF4444"}], "desc": {"title": "Démographie — Âge × Origine", "x": "<b>Axe X — % population étrangère</b> : part des résidents de nationalité étrangère dans l'IRIS.", "y": "<b>Axe Y — Âge moyen</b> : âge moyen de la population résidente de l'IRIS.", "quadrants": {"tl": "<b>Vieux natifs</b> — Zones âgées à faible immigration : France rurale profonde, littoral retraité.", "tr": "<b>Vieux immigrés</b> — Zones avec une immigration ancienne et installée.", "bl": "<b>Jeunes natifs</b> — Zones jeunes peu diversifiées : périurbain récent, villes moyennes.", "br": "<b>Jeunes immigrés</b> — Zones à forte immigration récente : banlieues denses, zones industrielles."}}}, {"id": "ruralite", "label": "Ruralité × Précarité", "emoji": "🌾", "xVar": "score_ruralite", "xInvert": false, "yVar": "score_precarite", "xTitle": "← Urbain ─── Score ruralité ─── Rural →", "yTitle": "← Sécurisé ─── Score précarité ─── Précaire →", "xRange": [-55.0, 55.0], "yRange": [-55.0, 55.0], "corners": [{"pos": "bl", "text": "URBAIN<br>SÉCURISÉ", "color": "#6B8FD4"}, {"pos": "br", "text": "RURAL<br>SÉCURISÉ", "color": "#059669"}, {"pos": "tl", "text": "URBAIN<br>PRÉCAIRE", "color": "#E87070"}, {"pos": "tr", "text": "RURAL<br>PRÉCAIRE", "color": "#C49A30"}], "desc": {"title": "Ruralité × Précarité sociale", "x": "<b>Axe X — Score ruralité</b> : profil agricole/retraité/voiture (droite = rural) vs tertiaire/diplômé/transports (gauche = urbain).", "y": "<b>Axe Y — Score précarité</b> : chômage, minimas sociaux, taux de pauvreté (haut = plus précaire).", "quadrants": {"tl": "<b>Urbain sécurisé</b> — Quartiers denses avec emploi stable : centre-ville, cadres, fonctionnaires.", "tr": "<b>Rural sécurisé</b> — Bourgs ruraux avec retraités et propriétaires fonciers aisés.", "bl": "<b>Urbain précaire</b> — Banlieues populaires denses : chômage élevé, minimas sociaux.", "br": "<b>Rural précaire</b> — Zones rurales défavorisées : désertification économique, faibles revenus."}}}, {"id": "precarite_peripherie", "label": "Fractures territoriales", "emoji": "🏘️", "xVar": "score_peripherie_metropole", "xInvert": false, "yVar": "score_precarite", "xTitle": "← Metropole (Macron/Jadot) ─── Peripherie-Metropole ─── Peripherie (Le Pen) →", "yTitle": "← Aise ─── Precarite sociale ─── Precaire →", "xRange": [-50, 50], "yRange": [-50, 50], "corners": [{"pos": "tl", "text": "BANLIEUE<br>POPULAIRE", "color": "#DC2626"}, {"pos": "tr", "text": "PERIPHERIE<br>PRECAIRE", "color": "#374151"}, {"pos": "bl", "text": "METROPOLE<br>AISEE", "color": "#F59E0B"}, {"pos": "br", "text": "PERIURBAIN<br>CONFORTABLE", "color": "#3B82F6"}], "desc": {"title": "Fractures territoriales — Precarite x Peripherie-Metropole", "x": "<b>Axe X — Score peripherie-metropole</b> : construit a partir des variables qui separent le mieux les electorats Le Pen/Zemmour (peripherie) de ceux de Macron/Jadot (metropole). A droite : zones periurbaines (voiture, maison, CAP-BEP, fioul). A gauche : centres-villes connectes (BAC+5, cadres, velo, petits logements).", "y": "<b>Axe Y — Score precarite</b> : composite chomage, minimas sociaux, taux de pauvrete vs revenu median et patrimoine. En haut : zones precaires. En bas : zones aisees.", "quadrants": {"tr": "<b>Peripherie precaire</b> — Zones rurales ou periurbaines en difficulte economique. Terre d'election du RN.", "tl": "<b>Banlieue populaire</b> — Grands ensembles et quartiers denses en difficulte. Fort vote LFI.", "br": "<b>Periurbain confortable</b> — Lotissements pavillonnaires aises. Vote droite traditionnelle ou RN modere.", "bl": "<b>Metropole aisee</b> — Centres-villes bourgeois et quartiers connectes. Vote Macron/EELV."}}}, {"id": "acp", "label": "ACP (PC1 x PC2)", "emoji": "📊", "xVar": "score_pca_pc1_logement_confort", "xInvert": false, "yVar": "score_pca_pc2_composition_diplomes", "xTitle": "← Locatif dense ─── ACP PC1 : Logement & confort ─── Proprietaire pavillonnaire →", "yTitle": "← Diplome aise ─── ACP PC2 : Composition sociale ─── Ouvrier precaire →", "xRange": [-50, 50], "yRange": [-50, 50], "corners": [{"pos": "tl", "text": "HLM<br>PRECAIRE", "color": "#DC2626"}, {"pos": "tr", "text": "PAVILLONNAIRE<br>OUVRIER", "color": "#374151"}, {"pos": "bl", "text": "URBAIN<br>DIPLOME", "color": "#F59E0B"}, {"pos": "br", "text": "RESIDENTIEL<br>BOURGEOIS", "color": "#3B82F6"}], "desc": {"title": "Analyse en Composantes Principales — PC1 × PC2", "x": "<b>Axe X — ACP PC1 : Logement & confort</b> (1ère composante). L'ACP cherche les axes de plus grande variabilité sans utiliser l'information électorale. PC1 résume l'opposition entre habitat pavillonnaire et habitat collectif dense. <br><b>+</b> grands logements, garage, voiture, maison, propriétaires. <br><b>−</b> appartements, locataires, immigrés, transports, studios.", "y": "<b>Axe Y — ACP PC2 : Composition sociale</b> (2ème composante, orthogonale à PC1). Sépare zones ouvrières précaires des zones de cadres diplômés. <br><b>+</b> CAP-BEP, chômage, ouvriers, minimas sociaux, sans diplôme. <br><b>−</b> revenu médian, BAC+, cadres, BAC+5, revenus d'activité.", "quadrants": {"tr": "<b>Pavillonnaire ouvrier</b> — Lotissements périurbains peu qualifiés. Vote RN.", "tl": "<b>HLM précaire</b> — Grands ensembles avec forte précarité. Vote LFI.", "br": "<b>Résidentiel bourgeois</b> — Grandes propriétés, cadres supérieurs. Vote Macron.", "bl": "<b>Urbain diplômé</b> — Centres-villes, jeunes actifs. Électorat EELV/Macron."}}}, {"id": "tsne", "label": "t-SNE", "emoji": "🔬", "xVar": "tsne_x", "xInvert": false, "yVar": "tsne_y", "xTitle": "t-SNE dimension 1", "yTitle": "t-SNE dimension 2", "xRange": null, "yRange": null, "corners": [], "desc": {"title": "t-SNE — Carte des similarités entre IRIS", "x": "<b>Technique : t-SNE</b> (t-distributed Stochastic Neighbor Embedding) : projette les ~80 variables socio-économiques en 2D en préservant les <em>voisinages locaux</em>. Deux IRIS proches sur cette carte ont des profils sociologiques similaires.", "y": "<b>Comment lire</b> : les axes X et Y n'ont aucune signification propre. Ce qui compte, ce sont les <em>regroupements visuels</em>. Les couleurs révèlent comment le vote s'organise dans cet espace.", "quadrants": {}}}, {"id": "umap", "label": "UMAP", "emoji": "🌐", "xVar": "umap_x", "xInvert": false, "yVar": "umap_y", "xTitle": "UMAP dimension 1", "yTitle": "UMAP dimension 2", "xRange": null, "yRange": null, "corners": [], "desc": {"title": "UMAP — Topologie des territoires", "x": "<b>Technique : UMAP</b> (Uniform Manifold Approximation and Projection) : comme le t-SNE mais préserve aussi la structure <em>globale</em>. Deux amas éloignés = territoires véritablement différents.", "y": "<b>Comment lire</b> : les axes n'ont pas de signification propre. L'intérêt est dans la topologie : forme des amas, séparation, ponts entre types de territoires.", "quadrants": {}}}];
+const VARS       = {"Scores composites": ["score_exploitation", "score_domination", "score_cap_eco", "score_cap_cult", "score_precarite", "score_rentier", "score_ruralite", "score_urbanite", "score_confort_residentiel", "score_equipement_public", "score_pca_pc1_logement_confort", "score_pca_pc2_composition_diplomes", "score_pca_pc3_equipements_demographie", "score_pca_pc4_demographie_chauffage", "score_pca_pc5_equipements_csp", "score_pca_pc6_equipements_diplomes", "score_pca_pc7_logement_csp", "score_pca_pc8_equipements_logement", "score_peripherie_metropole"], "Réductions dimensionnelles": ["tsne_x", "tsne_y", "umap_x", "umap_y"], "Démographie": ["pct_0_19", "pct_20_64", "pct_65_plus", "pct_etrangers", "pct_immigres", "age_moyen", ""], "Revenus et inégalités": ["DISP_MED21", "DISP_TP6021", "DISP_GI21", "DISP_S80S2021", "DISP_RD21", "DISP_PPAT21", "DISP_PPSOC21", "DISP_PPMINI21", "DISP_PACT21", "DISP_PPEN21", "DISP_PBEN21", "DISP_PPFAM21", "DISP_PPLOGT21", "DISP_PCHO21", "DISP_PTSA21", "DISP_D121", "DISP_D221", "DISP_D321", "DISP_D421", "DISP_D621", "DISP_D721", "DISP_D821", "DISP_D921", "DISP_Q121", "DISP_Q321", "DISP_PIMPOT21"], "Diplômes et emploi": ["pct_sup5", "pct_bac_plus", "pct_sans_diplome", "pct_capbep", "pct_chomage", "pct_cdi", "pct_cdd", "pct_interim", "pct_temps_partiel", "pct_inactif", "pct_csp_agriculteur", "pct_csp_independant", "pct_csp_plus", "pct_csp_intermediaire", "pct_csp_employe", "pct_csp_ouvrier", "pct_csp_retraite", "pct_csp_sans_emploi", "pct_etudiants"], "Mobilité": ["pct_actifs_voiture", "pct_actifs_transports", "pct_actifs_velo", "pct_actifs_2roues"]};
+const varLabels  = {"score_exploitation": "Score exploitation (Marx) — part capital vs travail", "score_domination": "Score domination (Bourdieu) — hiérarchie sociale totale", "score_cap_cult": "Score capital culturel — diplômes + professions intellectuelles", "score_cap_eco": "Score capital économique — richesse, patrimoine, revenus", "score_precarite": "Score précarité sociale — chômage, minimas, pauvreté", "score_rentier": "Score rentier — part patrimoine/capital dans les revenus", "score_ruralite": "Score ruralité — profils agricoles/retraités vs urbains", "score_urbanite": "Score urbanité — habitat dense, transports vs pavillonnaire, voiture", "score_confort_residentiel": "Score confort résidentiel — propriété, surface, garage vs HLM, suroccupation", "score_equipement_public": "Score équipement public — densité santé, enseignement, commerces, services", "score_pca_pc1_logement_confort": "Score ACP-PC1 — Logement & confort. <b>+</b> grands logements, garage, voiture, maison, propriétaires, surface. <b>−</b> appartements, locataires, sans-voiture, immigrés, transports, studios.", "score_pca_pc2_composition_diplomes": "Score ACP-PC2 — Composition sociale. <b>+</b> CAP-BEP, intérim, chômage, ouvriers, taux pauvreté, minimas sociaux, sans diplôme. <b>−</b> revenu médian, BAC+, cadres, BAC+5, revenus d'activité.", "score_pca_pc3_equipements_demographie": "Score ACP-PC3 — Équipements & démographie. <b>+</b> professions intermédiaires, revenus d'activité, 0-19 ans. <b>−</b> 65+ ans, âge moyen, pensions, BPE total, retraités, commerces, tourisme, santé, marche, services.", "score_pca_pc4_demographie_chauffage": "Score ACP-PC4 — Démographie & chauffage. <b>+</b> âge moyen, retraités, 65+, pensions, gaz de ville, femmes. <b>−</b> logements anciens, services, 20-64 ans, chauffage autre/bouteille/fioul, agriculteurs, BPE total, sport-culture.", "score_pca_pc5_equipements_csp": "Score ACP-PC5 — Équipements & CSP. <b>+</b> grands logements, sans-emploi, inégalités S80/S20, temps partiel, inactifs, étudiants. <b>−</b> BPE total/services/commerces/santé, employés, chauffage élec, logements récents, prof. intermédiaires.", "score_pca_pc6_equipements_diplomes": "Score ACP-PC6 — Éducation privée & diplômes. <b>+</b> inactifs, sport indoor, écoles privées, enseignement, hors-ménage, étudiants. <b>−</b> transports BPE, immigrés, étrangers, CDI, transports commun, 2-roues, indépendants, inégalités.", "score_pca_pc7_logement_csp": "Score ACP-PC7 — Logement récent & inégalités. <b>+</b> inégalités S80/S20 et Gini, logements récents, services BPE, sans-emploi, inactifs, indépendants, 0-19 ans, patrimoine. <b>−</b> logements vacants/anciens, agriculteurs, 20-64 ans, vélo.", "score_pca_pc8_equipements_logement": "Score ACP-PC8 — CDD & logements récents. <b>+</b> CDD, logements récents, chauffage élec. <b>−</b> sport indoor, enseignement, écoles privées, gaz de ville, sport-culture BPE, logements vacants, BPE total, santé.", "score_peripherie_metropole": "Score périphérie-métropole — Périurbain voiture (Le Pen) vs métropole diplômée (Macron/Jadot)", "tsne_x": "Coordonnée t-SNE X (réduction non-linéaire)", "tsne_y": "Coordonnée t-SNE Y (réduction non-linéaire)", "umap_x": "Coordonnée UMAP X (réduction non-linéaire)", "umap_y": "Coordonnée UMAP Y (réduction non-linéaire)", "pct_csp_agriculteur": "% agriculteurs exploitants (CSP 1)", "pct_csp_independant": "% artisans, commerçants, chefs d'entreprise (CSP 2)", "pct_csp_plus": "% cadres et professions intellectuelles supérieures (CSP 3)", "pct_csp_intermediaire": "% professions intermédiaires (CSP 4)", "pct_csp_employe": "% employés (CSP 5)", "pct_csp_ouvrier": "% ouvriers (CSP 6)", "pct_csp_retraite": "% retraités (CSP 7)", "pct_csp_sans_emploi": "% autres inactifs sans emploi (CSP 8)", "pct_0_19": "% population 0-19 ans", "pct_20_64": "% population 20-64 ans", "pct_65_plus": "% population 65 ans et plus", "pct_etrangers": "% population de nationalité étrangère", "pct_immigres": "% population immigrée", "age_moyen": "Âge moyen de la population", "DISP_MED21": "Revenu médian disponible (€/UC)", "DISP_TP6021": "Taux de pauvreté (%)", "DISP_GI21": "Indice de Gini (inégalités intra-IRIS)", "DISP_S80S2021": "Ratio S80/S20 (inégalités)", "DISP_PPAT21": "% revenus du patrimoine", "DISP_PPSOC21": "% prestations sociales", "DISP_PPMINI21": "% minimas sociaux (RSA, etc.)", "DISP_PACT21": "% revenus d'activité", "pct_etudiants": "% étudiants parmi 15 ans et +", "pct_sup5": "% diplômés BAC+5 (parmi 15 ans et +)", "pct_bac_plus": "% diplômés BAC et plus (parmi 15 ans et +)", "pct_sans_diplome": "% sans diplôme (parmi 15 ans et +)", "pct_capbep": "% diplômés CAP ou BEP", "pct_chomage": "% chômeurs parmi actifs 15-64 ans", "pct_cdi": "% salariés en CDI", "pct_cdd": "% salariés en CDD", "pct_interim": "% salariés en intérim", "pct_temps_partiel": "% salariés à temps partiel", "pct_actifs_voiture": "% actifs allant au travail en voiture", "pct_actifs_transports": "% actifs allant au travail en transports en commun", "pct_actifs_velo": "% actifs allant au travail en vélo", "pct_actifs_2roues": "% actifs allant au travail en 2 roues motorisées", "pct_actifs_marche": "% actifs allant au travail à pied", "DISP_PPEN21": "% retraites et pensions dans le revenu disponible", "DISP_PBEN21": "% bénéfices (revenus indépendants) dans le revenu", "DISP_PPFAM21": "% prestations familiales dans le revenu", "DISP_PPLOGT21": "% aides au logement dans le revenu", "DISP_PCHO21": "% allocations chômage dans le revenu", "DISP_PTSA21": "dont part des salaires et traitements dans le revenu (%)", "DISP_RD21": "Rapport interdécile D9/D1 du revenu disponible", "DISP_EQ21": "Écart interquartile rapporté à la médiane", "DISP_D121": "1er décile du revenu disponible (€/UC)", "DISP_D221": "2e décile du revenu disponible (€/UC)", "DISP_D321": "3e décile du revenu disponible (€/UC)", "DISP_D421": "4e décile du revenu disponible (€/UC)", "DISP_D621": "6e décile du revenu disponible (€/UC)", "DISP_D721": "7e décile du revenu disponible (€/UC)", "DISP_D821": "8e décile du revenu disponible (€/UC)", "DISP_D921": "9e décile du revenu disponible (€/UC)", "DISP_Q121": "1er quartile du revenu disponible (€/UC)", "DISP_Q321": "3e quartile du revenu disponible (€/UC)", "DISP_PIMPOT21": "Part des impôts dans le revenu disponible (%)", "P21_POP1564": "Population 15-64 ans", "P21_POP1524": "Population 15-24 ans", "P21_POP2554": "Population 25-54 ans", "P21_POP5564": "Population 55-64 ans", "P21_ACT1564": "Actifs 15-64 ans", "P21_ACT1524": "Actifs 15-24 ans", "P21_ACT2554": "Actifs 25-54 ans", "P21_ACT5564": "Actifs 55-64 ans", "P21_ACTOCC1564": "Actifs occupés 15-64 ans", "P21_ACTOCC1524": "Actifs occupés 15-24 ans", "P21_ACTOCC2554": "Actifs occupés 25-54 ans", "P21_ACTOCC5564": "Actifs occupés 55-64 ans", "P21_CHOM1564": "Chômeurs 15-64 ans", "P21_CHOM1524": "Chômeurs 15-24 ans", "P21_CHOM2554": "Chômeurs 25-54 ans", "P21_CHOM5564": "Chômeurs 55-64 ans", "P21_INACT1564": "Inactifs 15-64 ans", "P21_ETUD1564": "Élèves, étudiants et stagiaires non rémunérés 15-64 ans", "P21_RETR1564": "Retraités ou préretraités 15-64 ans", "P21_AINACT1564": "Autres inactifs 15-64 ans", "C21_ACT1564": "Actifs 15-64 ans (recensement)", "C21_ACT1564_CS1": "Agriculteurs exploitants actifs 15-64 ans", "C21_ACT1564_CS2": "Artisans, commerçants, chefs d'entreprise actifs 15-64 ans", "C21_ACT1564_CS3": "Cadres et professions intellectuelles supérieures actifs 15-64 ans", "C21_ACT1564_CS4": "Professions intermédiaires actifs 15-64 ans", "C21_ACT1564_CS5": "Employés actifs 15-64 ans", "C21_ACT1564_CS6": "Ouvriers actifs 15-64 ans", "C21_ACTOCC1564": "Actifs occupés 15-64 ans (recensement)", "C21_ACTOCC1564_CS1": "Agriculteurs exploitants actifs occupés 15-64 ans", "C21_ACTOCC1564_CS2": "Artisans, commerçants, chefs d'entreprise actifs occupés 15-64 ans", "C21_ACTOCC1564_CS3": "Cadres, professions intellectuelles supérieures actifs occupés 15-64 ans", "C21_ACTOCC1564_CS4": "Professions intermédiaires actifs occupés 15-64 ans", "C21_ACTOCC1564_CS5": "Employés actifs occupés 15-64 ans", "C21_ACTOCC1564_CS6": "Ouvriers actifs occupés 15-64 ans", "P21_ACTOCC15P": "Actifs occupés 15 ans ou plus", "P21_SAL15P": "Salariés 15 ans ou plus", "P21_NSAL15P": "Non-salariés 15 ans ou plus", "P21_ACTOCC15P_TP": "Actifs occupés à temps partiel 15 ans ou plus", "P21_SAL15P_TP": "Salariés à temps partiel 15 ans ou plus", "P21_SAL15P_CDI": "Salariés en CDI ou fonction publique 15 ans ou plus", "P21_SAL15P_CDD": "Salariés en CDD 15 ans ou plus", "P21_SAL15P_INTERIM": "Salariés intérimaires 15 ans ou plus", "P21_SAL15P_EMPAID": "Salariés en emploi aidé 15 ans ou plus", "P21_SAL15P_APPR": "Salariés en apprentissage ou stagiaires 15 ans ou plus", "P21_NSAL15P_INDEP": "Non-salariés indépendants 15 ans ou plus", "P21_NSAL15P_EMPLOY": "Non-salariés employeurs 15 ans ou plus", "P21_NSAL15P_AIDFAM": "Aides familiaux (non-salariés) 15 ans ou plus", "P21_ACTOCC15P_ILT1": "Actifs occupés travaillant dans leur commune de résidence", "P21_ACTOCC15P_ILT2P": "Actifs occupés travaillant dans une autre commune", "P21_ACTOCC15P_ILT2": "Actifs occupés travaillant dans un autre commune du même département", "P21_ACTOCC15P_ILT3": "Actifs occupés travaillant dans un autre département de la même région", "P21_ACTOCC15P_ILT4": "Actifs occupés travaillant dans une autre région en France métropolitaine", "P21_ACTOCC15P_ILT5": "Actifs occupés travaillant hors de France métropolitaine", "C21_ACTOCC15P": "Actifs occupés 15 ans ou plus (recensement)", "C21_ACTOCC15P_PAS": "Actifs occupés n'utilisant pas de moyen de transport pour travailler", "C21_ACTOCC15P_MAR": "Actifs occupés allant travailler principalement à pied", "C21_ACTOCC15P_VELO": "Actifs occupés allant travailler principalement à vélo", "C21_ACTOCC15P_2ROUESMOT": "Actifs occupés allant travailler principalement en deux-roues motorisé", "C21_ACTOCC15P_VOIT": "Actifs occupés allant travailler principalement en voiture", "C21_ACTOCC15P_TCOM": "Actifs occupés allant travailler principalement en transports en commun", "P21_POP0205": "Population 2-5 ans", "P21_POP0610": "Population 6-10 ans", "P21_POP1114": "Population 11-14 ans", "P21_POP1517": "Population 15-17 ans", "P21_POP1824": "Population 18-24 ans", "P21_POP2529": "Population 25-29 ans", "P21_POP30P": "Population 30 ans ou plus", "P21_SCOL0205": "Scolarisés 2-5 ans", "P21_SCOL0610": "Scolarisés 6-10 ans", "P21_SCOL1114": "Scolarisés 11-14 ans", "P21_SCOL1517": "Scolarisés 15-17 ans", "P21_SCOL1824": "Scolarisés 18-24 ans", "P21_SCOL2529": "Scolarisés 25-29 ans", "P21_SCOL30P": "Scolarisés 30 ans ou plus", "P21_NSCOL15P": "Non scolarisés 15 ans ou plus", "P21_NSCOL15P_DIPLMIN": "Non scolarisés 15+ sans diplôme ou au plus CEP", "P21_NSCOL15P_BEPC": "Non scolarisés 15+ titulaires BEPC / brevet des collèges / DNB", "P21_NSCOL15P_CAPBEP": "Non scolarisés 15+ titulaires CAP ou BEP", "P21_NSCOL15P_BAC": "Non scolarisés 15+ titulaires BAC ou brevet professionnel", "P21_NSCOL15P_SUP2": "Non scolarisés 15+ titulaires BAC+2", "P21_NSCOL15P_SUP34": "Non scolarisés 15+ titulaires BAC+3 ou BAC+4", "P21_NSCOL15P_SUP5": "Non scolarisés 15+ titulaires BAC+5 ou plus", "P21_CHOM_DIPLMIN": "Chômeurs 15-64 ans sans diplôme ou au plus CEP", "P21_CHOM_BEPC": "Chômeurs 15-64 ans titulaires BEPC", "P21_CHOM_CAPBEP": "Chômeurs 15-64 ans titulaires CAP ou BEP", "P21_CHOM_BAC": "Chômeurs 15-64 ans titulaires BAC", "P21_CHOM_SUP2": "Chômeurs 15-64 ans titulaires BAC+2", "P21_CHOM_SUP34": "Chômeurs 15-64 ans titulaires BAC+3 ou BAC+4", "P21_CHOM_SUP5": "Chômeurs 15-64 ans titulaires BAC+5 ou plus", "P21_ACT_DIPLMIN": "Actifs 15-64 ans sans diplôme ou au plus CEP", "P21_ACT_BEPC": "Actifs 15-64 ans titulaires BEPC", "P21_ACT_CAPBEP": "Actifs 15-64 ans titulaires CAP ou BEP", "P21_ACT_BAC": "Actifs 15-64 ans titulaires BAC", "P21_ACT_SUP2": "Actifs 15-64 ans titulaires BAC+2", "P21_ACT_SUP34": "Actifs 15-64 ans titulaires BAC+3 ou BAC+4", "P21_ACT_SUP5": "Actifs 15-64 ans titulaires BAC+5 ou plus"};
+const COULEURS_JS = {"RN":"#374151","LFI":"#DC2626","PS":"#EC4899","ENS":"#F97316","EELV":"#16A34A","PCF":"#9B1C1C","LR":"#1D4ED8","REC":"#0F172A","AUTRE":"#9CA3AF","NFP":"#B91C1C","NUPES":"#B91C1C","PS_PP":"#E86BA8","UG":"#C84B6E","UXD":"#7C3AED","DVD":"#60A5FA","DVC":"#A78BFA","DLF":"#4B5563","EXD":"#1F2937","MODEM":"#FB923C","HOR":"#FDBA74","UDI":"#93C5FD","DVG":"#F9A8D4","EXG":"#7F1D1D","REG":"#89712F","MACRON":"#F97316","LE_PEN":"#374151","MELENCHON":"#DC2626","FILLON":"#1D4ED8","HAMON":"#EC4899","DUPONT_AIGNAN":"#6B7280","ZEMMOUR":"#0F172A","PECRESSE":"#3B82F6","JADOT":"#16A34A","ROUSSEL":"#9B1C1C","HIDALGO":"#DB2777"};
+const VOTE_PARTIES = [{"key":"score_LFI","label":"LFI","color":"#DC2626"},{"key":"score_MELENCHON","label":"MELE","color":"#DC2626"},{"key":"score_PCF","label":"PCF","color":"#9B1C1C"},{"key":"score_ROUSSEL","label":"ROUS","color":"#9B1C1C"},{"key":"score_EXG","label":"EXG","color":"#7F1D1D"},{"key":"score_EELV","label":"EELV","color":"#16A34A"},{"key":"score_JADOT","label":"JADO","color":"#16A34A"},{"key":"score_PS","label":"PS","color":"#EC4899"},{"key":"score_DVG","label":"DVG","color":"#F9A8D4"},{"key":"score_HAMON","label":"HAMO","color":"#EC4899"},{"key":"score_NFP","label":"NFP","color":"#B91C1C"},{"key":"score_NUPES","label":"NUPE","color":"#B91C1C"},{"key":"score_PS_PP","label":"PS_P","color":"#E86BA8"},{"key":"score_UG","label":"UG","color":"#C84B6E"},{"key":"score_ENS","label":"ENS","color":"#F97316"},{"key":"score_MODEM","label":"MODE","color":"#FB923C"},{"key":"score_HOR","label":"HOR","color":"#FDBA74"},{"key":"score_UDI","label":"UDI","color":"#93C5FD"},{"key":"score_MACRON","label":"MACR","color":"#F97316"},{"key":"score_LR","label":"LR","color":"#1D4ED8"},{"key":"score_DVD","label":"DVD","color":"#60A5FA"},{"key":"score_DVC","label":"DVC","color":"#A78BFA"},{"key":"score_FILLON","label":"FILL","color":"#1D4ED8"},{"key":"score_PECRESSE","label":"PECR","color":"#3B82F6"},{"key":"score_UXD","label":"UXD","color":"#7C3AED"},{"key":"score_RN","label":"RN","color":"#374151"},{"key":"score_LE_PEN","label":"LE_P","color":"#374151"},{"key":"score_REC","label":"RCQ","color":"#0F172A"},{"key":"score_EXD","label":"EXD","color":"#1F2937"},{"key":"score_DLF","label":"DLF","color":"#4B5563"},{"key":"score_ZEMMOUR","label":"ZEMM","color":"#0F172A"},{"key":"score_DUPONT_AIGNAN","label":"DUPO","color":"#6B7280"},{"key":"score_REG","label":"REG","color":"#89712F"},{"key":"score_HIDALGO","label":"HIDA","color":"#DB2777"},{"key":"score_AUTRE","label":"Autre","color":"#9CA3AF"}];
+const ALL_PARTIES_COLORS_JS = {"RN":"#374151","LFI":"#DC2626","PS":"#EC4899","ENS":"#F97316","EELV":"#16A34A","PCF":"#9B1C1C","LR":"#1D4ED8","REC":"#0F172A","AUTRE":"#9CA3AF","NFP":"#B91C1C","NUPES":"#B91C1C","PS_PP":"#E86BA8","UG":"#C84B6E","UXD":"#7C3AED","DVD":"#60A5FA","DVC":"#A78BFA","DLF":"#4B5563","EXD":"#1F2937","MODEM":"#FB923C","HOR":"#FDBA74","UDI":"#93C5FD","DVG":"#F9A8D4","EXG":"#7F1D1D","REG":"#89712F","MACRON":"#F97316","LE_PEN":"#374151","MELENCHON":"#DC2626","FILLON":"#1D4ED8","HAMON":"#EC4899","DUPONT_AIGNAN":"#6B7280","ZEMMOUR":"#0F172A","PECRESSE":"#3B82F6","JADOT":"#16A34A","ROUSSEL":"#9B1C1C","HIDALGO":"#DB2777"};
+const btns       = [{"key":"LFI","short":"LFI","label":"La France Insoumise","color":"#DC2626","count":0},{"key":"MELENCHON","short":"MELE","label":"MELENCHON","color":"#DC2626","count":0},{"key":"PCF","short":"PCF","label":"Parti Communiste","color":"#9B1C1C","count":0},{"key":"ROUSSEL","short":"ROUS","label":"ROUSSEL","color":"#9B1C1C","count":0},{"key":"EXG","short":"EXG","label":"EXG","color":"#7F1D1D","count":0},{"key":"EELV","short":"EELV","label":"Europe Écologie","color":"#16A34A","count":4},{"key":"JADOT","short":"JADO","label":"JADOT","color":"#16A34A","count":0},{"key":"PS","short":"PS","label":"Parti Socialiste","color":"#EC4899","count":0},{"key":"DVG","short":"DVG","label":"DVG","color":"#F9A8D4","count":1368},{"key":"HAMON","short":"HAMO","label":"HAMON","color":"#EC4899","count":0},{"key":"NFP","short":"NFP","label":"NFP","color":"#B91C1C","count":0},{"key":"NUPES","short":"NUPE","label":"NUPES","color":"#B91C1C","count":12716},{"key":"PS_PP","short":"PS_P","label":"PS_PP","color":"#E86BA8","count":0},{"key":"UG","short":"UG","label":"UG","color":"#C84B6E","count":0},{"key":"ENS","short":"ENS","label":"Ensemble / Renaissance","color":"#F97316","count":12285},{"key":"MODEM","short":"MODE","label":"MODEM","color":"#FB923C","count":0},{"key":"HOR","short":"HOR","label":"HOR","color":"#FDBA74","count":0},{"key":"UDI","short":"UDI","label":"UDI","color":"#93C5FD","count":195},{"key":"MACRON","short":"MACR","label":"MACRON","color":"#F97316","count":0},{"key":"LR","short":"LR","label":"Les Républicains","color":"#1D4ED8","count":5271},{"key":"DVD","short":"DVD","label":"DVD","color":"#60A5FA","count":1241},{"key":"DVC","short":"DVC","label":"DVC","color":"#A78BFA","count":130},{"key":"FILLON","short":"FILL","label":"FILLON","color":"#1D4ED8","count":0},{"key":"PECRESSE","short":"PECR","label":"PECRESSE","color":"#3B82F6","count":0},{"key":"UXD","short":"UXD","label":"UXD","color":"#7C3AED","count":0},{"key":"RN","short":"RN","label":"Rassemblement National","color":"#374151","count":12753},{"key":"LE_PEN","short":"LE_P","label":"LE_PEN","color":"#374151","count":0},{"key":"REC","short":"RCQ","label":"Reconquête","color":"#0F172A","count":23},{"key":"EXD","short":"EXD","label":"EXD","color":"#1F2937","count":0},{"key":"DLF","short":"DLF","label":"DLF","color":"#4B5563","count":0},{"key":"ZEMMOUR","short":"ZEMM","label":"ZEMMOUR","color":"#0F172A","count":0},{"key":"DUPONT_AIGNAN","short":"DUPO","label":"DUPONT_AIGNAN","color":"#6B7280","count":0},{"key":"REG","short":"REG","label":"REG","color":"#89712F","count":406},{"key":"HIDALGO","short":"HIDA","label":"HIDALGO","color":"#DB2777","count":0},{"key":"AUTRE","short":"Autre","label":"Autres partis","color":"#9CA3AF","count":140}];
+const ORDER = ["LFI","MELENCHON","PCF","ROUSSEL","EXG","EELV","JADOT","PS","DVG","HAMON","NFP","NUPES","PS_PP","UG","ENS","MODEM","HOR","UDI","MACRON","LR","DVD","DVC","FILLON","PECRESSE","UXD","RN","LE_PEN","REC","EXD","DLF","ZEMMOUR","DUPONT_AIGNAN","REG","HIDALGO","AUTRE"];
+
+// ── Données globales (chargées en async depuis data/) ─────────────────────
+let IRIS_X = null, IRIS_Y = null;
+let IRIS_INFO = null, IRIS_POPS = null, MARKER_SIZES = null, GROUP_INDICES = null;
+const elecCache = {};  // cache élections déjà fetché
+
+let currentXVar = 'score_exploitation';
+let currentYVar = 'score_domination';
+let currentXInvert = false;
+let currentPresetId = 'saint_graphique';
+let currentXRange = PRESETS[0].xRange.slice();
+let currentYRange = PRESETS[0].yRange.slice();
+let currentCorners = PRESETS[0].corners;
+
+let activeGroups;
+let currentElectionId;
+let currentElectionType, currentElectionYear, currentElectionTour;
+let currentClickedGlobalIdx = null;
+let currentGroupIndices = {};
+let elecByType = {};
+let baryMeans = {};
+let currentBarySizeMap = {};
+const typeLabels = {legi:'Législatives', euro:'Européennes', pres:'Présidentielles', muni:'Municipales'};
+
+const chartDiv = document.getElementById('chart');
+
+// ── Corner labels ─────────────────────────────────────────────────────────
+function setCorners(corners) {
+  const map = {};
+  corners.forEach(c => map[c.pos] = c);
+  const ids = {tl:'cornerTL', tr:'cornerTR', bl:'cornerBL', br:'cornerBR'};
+  for (const [pos, elId] of Object.entries(ids)) {
+    const el = document.getElementById(elId);
+    if (map[pos]) { el.innerHTML = map[pos].text; el.style.color = map[pos].color; }
+    else { el.innerHTML = ''; }
+  }
+}
+
+// ── Auto-range helper ─────────────────────────────────────────────────────
+function computeDataRange(varName, invert) {
+  if (!IRIS_X || !IRIS_Y) return [-1, 1];
+  const arr = IRIS_X[varName] || IRIS_Y[varName];
+  if (!arr) return [-1, 1];
+  let mn = Infinity, mx = -Infinity;
+  for (const v of arr) {
+    if (v === null || v === undefined || isNaN(v)) continue;
+    const val = invert ? -v : v;
+    if (val < mn) mn = val;
+    if (val > mx) mx = val;
+  }
+  if (mn === Infinity) return [-1, 1];
+  const pad = (mx - mn) * 0.08;
+  return [mn - pad, mx + pad];
+}
+
+// ── Description panel ─────────────────────────────────────────────────────
+const descDiv = document.getElementById('axisDesc');
+
+function updateDesc(preset, xVar, yVar) {
+  if (preset && preset.desc) {
+    const d = preset.desc;
+    const qs = preset.corners;
+    const qmap = {};
+    if (preset.desc.quadrants) {
+      for (const [pos, txt] of Object.entries(preset.desc.quadrants)) qmap[pos] = txt;
+    }
+    const qOrder = [{'pos':'tl','label':'↖'},{'pos':'tr','label':'↗'},{'pos':'bl','label':'↙'},{'pos':'br','label':'↘'}];
+    const qHtml = qOrder.filter(q => qmap[q.pos]).map(q => `
+      <div class="desc-q">
+        <div class="desc-q-label">${q.label} ${qs.find(c=>c.pos===q.pos)?.text?.replace('<br>',' ') || ''}</div>
+        ${qmap[q.pos]}
+      </div>`).join('');
+    descDiv.innerHTML = `
+      <div class="desc-title">${d.title}</div>
+      <div class="desc-ax">${d.x}</div>
+      <div class="desc-ax" style="margin-top:6px">${d.y}</div>
+      ${qHtml ? `<div class="desc-quadrants" style="margin-top:8px"><b style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:.4px">Quadrants</b><div class="desc-q-grid">${qHtml}</div></div>` : ''}`;
+  } else {
+    const xl = varLabels[xVar] || xVar;
+    const yl = varLabels[yVar] || yVar;
+    descDiv.innerHTML = `
+      <div class="desc-ax"><b>Axe X — ${xVar}</b><br>${xl}</div>
+      <div class="desc-ax" style="margin-top:6px"><b>Axe Y — ${yVar}</b><br>${yl}</div>`;
+  }
+}
+
+// ── Shared helpers (copied from desktop) ──────────────────────────────────
+function fmtPct(v) { return (v !== '' && v !== null && !isNaN(Number(v))) ? Number(v).toFixed(1) + '%' : '—'; }
+function fmtNum(v, suffix) { return (v !== '' && v !== null && !isNaN(Number(v))) ? Math.round(Number(v)).toLocaleString('fr-FR') + (suffix||'') : '—'; }
+
+// ── Info card ──────────────────────────────────────────────────────────────
+function showCard(irisGlobalIdx) {
+  const cd = IRIS_INFO[irisGlobalIdx];
+  if (!cd) return;
+  currentClickedGlobalIdx = irisGlobalIdx;
+  const card = document.getElementById('infoCard');
+
+  const xRaw = (IRIS_X[currentXVar] || [])[irisGlobalIdx];
+  const yRaw = (IRIS_Y[currentYVar] || [])[irisGlobalIdx];
+  const xDisp = xRaw !== undefined ? (currentXInvert ? -xRaw : xRaw) : undefined;
+
+  const elecData = elecCache[currentElectionId];
+  const elecScores = elecData ? elecData.scores[irisGlobalIdx] : null;
+  const currentMeta = ELECTIONS_META[currentElectionId];
+  const currentColor = elecData?.colors[irisGlobalIdx] || '#9CA3AF';
+  const currentParti = elecData?.partis[irisGlobalIdx] || '—';
+
+  const abstElec = elecData ? elecData.abst[irisGlobalIdx] : null;
+
+  let voteGridHtml = '';
+  if (elecScores && Object.keys(elecScores).length > 0) {
+    const allScores = Object.entries(elecScores).filter(([,v]) => v > 0).sort((a,b) => b[1]-a[1]);
+    const maxScore = allScores[0]?.[1] || 1;
+    voteGridHtml = allScores.map(([p, score]) => {
+      const color = ALL_PARTIES_COLORS_JS[p] || '#9CA3AF';
+      const barW = Math.round(score / maxScore * 100);
+      return `<div class="vote-cell">` +
+        `<span class="vote-parti" style="color:${color}">${p.replace('_',' ')}</span>` +
+        `<div class="vote-bar-bg"><div class="vote-bar-fill" style="width:${barW}%;background:${color}"></div></div>` +
+        `<span class="vote-score">${score.toFixed(1)}%</span>` +
+        `</div>`;
+    }).join('');
+  }
+
+  document.getElementById('cardName').textContent = cd[0] || 'IRIS inconnu';
+  const partyEl = document.getElementById('cardParty');
+  partyEl.textContent = ((currentParti || '').replace('_',' ')) + (cd[1] ? ' · ' + cd[1] : '');
+  partyEl.style.color = currentColor;
+  document.getElementById('cardPop').textContent = fmtNum(cd[2], ' hab.');
+  document.getElementById('cardAge').textContent = cd[18] !== '' && cd[18] != null ? Number(cd[18]).toFixed(1) + ' ans' : '—';
+  document.getElementById('cardRev').textContent = fmtNum(cd[3], ' €/UC');
+  document.getElementById('cardCSP').innerHTML =
+    `<div class="stat-row"><span class="stat-lbl">Cadres sup.</span><div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${Math.min(100,cd[4]||0)}%;background:#5B8DB8"></div></div><span class="stat-pct">${fmtPct(cd[4])}</span></div>` +
+    `<div class="stat-row"><span class="stat-lbl">Prof. interm.</span><div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${Math.min(100,cd[6]||0)}%;background:#82AAC8"></div></div><span class="stat-pct">${fmtPct(cd[6])}</span></div>` +
+    `<div class="stat-row"><span class="stat-lbl">Ouvriers</span><div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${Math.min(100,cd[5]||0)}%;background:#C97A5A"></div></div><span class="stat-pct">${fmtPct(cd[5])}</span></div>`;
+  document.getElementById('cardFormation').innerHTML =
+    `<div class="stat-row"><span class="stat-lbl">Bac+</span><div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${Math.min(100,cd[16]||0)}%;background:#7AAD8F"></div></div><span class="stat-pct">${fmtPct(cd[16])}</span></div>` +
+    `<div class="stat-row"><span class="stat-lbl">Sans diplôme</span><div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${Math.min(100,cd[17]||0)}%;background:#C9A45A"></div></div><span class="stat-pct">${fmtPct(cd[17])}</span></div>` +
+    `<div class="stat-row"><span class="stat-lbl">Chômage</span><div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${Math.min(100,cd[15]||0)}%;background:#C95A5A"></div></div><span class="stat-pct">${fmtPct(cd[15])}</span></div>`;
+  document.getElementById('cardHousing').innerHTML =
+    `<div class="stat-row"><span class="stat-lbl">Propriétaires</span><div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${Math.min(100,cd[13]||0)}%;background:#7AA7D0"></div></div><span class="stat-pct">${fmtPct(cd[13])}</span></div>` +
+    `<div class="stat-row"><span class="stat-lbl">HLM</span><div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${Math.min(100,cd[14]||0)}%;background:#E8975A"></div></div><span class="stat-pct">${fmtPct(cd[14])}</span></div>`;
+  document.getElementById('cardElecLabel').textContent = currentMeta ? currentMeta.label : currentElectionId;
+  const abstElecRow = document.getElementById('cardAbstElecRow');
+  if (abstElec != null) {
+    document.getElementById('cardAbstElec').textContent = fmtPct(abstElec);
+    abstElecRow.style.display = '';
+  } else {
+    abstElecRow.style.display = 'none';
+  }
+  document.getElementById('cardVotes').innerHTML = voteGridHtml || '<span style="color:#AAA;font-size:10px">Données non disponibles</span>';
+  document.getElementById('cardXVar').textContent = currentXVar;
+  document.getElementById('cardYVar').textContent = currentYVar;
+  document.getElementById('cardXVal').textContent = xDisp !== undefined ? Number(xDisp).toFixed(3) : '—';
+  document.getElementById('cardYVal').textContent = yRaw !== undefined ? Number(yRaw).toFixed(3) : '—';
+
+  card.classList.add('show');
+}
+
+document.getElementById('closeCard').addEventListener('click', () => {
+  document.getElementById('infoCard').classList.remove('show');
+  currentClickedGlobalIdx = null;
+});
+(function() {
+  const card = document.getElementById('infoCard');
+  let startY = 0;
+  card.addEventListener('touchstart', e => { startY = e.touches[0].clientY; }, {passive: true});
+  card.addEventListener('touchend', e => {
+    const dy = e.changedTouches[0].clientY - startY;
+    if (dy > 60) { card.classList.remove('show'); currentClickedGlobalIdx = null; }
+  }, {passive: true});
+})();
+
+function computeButtonPcts(electionId) {
+  const data = elecCache[electionId];
+  if (!data || !data.buttonPcts) return;
+  btns.forEach(b => { b.pct = data.buttonPcts[b.key] || 0; });
+}
+
+// ── Restyle all IRIS (trace 1) ────────────────────────────────────────────
+function restyleIRIS() {
+  if (!IRIS_X || !IRIS_Y) return;
+  const data = elecCache[currentElectionId];
+  if (!data) return;
+  const xArr = IRIS_X[currentXVar] || [];
+  const yArr = IRIS_Y[currentYVar] || [];
+  const n = xArr.length;
+  const knownKeys = new Set(btns.map(b => b.key));
+  const fx = [], fy = [], fc = [], fs = [], fcd = [];
+  for (let i = 0; i < n; i++) {
+    const parti = data.partis[i];
+    if (parti === null || parti === undefined) continue;
+    const effectiveKey = knownKeys.has(parti) ? parti : 'AUTRE';
+    if (!activeGroups.has(effectiveKey)) continue;
+    const xv = xArr[i], yv = yArr[i];
+    if (xv == null || yv == null) continue;
+    fx.push(currentXInvert ? -xv : xv);
+    fy.push(yv);
+    fc.push(data.colors[i] || '#9CA3AF');
+    fs.push(MARKER_SIZES[i] || 3);
+    fcd.push(i);
+  }
+  Plotly.restyle(chartDiv, {
+    x: [fx], y: [fy],
+    'marker.color': [fc],
+    'marker.size': [fs],
+    customdata: [fcd],
+  }, [1]);
+}
+
+// ── Restyle barycentres (trace 0) ─────────────────────────────────────────
+function computeAbstBary(electionId) {
+  const data = elecCache[electionId];
+  return (data && data.abstBary) ? data.abstBary : null;
+}
+
+function restyleBarycentres() {
+  const baryX = [], baryY = [], baryColors = [], baryTexts = [], barySzs = [];
+  const topG = Object.keys(currentGroupIndices)
+    .filter(g => {
+      if (g === 'AUTRE') return false;
+      const b = btns.find(b2 => b2.key === g);
+      return baryMeans[g] && b && b.pct > 1;
+    })
+    .sort((a, b2) => {
+      const pa = btns.find(x => x.key === a)?.pct || 0;
+      const pb = btns.find(x => x.key === b2)?.pct || 0;
+      return pb - pa;
+    });
+  topG.forEach(g => {
+    const xm = baryMeans[g][currentXVar] !== undefined ? baryMeans[g][currentXVar] : 0;
+    const ym = baryMeans[g][currentYVar] !== undefined ? baryMeans[g][currentYVar] : 0;
+    baryX.push(currentXInvert ? -xm : xm);
+    baryY.push(ym);
+    baryColors.push(ALL_PARTIES_COLORS_JS[g] || COULEURS_JS[g] || '#999');
+    baryTexts.push(btns.find(b2 => b2.key === g)?.short || g);
+    barySzs.push(currentBarySizeMap[g] || 22);
+  });
+  const abstBary = computeAbstBary(currentElectionId);
+  if (abstBary) {
+    const xm = abstBary[currentXVar], ym = abstBary[currentYVar];
+    if (xm !== null && ym !== null) {
+      baryX.push(currentXInvert ? -xm : xm); baryY.push(ym);
+      baryColors.push('#9CA3AF'); baryTexts.push('Abst.');
+      barySzs.push(currentBarySizeMap['__ABST__'] || 18);
+    }
+  }
+  Plotly.restyle(chartDiv, {
+    x: [baryX], y: [baryY],
+    'marker.color': [baryColors],
+    'marker.line.color': [baryColors],
+    'textfont.color': [baryColors],
+    text: [baryTexts],
+    'marker.size': [barySzs],
+  }, [0]);
+}
+
+// ── Abstention stats panel (compact mobile) ────────────────────────────────
+function updateAbstPanel(electionId) {
+  const panel = document.getElementById('abst-stats-panel');
+  if (!panel) return;
+  const data = elecCache[electionId];
+  if (!data || !data.abst) { panel.style.display = 'none'; return; }
+  const hasInscrits = data.inscrits && data.inscrits.some(v => v != null);
+  const hasExprimes = data.exprimes && data.exprimes.some(v => v != null);
+  const hasBlancs = data.blancs && data.blancs.some(v => v != null);
+  const hasNuls = data.nuls && data.nuls.some(v => v != null);
+  let totalInscrits = 0, totalAbst = 0, totalExprimes = 0, totalBlancs = 0, totalNuls = 0;
+  for (let i = 0; i < data.abst.length; i++) {
+    const abst = data.abst[i];
+    if (abst == null || isNaN(abst)) continue;
+    const ins = hasInscrits ? (data.inscrits[i] || 0) : (IRIS_POPS[i] || 0);
+    totalInscrits += ins;
+    totalAbst += ins * abst / 100;
+    if (hasExprimes) totalExprimes += data.exprimes[i] || 0;
+    if (hasBlancs) totalBlancs += data.blancs[i] || 0;
+    if (hasNuls) totalNuls += data.nuls[i] || 0;
+  }
+  const pctAbst = totalInscrits > 0 ? totalAbst / totalInscrits * 100 : null;
+  const pctBlancs = totalInscrits > 0 && hasBlancs ? totalBlancs / totalInscrits * 100 : null;
+  const pctNuls = totalInscrits > 0 && hasNuls ? totalNuls / totalInscrits * 100 : null;
+  const partyTotals = {};
+  for (let i = 0; i < data.scores.length; i++) {
+    const sc = data.scores[i];
+    if (!sc || typeof sc !== 'object') continue;
+    const exp = hasExprimes ? (data.exprimes[i] || 0) : (IRIS_POPS[i] || 0);
+    Object.entries(sc).forEach(([g, s]) => { if (s > 0) partyTotals[g] = (partyTotals[g] || 0) + exp * s / 100; });
+  }
+  const top6 = Object.entries(partyTotals).sort((a, b) => b[1] - a[1]).slice(0, 6);
+  const fmtP = p => p != null ? p.toFixed(1) + '%' : '–';
+  let line1 = `<b>Abst. ${fmtP(pctAbst)}</b>`;
+  if (pctBlancs != null) line1 += ` · <span style="color:#AAA">Blancs ${fmtP(pctBlancs)}</span>`;
+  if (pctNuls != null) line1 += ` · <span style="color:#CCC">Nuls ${fmtP(pctNuls)}</span>`;
+  let line2 = top6.map(([g, v]) => {
+    const pct = totalExprimes > 0 ? v / totalExprimes * 100 : 0;
+    const color = ALL_PARTIES_COLORS_JS[g] || '#999';
+    return `<span style="color:${color};font-weight:600">${g}</span>&nbsp;${fmtP(pct)}`;
+  }).join(' · ');
+  panel.innerHTML = line1 + (line2 ? '<br>' + line2 : '');
+  panel.style.display = 'block';
+}
+
+// ── Election switching ────────────────────────────────────────────────────
+function getElectionId(type, year, tour) {
+  const years = elecByType[type];
+  if (!years || !years[year]) return null;
+  const found = years[year].find(e => e.tour === tour);
+  return found ? found.id : null;
+}
+
+const filtersDiv = document.getElementById('filters');
+const toggleAllBtn = document.getElementById('toggleAll');
+let allOn = true;
+
+function updateToggleLabel() {
+  const enabledBtns = btns.filter(b => b.count > 0);
+  allOn = enabledBtns.every(b => activeGroups.has(b.key));
+  toggleAllBtn.textContent = allOn ? 'Tout décocher' : 'Tout cocher';
+}
+
+function setGroupVisible(b, visible) {
+  const el = filtersDiv.querySelector('[data-key="' + b.key + '"]');
+  const xr = chartDiv.layout.xaxis.range.slice();
+  const yr = chartDiv.layout.yaxis.range.slice();
+  if (visible) {
+    activeGroups.add(b.key);
+    if (el) { el.classList.replace('off','on'); el.style.backgroundColor = b.color; el.style.color = '#fff'; }
+  } else {
+    activeGroups.delete(b.key);
+    if (el) { el.classList.replace('on','off'); el.style.backgroundColor = 'transparent'; el.style.color = b.color; }
+  }
+  restyleIRIS();
+  Plotly.relayout(chartDiv, {'xaxis.range': xr, 'yaxis.range': yr});
+}
+
+function rebuildFilterButtons() {
+  filtersDiv.innerHTML = '';
+  const activeBtns = btns.filter(b => b.count > 0).sort((a, b2) => (b2.pct || 0) - (a.pct || 0));
+  activeBtns.forEach(b => {
+    const el = document.createElement('button');
+    const isOn = activeGroups.has(b.key);
+    el.className = 'fbtn ' + (isOn ? 'on' : 'off');
+    el.dataset.key = b.key;
+    el.style.borderColor = b.color;
+    el.style.backgroundColor = isOn ? b.color : 'transparent';
+    el.style.color = isOn ? '#fff' : b.color;
+    el.innerHTML = b.short + ' <span style="font-size:7px;font-weight:400;opacity:0.7">' + (b.pct || 0).toFixed(1) + '%</span>';
+    el.addEventListener('click', (e) => { e.preventDefault(); setGroupVisible(b, !activeGroups.has(b.key)); updateToggleLabel(); });
+    filtersDiv.appendChild(el);
+  });
+}
+
+async function applyElection(electionId) {
+  if (!elecCache[electionId]) {
+    const spinner = document.getElementById('elecSpinner');
+    if (spinner) spinner.style.display = 'inline';
+    try {
+      const r = await fetch('data/elec_' + electionId + '.json');
+      elecCache[electionId] = await r.json();
+    } finally {
+      if (spinner) spinner.style.display = 'none';
+    }
+  }
+  const data = elecCache[electionId];
+  if (!data) return;
+  currentElectionId = electionId;
+  computeButtonPcts(electionId);
+
+  const newGroups = {};
+  ORDER.forEach(g => newGroups[g] = []);
+  data.partis.forEach((parti, i) => {
+    if (parti === null || parti === undefined) return;
+    if (newGroups[parti] !== undefined) { newGroups[parti].push(i); }
+    else if (newGroups['AUTRE'] !== undefined) { newGroups['AUTRE'].push(i); }
+  });
+  const oldEnabledBtns = btns.filter(b => (currentGroupIndices[b.key] || []).length > 0);
+  const wasAllOn = oldEnabledBtns.length > 0 && oldEnabledBtns.every(b => activeGroups.has(b.key));
+  const wasAllOff = oldEnabledBtns.every(b => !activeGroups.has(b.key));
+  currentGroupIndices = newGroups;
+
+  const enabledBtns = btns.filter(b => (newGroups[b.key] || []).length > 0);
+  const enabledKeys = new Set(enabledBtns.map(b => b.key));
+  btns.forEach(b => { b.count = (newGroups[b.key] || []).length; });
+
+  if (wasAllOn) {
+    activeGroups = new Set(enabledKeys);
+  } else if (wasAllOff) {
+    activeGroups = new Set();
+  } else {
+    const intersection = new Set([...activeGroups].filter(k => enabledKeys.has(k)));
+    const intersectionReal = new Set([...intersection].filter(k => k !== 'AUTRE'));
+    activeGroups = intersectionReal.size > 0 ? intersection : new Set(enabledKeys);
+  }
+
+  const xr = (chartDiv.layout && chartDiv.layout.xaxis) ? chartDiv.layout.xaxis.range.slice() : currentXRange.slice();
+  const yr = (chartDiv.layout && chartDiv.layout.yaxis) ? chartDiv.layout.yaxis.range.slice() : currentYRange.slice();
+  restyleIRIS();
+  rebuildFilterButtons();
+  Plotly.relayout(chartDiv, { 'xaxis.range': xr, 'yaxis.range': yr });
+
+  baryMeans = (data.baryMeans) ? data.baryMeans : {};
+  currentBarySizeMap = (data.barySizes) ? data.barySizes : {};
+  restyleBarycentres();
+
+  updateAbstPanel(electionId);
+
+  const meta = ELECTIONS_META[electionId];
+  document.getElementById('electionCurrentLabel').textContent = meta ? meta.label : electionId;
+  updateToggleLabel();
+
+  if (currentClickedGlobalIdx !== null) {
+    const partisData = elecCache[currentElectionId];
+    if (partisData && partisData.partis[currentClickedGlobalIdx] !== null) {
+      showCard(currentClickedGlobalIdx);
+    } else {
+      document.getElementById('infoCard').classList.remove('show');
+      currentClickedGlobalIdx = null;
+    }
+  }
+}
+
+function updateYearBtns(type) {
+  const elecYearBtns = document.getElementById('elecYearBtns');
+  elecYearBtns.innerHTML = '';
+  const years = elecByType[type] ? Object.keys(elecByType[type]).sort() : [];
+  years.forEach(year => {
+    const btn = document.createElement('button');
+    btn.className = 'elec-year-btn' + (parseInt(year) === currentElectionYear && type === currentElectionType ? ' active' : '');
+    btn.textContent = year;
+    btn.dataset.year = year;
+    btn.addEventListener('click', () => {
+      currentElectionYear = parseInt(year);
+      elecYearBtns.querySelectorAll('.elec-year-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      updateTourBtns(type, parseInt(year));
+      const eid = getElectionId(type, parseInt(year), currentElectionTour)
+             || getElectionId(type, parseInt(year), 1);
+      if (eid) { currentElectionTour = ELECTIONS_META[eid].tour; applyElection(eid); }
+    });
+    elecYearBtns.appendChild(btn);
+  });
+}
+
+function updateTourBtns(type, year) {
+  const tourBtn1 = document.getElementById('tourBtn1');
+  const tourBtn2 = document.getElementById('tourBtn2');
+  const years = elecByType[type];
+  const available = years && years[year] ? years[year].map(e => e.tour) : [];
+  tourBtn1.disabled = !available.includes(1);
+  tourBtn2.disabled = !available.includes(2);
+  tourBtn1.classList.toggle('active', currentElectionTour === 1 && available.includes(1));
+  tourBtn2.classList.toggle('active', currentElectionTour === 2 && available.includes(2));
+}
+
+// ── Apply axes ────────────────────────────────────────────────────────────
+function applyAxes(xVar, xInvert, yVar, preset) {
+  currentXVar = xVar;
+  currentYVar = yVar;
+  currentXInvert = xInvert;
+  if (preset) {
+    currentXRange = preset.xRange ? preset.xRange.slice() : computeDataRange(xVar, xInvert);
+    currentYRange = preset.yRange ? preset.yRange.slice() : computeDataRange(yVar, false);
+    currentCorners = preset.corners;
+  } else {
+    currentXRange = computeDataRange(xVar, xInvert);
+    currentYRange = computeDataRange(yVar, false);
+  }
+
+  activeGroups = new Set(btns.filter(b => b.count > 0).map(b => b.key));
+  rebuildFilterButtons();
+  updateToggleLabel();
+  restyleIRIS();
+  restyleBarycentres();
+
+  const xTitle = preset ? preset.xTitle : (varLabels[xVar] || xVar) + (xInvert ? ' (inversé)' : '');
+  const yTitle = preset ? preset.yTitle : (varLabels[yVar] || yVar);
+  Plotly.relayout(chartDiv, {
+    'xaxis.title.text': xTitle,
+    'yaxis.title.text': yTitle,
+    'xaxis.range': currentXRange.slice(),
+    'yaxis.range': currentYRange.slice(),
+  });
+
+  setCorners(preset ? preset.corners : []);
+  updateDesc(preset, xVar, yVar);
+  document.getElementById('xInvertChk').checked = xInvert;
+}
+
+// ── Touch pan + pinch-zoom + tap ──────────────────────────────────────────
+let gesture = null;
+let touch1  = null;
+let pinch   = null;
+let rafId   = null;
+
+function getRange() {
+  return {
+    x: chartDiv._fullLayout.xaxis.range.slice(),
+    y: chartDiv._fullLayout.yaxis.range.slice(),
+  };
+}
+
+function findNearest(cx, cy) {
+  const ax = chartDiv._fullLayout.xaxis;
+  const ay = chartDiv._fullLayout.yaxis;
+  let best = null, bestD = Infinity;
+  for (let ti = 1; ti < chartDiv.data.length; ti++) {
+    const tr = chartDiv.data[ti];
+    if (tr.visible === false || !tr.customdata) continue;
+    for (let pi = 0; pi < tr.x.length; pi++) {
+      const sx = ax.d2p(tr.x[pi]) + ax._offset;
+      const sy = ay.d2p(tr.y[pi]) + ay._offset;
+      const d = Math.hypot(cx - sx, cy - sy);
+      if (d < bestD && d < 30) { bestD = d; best = {ti, pi}; }
+    }
+  }
+  return best;
+}
+
+function doRelayout(xr, yr) {
+  if (rafId) cancelAnimationFrame(rafId);
+  rafId = requestAnimationFrame(() => {
+    Plotly.relayout(chartDiv, {'xaxis.range': xr, 'yaxis.range': yr});
+    rafId = null;
+  });
+}
+
+chartDiv.addEventListener('touchstart', function(e) {
+  e.stopPropagation();
+  if (e.touches.length >= 2) {
+    gesture = 'pinch';
+    const t1 = e.touches[0], t2 = e.touches[1];
+    const rect = chartDiv.getBoundingClientRect();
+    pinch = {
+      dist: Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY),
+      midPxX: (t1.clientX + t2.clientX) / 2 - rect.left,
+      midPxY: (t1.clientY + t2.clientY) / 2 - rect.top,
+      startRanges: getRange(),
+    };
+    touch1 = null;
+  } else if (e.touches.length === 1) {
+    gesture = null;
+    const t = e.touches[0];
+    const rect = chartDiv.getBoundingClientRect();
+    touch1 = {
+      clientX: t.clientX, clientY: t.clientY,
+      time: Date.now(),
+      startPxX: t.clientX - rect.left,
+      startPxY: t.clientY - rect.top,
+      startRanges: getRange(),
+      moved: false,
+    };
+  }
+}, { passive: false, capture: true });
+
+chartDiv.addEventListener('touchmove', function(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  if (e.touches.length >= 2 && pinch) {
+    gesture = 'pinch';
+    const t1 = e.touches[0], t2 = e.touches[1];
+    const rect = chartDiv.getBoundingClientRect();
+    const newDist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+    const newMidPxX = (t1.clientX + t2.clientX) / 2 - rect.left;
+    const newMidPxY = (t1.clientY + t2.clientY) / 2 - rect.top;
+    const scale = pinch.dist / newDist;
+    const sr = pinch.startRanges;
+    const ax = chartDiv._fullLayout.xaxis;
+    const ay = chartDiv._fullLayout.yaxis;
+    const xSpan0 = sr.x[1] - sr.x[0];
+    const ySpan0 = sr.y[1] - sr.y[0];
+    const plotW = ax._length;
+    const plotH = ay._length;
+    const anchorX = sr.x[0] + (pinch.midPxX - ax._offset) / plotW * xSpan0;
+    const anchorY = sr.y[1] - (pinch.midPxY - ay._offset) / plotH * ySpan0;
+    let x0 = anchorX + (sr.x[0] - anchorX) * scale;
+    let x1 = anchorX + (sr.x[1] - anchorX) * scale;
+    let y0 = anchorY + (sr.y[0] - anchorY) * scale;
+    let y1 = anchorY + (sr.y[1] - anchorY) * scale;
+    const newXSpan = x1 - x0;
+    const newYSpan = y1 - y0;
+    const panDx = (newMidPxX - pinch.midPxX) / plotW * newXSpan;
+    const panDy = (newMidPxY - pinch.midPxY) / plotH * newYSpan;
+    doRelayout([x0 - panDx, x1 - panDx], [y0 + panDy, y1 + panDy]);
+  } else if (e.touches.length === 1 && touch1 && gesture !== 'pinch') {
+    gesture = 'pan';
+    touch1.moved = true;
+    const t = e.touches[0];
+    const rect = chartDiv.getBoundingClientRect();
+    const curPxX = t.clientX - rect.left;
+    const curPxY = t.clientY - rect.top;
+    const sr = touch1.startRanges;
+    const ax = chartDiv._fullLayout.xaxis;
+    const ay = chartDiv._fullLayout.yaxis;
+    const xSpan = sr.x[1] - sr.x[0];
+    const ySpan = sr.y[1] - sr.y[0];
+    const plotW = ax._length;
+    const plotH = ay._length;
+    const dx = (curPxX - touch1.startPxX) / plotW * xSpan;
+    const dy = (curPxY - touch1.startPxY) / plotH * ySpan;
+    doRelayout([sr.x[0] - dx, sr.x[1] - dx], [sr.y[0] + dy, sr.y[1] + dy]);
+  }
+}, { passive: false, capture: true });
+
+chartDiv.addEventListener('touchend', function(e) {
+  e.stopPropagation();
+  if (gesture === 'pinch' && e.touches.length < 2) {
+    gesture = null;
+    pinch = null;
+    if (e.touches.length === 1) {
+      const t = e.touches[0];
+      const rect = chartDiv.getBoundingClientRect();
+      touch1 = {
+        clientX: t.clientX, clientY: t.clientY,
+        time: Date.now(),
+        startPxX: t.clientX - rect.left,
+        startPxY: t.clientY - rect.top,
+        startRanges: getRange(),
+        moved: false,
+      };
+    } else {
+      touch1 = null;
+    }
+    return;
+  }
+  if (e.touches.length === 0 && touch1 && !touch1.moved) {
+    const t = e.changedTouches[0];
+    const dx = Math.abs(t.clientX - touch1.clientX);
+    const dy = Math.abs(t.clientY - touch1.clientY);
+    const dt = Date.now() - touch1.time;
+    if (dx <= 12 && dy <= 12 && dt <= 300) {
+      const rect = chartDiv.getBoundingClientRect();
+      const hit = findNearest(t.clientX - rect.left, t.clientY - rect.top);
+      if (hit) {
+        const globalIdx = chartDiv.data[hit.ti].customdata[hit.pi];
+        if (globalIdx !== undefined && globalIdx !== null) showCard(globalIdx);
+      } else {
+        card.classList.remove('show');
+      }
+    }
+  }
+  if (e.touches.length === 0) {
+    gesture = null; touch1 = null; pinch = null;
+  }
+}, { passive: false, capture: true });
+
+chartDiv.addEventListener('touchcancel', function() {
+  gesture = null; touch1 = null; pinch = null;
+}, { passive: true });
+
+// ── Axis controls ─────────────────────────────────────────────────────────
+const presetBtnsDiv = document.getElementById('presetBtns');
+PRESETS.forEach(p => {
+  if (p.id === 'tsne' && !IRIS_X['tsne_x']) return;
+  if (p.id === 'umap' && !IRIS_X['umap_x']) return;
+  const btn = document.createElement('button');
+  btn.className = 'preset-btn' + (p.id === 'saint_graphique' ? ' active' : '');
+  btn.dataset.id = p.id;
+  btn.textContent = p.emoji + ' ' + p.label;
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentPresetId = p.id;
+    document.getElementById('xSelect').value = p.xVar;
+    document.getElementById('ySelect').value = p.yVar;
+    document.getElementById('xInvertChk').checked = p.xInvert;
+    applyAxes(p.xVar, p.xInvert, p.yVar, p);
+  });
+  presetBtnsDiv.appendChild(btn);
+});
+
+const customToggle = document.getElementById('customToggle');
+const customPanel = document.getElementById('customPanel');
+customToggle.addEventListener('click', () => {
+  const open = customPanel.classList.toggle('open');
+  customToggle.classList.toggle('open', open);
+  customToggle.textContent = open ? 'Personnaliser ▴' : 'Personnaliser ▾';
+});
+
+function buildSelect(selectId, selectedVar) {
+  const sel = document.getElementById(selectId);
+  sel.innerHTML = '';
+  for (const [cat, vars] of Object.entries(VARS)) {
+    const availVars = vars.filter(v => IRIS_X[v] !== undefined);
+    if (!availVars.length) continue;
+    const og = document.createElement('optgroup');
+    og.label = cat;
+    availVars.forEach(v => {
+      const opt = document.createElement('option');
+      opt.value = v;
+      opt.textContent = v + (varLabels[v] ? ' — ' + varLabels[v].substring(0, 50) : '');
+      if (v === selectedVar) opt.selected = true;
+      og.appendChild(opt);
+    });
+    sel.appendChild(og);
+  }
+}
+
+function onCustomChange() {
+  const xVar = document.getElementById('xSelect').value;
+  const yVar = document.getElementById('ySelect').value;
+  const xInvert = document.getElementById('xInvertChk').checked;
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  currentPresetId = null;
+  const matchPreset = PRESETS.find(p => p.xVar === xVar && p.yVar === yVar && p.xInvert === xInvert);
+  if (matchPreset) {
+    document.querySelectorAll('.preset-btn').forEach(b => {
+      if (b.dataset.id === matchPreset.id) b.classList.add('active');
+    });
+  }
+  applyAxes(xVar, xInvert, yVar, matchPreset || null);
+}
+
+document.getElementById('xSelect').addEventListener('change', onCustomChange);
+document.getElementById('ySelect').addEventListener('change', onCustomChange);
+document.getElementById('xInvertChk').addEventListener('change', onCustomChange);
+
+toggleAllBtn.addEventListener('click', () => {
+  const enabledBtns = btns.filter(b => b.count > 0);
+  const xr = chartDiv.layout ? chartDiv.layout.xaxis.range.slice() : currentXRange.slice();
+  const yr = chartDiv.layout ? chartDiv.layout.yaxis.range.slice() : currentYRange.slice();
+  if (allOn) {
+    enabledBtns.forEach(b => {
+      activeGroups.delete(b.key);
+      const el = filtersDiv.querySelector('[data-key="' + b.key + '"]');
+      if (el) { el.classList.replace('on','off'); el.style.backgroundColor = 'transparent'; el.style.color = b.color; }
+    });
+  } else {
+    enabledBtns.forEach(b => {
+      activeGroups.add(b.key);
+      const el = filtersDiv.querySelector('[data-key="' + b.key + '"]');
+      if (el) { el.classList.replace('off','on'); el.style.backgroundColor = b.color; el.style.color = '#fff'; }
+    });
+  }
+  restyleIRIS();
+  restyleBarycentres();
+  Plotly.relayout(chartDiv, {'xaxis.range': xr, 'yaxis.range': yr});
+  updateToggleLabel();
+});
+
+// ── Helpers overlay de chargement ─────────────────────────────────────────
+function setLoadingProgress(pct, msg, detail) {
+  const bar = document.getElementById('loadingBar');
+  const msgEl = document.getElementById('loadingMsg');
+  const detailEl = document.getElementById('loadingDetail');
+  if (bar) bar.style.width = pct + '%';
+  if (msg && msgEl) msgEl.textContent = msg;
+  if (detailEl) detailEl.textContent = detail || '';
+}
+function hideLoadingOverlay() {
+  const ov = document.getElementById('loadingOverlay');
+  if (ov) { ov.style.opacity = '0'; ov.style.transition = 'opacity 0.4s'; setTimeout(() => ov.remove(), 400); }
+}
+
+// ── Init state et UI synchrone (métadonnées inline disponibles immédiatement) ──
+currentElectionId = DEFAULT_ELECTION_ID;
+currentElectionType = ELECTIONS_META[DEFAULT_ELECTION_ID]?.type || 'euro';
+currentElectionYear = ELECTIONS_META[DEFAULT_ELECTION_ID]?.year || 2024;
+currentElectionTour = ELECTIONS_META[DEFAULT_ELECTION_ID]?.tour || 1;
+currentGroupIndices = {};  // rempli après chargement de static.json
+activeGroups = new Set(btns.map(b => b.key));
+
+elecByType = {};
+for (const [eid, meta] of Object.entries(ELECTIONS_META)) {
+  if (!elecByType[meta.type]) elecByType[meta.type] = {};
+  if (!elecByType[meta.type][meta.year]) elecByType[meta.type][meta.year] = [];
+  elecByType[meta.type][meta.year].push({id: eid, tour: meta.tour});
+}
+
+const elecTypeBtns = document.getElementById('elecTypeBtns');
+for (const [type, label] of Object.entries(typeLabels)) {
+  if (!elecByType[type]) continue;
+  const btn = document.createElement('button');
+  btn.className = 'elec-type-btn' + (type === currentElectionType ? ' active' : '');
+  btn.textContent = label;
+  btn.dataset.type = type;
+  btn.addEventListener('click', () => {
+    currentElectionType = type;
+    elecTypeBtns.querySelectorAll('.elec-type-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const years = Object.keys(elecByType[type] || {}).sort();
+    currentElectionYear = parseInt(years[years.length - 1]) || 2024;
+    currentElectionTour = 1;
+    updateYearBtns(type);
+    updateTourBtns(type, currentElectionYear);
+    const eid = getElectionId(type, currentElectionYear, 1)
+           || getElectionId(type, currentElectionYear, 2);
+    if (eid) applyElection(eid);
+  });
+  elecTypeBtns.appendChild(btn);
+}
+
+updateYearBtns(currentElectionType);
+updateTourBtns(currentElectionType, currentElectionYear);
+document.getElementById('electionCurrentLabel').textContent = ELECTIONS_META[DEFAULT_ELECTION_ID]?.label || DEFAULT_ELECTION_ID;
+
+document.getElementById('tourBtn1').addEventListener('click', () => {
+  if (document.getElementById('tourBtn1').disabled) return;
+  currentElectionTour = 1;
+  updateTourBtns(currentElectionType, currentElectionYear);
+  const eid = getElectionId(currentElectionType, currentElectionYear, 1);
+  if (eid) applyElection(eid);
+});
+document.getElementById('tourBtn2').addEventListener('click', () => {
+  if (document.getElementById('tourBtn2').disabled) return;
+  currentElectionTour = 2;
+  updateTourBtns(currentElectionType, currentElectionYear);
+  const eid = getElectionId(currentElectionType, currentElectionYear, 2);
+  if (eid) applyElection(eid);
+});
+
+// Dropdowns axes désactivés jusqu'au chargement de IRIS_X/IRIS_Y
+document.getElementById('xSelect').disabled = true;
+document.getElementById('ySelect').disabled = true;
+
+rebuildFilterButtons();
+updateToggleLabel();
+
+const resetBtn = document.getElementById('resetBtn');
+function checkZoomed() {
+  const xr = chartDiv.layout.xaxis.range;
+  const yr = chartDiv.layout.yaxis.range;
+  const zoomed = Math.abs(xr[0]-currentXRange[0])>0.05 || Math.abs(xr[1]-currentXRange[1])>0.05 ||
+                 Math.abs(yr[0]-currentYRange[0])>0.05 || Math.abs(yr[1]-currentYRange[1])>0.05;
+  resetBtn.classList.toggle('show', zoomed);
+}
+resetBtn.addEventListener('click', () => {
+  Plotly.relayout(chartDiv, {'xaxis.range': currentXRange.slice(), 'yaxis.range': currentYRange.slice()});
+});
+
+// ── Initialisation async ──────────────────────────────────────────────────
+(async function init() {
+  setLoadingProgress(5, 'Initialisation du graphique…');
+  await Plotly.newPlot(chartDiv, figData.data, figData.layout, {
+    responsive: true, displayModeBar: false, scrollZoom: false,
+    doubleClick: false, staticPlot: false,
+  });
+  chartDiv.on('plotly_relayout', checkZoomed);
+
+  setLoadingProgress(10, 'Chargement des données…', 'static.json + élection par défaut');
+
+  const [staticData, defaultElecData] = await Promise.all([
+    fetch('data/static.json').then(r => r.json()),
+    fetch('data/elec_' + DEFAULT_ELECTION_ID + '.json').then(r => r.json()),
+  ]);
+
+  IRIS_INFO = staticData.IRIS_INFO;
+  IRIS_POPS = staticData.IRIS_POPS;
+  MARKER_SIZES = staticData.MARKER_SIZES;
+  GROUP_INDICES = staticData.GROUP_INDICES;
+  elecCache[DEFAULT_ELECTION_ID] = defaultElecData;
+  currentGroupIndices = Object.assign({}, GROUP_INDICES);
+
+  setLoadingProgress(40, 'Données électorales chargées — chargement des axes…', 'iris_x_mobile.json + iris_y_mobile.json');
+
+  await applyElection(DEFAULT_ELECTION_ID);
+  setCorners(PRESETS[0].corners);
+  updateDesc(PRESETS[0], PRESETS[0].xVar, PRESETS[0].yVar);
+
+  const [xData, yData] = await Promise.all([
+    fetch('data/iris_x_mobile.json').then(r => r.json()),
+    fetch('data/iris_y_mobile.json').then(r => r.json()),
+  ]);
+
+  IRIS_X = xData;
+  IRIS_Y = yData;
+
+  buildSelect('xSelect', PRESETS[0].xVar);
+  buildSelect('ySelect', PRESETS[0].yVar);
+  document.getElementById('xSelect').disabled = false;
+  document.getElementById('ySelect').disabled = false;
+  document.getElementById('xInvertChk').checked = PRESETS[0].xInvert || false;
+
+  setLoadingProgress(90, 'Finalisation…');
+  applyAxes(PRESETS[0].xVar, PRESETS[0].xInvert, PRESETS[0].yVar, PRESETS[0]);
+
+  setLoadingProgress(100);
+  hideLoadingOverlay();
+})();
+
+</script>
+</body>
+</html>
