@@ -98,10 +98,14 @@ NUANCE_TO_PARTI_BASE = {
     'COM':  'PCF', 'LCOM': 'PCF', 'FG':   'PCF', 'LFG':  'PCF',
     # ── Régionalistes ────────────────────────────────────────────────────────
     'REG':  'REG', 'LREG': 'REG',
+    # ── Union Divers Droite (maires sortants centre-droit, listes d'union locale) ─
+    'LUD':  'DVD',
+    # ── Union Citoyens / Union Centre (listes d'union centriste locale) ──────────
+    'LUC':  'DVC',
     # ── Divers / DSV / DXD / DXG ─────────────────────────────────────────────
     'DIV':  'AUTRE', 'LDIV': 'AUTRE', 'DSV':  'AUTRE',
     'DXD':  'AUTRE', 'DXG':  'AUTRE',
-    'LUD':  'AUTRE', 'LNC':  'AUTRE', 'LUC':  'AUTRE', 'LGJ':  'AUTRE',
+    'LNC':  'AUTRE', 'LGJ':  'AUTRE',
     'NC':   'AUTRE',
 }
 

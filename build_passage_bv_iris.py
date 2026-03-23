@@ -80,16 +80,40 @@ if len(unmatched) > 0:
 else:
     result = matched
 
-# --- 6. Deduplication et sauvegarde ---
+# --- 6. Deduplication BV ---
 result = result.drop_duplicates(subset='ID_BUREAU_VOTE')
 result = result[result['CODE_IRIS'].notna()].reset_index(drop=True)
 result['CODE_IRIS'] = result['CODE_IRIS'].astype(str).str.zfill(9)
 
-print(f"\nTotal BV avec IRIS: {len(result)}")
+# --- 7. Passe inverse : IRIS sans BV -> BV le plus proche ---
+# Pour chaque IRIS du contour qui n'a encore aucun BV, on lui assigne le BV le plus proche.
+# Le meme BV peut etre "donne" a plusieurs IRIS.
+iris_couverts = set(result['CODE_IRIS'])
+iris_sans_bv = gdf_iris[~gdf_iris['CODE_IRIS'].isin(iris_couverts)][['CODE_IRIS', 'geometry']].copy()
+print(f"\nIRIS sans BV apres sjoin: {len(iris_sans_bv)}")
+
+if len(iris_sans_bv) > 0:
+    # Centroide de chaque IRIS non couvert
+    iris_sans_bv = iris_sans_bv.copy()
+    iris_sans_bv['geometry'] = iris_sans_bv.geometry.centroid
+    # BV avec leur point representatif (deja calcule)
+    bv_pts = gdf_pts[['ID_BUREAU_VOTE', 'geometry']].copy()
+    bv_pts = bv_pts.to_crs(iris_sans_bv.crs) if bv_pts.crs != iris_sans_bv.crs else bv_pts
+    # Nearest BV pour chaque IRIS sans couverture
+    iris_fallback = gpd.sjoin_nearest(
+        iris_sans_bv[['CODE_IRIS', 'geometry']],
+        bv_pts[['ID_BUREAU_VOTE', 'geometry']],
+        how='left'
+    )[['CODE_IRIS', 'ID_BUREAU_VOTE']].copy()
+    iris_fallback = iris_fallback.dropna(subset=['ID_BUREAU_VOTE'])
+    print(f"  IRIS recuperes par nearest BV: {len(iris_fallback)}")
+    result = pd.concat([result, iris_fallback], ignore_index=True)
+
+print(f"\nTotal lignes BV->IRIS: {len(result)}")
 result.to_csv(OUT_FILE, index=False)
 print(f"Sauvegarde -> {OUT_FILE}")
 
-# --- 7. Verification ---
+# --- 8. Verification ---
 df_socio = pd.read_csv('iris/iris_final_socio_politique_bis.csv', low_memory=False, dtype={'IRIS': str})
 iris_socio = set(df_socio['IRIS'].astype(str))
 iris_passage = set(result['CODE_IRIS'])
