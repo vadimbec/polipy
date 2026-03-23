@@ -1670,7 +1670,7 @@ html, body {{ background: #FAF9F7; font-family: 'Helvetica Neue', system-ui, san
 
 <div id="chartWrap">
   <div id="chart"></div>
-  <div id="mapDiv" style="width:100%;height:calc(100vw * 0.72);display:none;position:relative;">
+  <div id="mapDiv" style="width:100%;height:calc(100vh - 160px);min-height:300px;display:none;position:relative;">
     <div id="carteLoadingMsg" style="display:none;position:absolute;top:8px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,0.92);padding:6px 16px;border-radius:20px;font-size:12px;color:#555;z-index:10;box-shadow:0 1px 4px rgba(0,0,0,0.1)">Chargement des coordonnées géographiques…</div>
     <button id="mapResetBtn" onclick="mapInstance && mapInstance.fitBounds([[-5.2,41.3],[9.6,51.2]],{{padding:10}})" style="position:absolute;bottom:16px;right:8px;z-index:20;background:rgba(255,255,255,0.95);border:1px solid #ccc;border-radius:6px;padding:6px 10px;font-size:13px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.15)">↺ Recentrer</button>
   </div>
