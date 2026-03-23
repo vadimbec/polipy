@@ -142,6 +142,7 @@ html, body { background: #FAF9F7; font-family: 'Helvetica Neue', system-ui, sans
   </div>
   <span class="election-current-label" id="electionCurrentLabel"></span>
   <span id="elecSpinner" style="display:none;font-size:11px;color:#888;margin-left:6px">chargement…</span>
+  <select id="colorVarSelect" disabled style="margin-left:10px;padding:3px 8px;border-radius:8px;border:1px solid #D0D0D0;font-size:11px;font-family:inherit;color:#555;background:#fff;cursor:pointer;min-width:180px"><option value="">Couleur : élection</option></select>
 </div>
 
 <div class="custom-panel" id="customPanel">
@@ -168,7 +169,7 @@ html, body { background: #FAF9F7; font-family: 'Helvetica Neue', system-ui, sans
       <div id="chartDiv"></div>
       <div id="mapDiv" style="width:100%;height:640px;display:none;position:relative;">
         <div id="carteLoadingMsg" style="display:none;position:absolute;top:8px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,0.92);padding:6px 16px;border-radius:20px;font-size:12px;color:#555;z-index:10;box-shadow:0 1px 4px rgba(0,0,0,0.1)">Chargement des coordonnées géographiques…</div>
-        <button id="mapResetBtn" onclick="mapInstance && mapInstance.flyTo({center:[2.35,46.8],zoom:5})" style="position:absolute;bottom:16px;right:8px;z-index:20;background:rgba(255,255,255,0.95);border:1px solid #ccc;border-radius:6px;padding:6px 10px;font-size:13px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.15)">↺ Recentrer</button>
+        <button id="mapResetBtn" onclick="mapInstance && mapInstance.fitBounds([[-5.2,41.3],[9.6,51.2]],{padding:20})" style="position:absolute;bottom:16px;right:8px;z-index:20;background:rgba(255,255,255,0.95);border:1px solid #ccc;border-radius:6px;padding:6px 10px;font-size:13px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.15)">↺ Recentrer</button>
       </div>
       <div class="corner-label corner-tl" id="cornerTL" style="color:#E87070"></div>
       <div class="corner-label corner-tr" id="cornerTR" style="color:#6B8FD4"></div>
@@ -176,6 +177,7 @@ html, body { background: #FAF9F7; font-family: 'Helvetica Neue', system-ui, sans
       <div class="corner-label corner-br" id="cornerBR" style="color:#C49A30"></div>
     </div>
     <div class="footer">⊕ = barycentre du groupe &nbsp;·&nbsp; taille = population IRIS &nbsp;·&nbsp; couleur = parti dominant &nbsp;·&nbsp; N=49303</div>
+    <div id="colorLegend" style="display:none;flex-direction:column;padding:6px 20px;background:#fff;border-top:1px solid #E8E8E8"></div>
     <div id="abst-stats-panel" style="padding:6px 20px 4px;font-size:12px;color:#555;border-top:1px solid #e5e7eb;margin-top:2px;display:none"></div>
     <div class="axis-desc" id="axisDesc"></div>
   </div>
@@ -232,6 +234,8 @@ let currentPresetId = 'saint_graphique';
 let currentXRange = PRESETS[0].xRange.slice();
 let currentYRange = PRESETS[0].yRange.slice();
 let currentCorners = PRESETS[0].corners;
+let currentColorVar = null;   // null = couleur par élection, sinon nom de variable
+let colorVarMin = 0, colorVarMax = 1;
 
 // ── Corner labels ─────────────────────────────────────────────────────────
 function setCorners(corners) {
@@ -261,6 +265,73 @@ function computeDataRange(varName, invert) {
   if (mn === Infinity) return [-1, 1];
   const pad = (mx - mn) * 0.08;
   return [mn - pad, mx + pad];
+}
+
+// ── Colorscale variable ────────────────────────────────────────────────────
+function lerp(a, b, t) { return a + (b - a) * t; }
+function varToHex(val, mn, mx) {
+  const t = Math.max(0, Math.min(1, (val - mn) / (mx - mn || 1)));
+  let r, g, b;
+  if (t < 0.5) {
+    const s = t * 2;
+    r = Math.round(lerp(59, 255, s));
+    g = Math.round(lerp(130, 255, s));
+    b = Math.round(lerp(246, 255, s));
+  } else {
+    const s = (t - 0.5) * 2;
+    r = Math.round(lerp(255, 239, s));
+    g = Math.round(lerp(255, 68, s));
+    b = Math.round(lerp(255, 68, s));
+  }
+  return '#' + [r,g,b].map(x => x.toString(16).padStart(2,'0')).join('');
+}
+
+function computeColorVarRange(varName) {
+  const arr = (IRIS_X && IRIS_X[varName]) ? IRIS_X[varName] : (IRIS_Y && IRIS_Y[varName] ? IRIS_Y[varName] : null);
+  if (!arr) { colorVarMin = 0; colorVarMax = 1; return; }
+  const sorted = arr.filter(v => v !== null && !isNaN(v)).slice().sort((a,b) => a-b);
+  if (!sorted.length) { colorVarMin = 0; colorVarMax = 1; return; }
+  const lo = Math.floor(sorted.length * 0.02);
+  const hi = Math.ceil(sorted.length * 0.98) - 1;
+  colorVarMin = sorted[Math.max(0,lo)];
+  colorVarMax = sorted[Math.min(sorted.length-1,hi)];
+}
+
+function buildColorVarSelect() {
+  const sel = document.getElementById('colorVarSelect');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">Couleur : élection</option>';
+  for (const [cat, vars] of Object.entries(VARS)) {
+    const avail = vars.filter(v => IRIS_X && IRIS_X[v] !== undefined);
+    if (!avail.length) continue;
+    const og = document.createElement('optgroup');
+    og.label = cat;
+    avail.forEach(v => {
+      const opt = document.createElement('option');
+      opt.value = v;
+      opt.textContent = (varLabels[v] || v).substring(0, 60);
+      if (v === currentColorVar) opt.selected = true;
+      og.appendChild(opt);
+    });
+    sel.appendChild(og);
+  }
+  sel.disabled = false;
+}
+
+function updateColorLegend() {
+  const leg = document.getElementById('colorLegend');
+  if (!leg) return;
+  if (!currentColorVar) { leg.style.display = 'none'; return; }
+  const label = (varLabels[currentColorVar] || currentColorVar).substring(0, 80);
+  const mn = colorVarMin.toFixed(2), mx = colorVarMax.toFixed(2);
+  leg.style.display = 'flex';
+  leg.innerHTML = `
+    <div style="font-size:10px;color:#555;margin-bottom:3px;font-weight:600">${label}</div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span style="font-size:10px;color:#3B82F6">${mn}</span>
+      <div style="flex:1;height:10px;border-radius:5px;background:linear-gradient(to right,#3B82F6,#fff,#EF4444)"></div>
+      <span style="font-size:10px;color:#EF4444">${mx}</span>
+    </div>`;
 }
 
 // ── Description panel ─────────────────────────────────────────────────────
@@ -305,23 +376,26 @@ function restyleIRIS() {
   if (!data) return;
   const xArr = IRIS_X[currentXVar] || [];
   const yArr = IRIS_Y[currentYVar] || [];
+  const colorArr = currentColorVar ? (IRIS_X[currentColorVar] || IRIS_Y[currentColorVar] || null) : null;
   const n = xArr.length;
-  // Pre-build set of known party keys for fast lookup
   const knownKeys = new Set(btns.map(b => b.key));
   const fx = [], fy = [], fc = [], fs = [], fcd = [];
   for (let i = 0; i < n; i++) {
     const parti = data.partis[i];
     if (parti === null || parti === undefined) continue;
-    // Filter: known parties checked directly, unknown parties map to AUTRE
     const effectiveKey = knownKeys.has(parti) ? parti : 'AUTRE';
     if (!activeGroups.has(effectiveKey)) continue;
     const xv = xArr[i], yv = yArr[i];
     if (xv == null || yv == null) continue;
     fx.push(currentXInvert ? -xv : xv);
     fy.push(yv);
-    fc.push(data.colors[i] || '#9CA3AF');
+    if (colorArr && colorArr[i] !== null && colorArr[i] !== undefined) {
+      fc.push(varToHex(colorArr[i], colorVarMin, colorVarMax));
+    } else {
+      fc.push(colorArr ? '#CCCCCC' : (data.colors[i] || '#9CA3AF'));
+    }
     fs.push(MARKER_SIZES[i] || 3);
-    fcd.push(i);  // global IRIS index for click detection
+    fcd.push(i);
   }
   Plotly.restyle(chartDiv, {
     x: [fx], y: [fy],
@@ -740,6 +814,15 @@ document.getElementById('xSelect').addEventListener('change', onCustomChange);
 document.getElementById('ySelect').addEventListener('change', onCustomChange);
 document.getElementById('xInvertChk').addEventListener('change', onCustomChange);
 
+document.getElementById('colorVarSelect').addEventListener('change', function() {
+  const v = this.value;
+  currentColorVar = v || null;
+  if (currentColorVar) computeColorVarRange(currentColorVar);
+  restyleIRIS();
+  updateMapColors();
+  updateColorLegend();
+});
+
 // ── Toggle all button ─────────────────────────────────────────────────────
 toggleAllBtn.addEventListener('click', () => {
   const enabledBtns = btns.filter(b => b.count > 0);
@@ -889,7 +972,16 @@ function showDesktopCardElec(irisGlobalIdx) {
     <div class="stat-bar-row"><div class="stat-bar-label">Propriétaires</div><div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${Math.min(100,cd[13]||0)}%;background:#7AA7D0"></div></div><div class="stat-bar-pct">${fmtPct(cd[13])}</div></div>
     <div class="stat-bar-row"><div class="stat-bar-label">HLM</div><div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${Math.min(100,cd[14]||0)}%;background:#E8975A"></div></div><div class="stat-bar-pct">${fmtPct(cd[14])}</div></div>
     <div class="section-title">${currentMeta ? currentMeta.label : currentElectionId}</div>
-    <div class="row"><span class="lbl">Abstention :</span> <b>${fmtPct(cd[10])}</b> &nbsp;·&nbsp; <span class="lbl">Blancs :</span> <b>${fmtPct(cd[11])}</b></div>
+    ${(function() {
+      const abstVal = elecData ? elecData.abst[irisGlobalIdx] : null;
+      const blancVal = elecData ? elecData.blancs[irisGlobalIdx] : null;
+      const inscrVal = elecData ? elecData.inscrits[irisGlobalIdx] : null;
+      const blancPct = (blancVal != null && inscrVal != null && inscrVal > 0) ? blancVal / inscrVal * 100 : null;
+      let row = '';
+      if (abstVal != null) row += `<span class="lbl">Abstention :</span> <b>${fmtPct(abstVal)}</b>`;
+      if (blancPct != null) row += (row ? ' &nbsp;·&nbsp; ' : '') + `<span class="lbl">Blancs :</span> <b>${fmtPct(blancPct)}</b>`;
+      return row ? `<div class="row">${row}</div>` : '';
+    })()}
     <div class="vote-bars">${voteBarsHtml || '<span style="color:#AAA;font-size:11px">Données non disponibles</span>'}</div>
     <div class="dynamic-row"><span class="lbl">Axe X (${currentXVar}) :</span> <b>${xDisp !== undefined ? Number(xDisp).toFixed(3) : '—'}</b></div>
     <div class="dynamic-row"><span class="lbl">Axe Y (${currentYVar}) :</span> <b>${yRaw !== undefined ? Number(yRaw).toFixed(3) : '—'}</b></div>
@@ -901,16 +993,24 @@ function buildMapGeoJSON() {
   const elecData = elecCache[currentElectionId];
   if (!elecData || !IRIS_LAT || !IRIS_LON) return null;
   const enabledKeys = new Set(btns.filter(b => activeGroups.has(b.key)).map(b => b.key));
+  const knownPartiKeys = new Set(btns.map(b => b.key));
+  const colorArr = currentColorVar ? (IRIS_X && (IRIS_X[currentColorVar] || null)) || (IRIS_Y && (IRIS_Y[currentColorVar] || null)) : null;
   const features = [];
   for (let i = 0; i < IRIS_LAT.length; i++) {
     if (IRIS_LAT[i] === null) continue;
     const parti = elecData.partis[i];
-    const key = enabledKeys.has(parti) ? parti : (enabledKeys.has('AUTRE') ? 'AUTRE' : null);
-    if (!key) continue;
+    const effectiveKey = knownPartiKeys.has(parti) ? parti : 'AUTRE';
+    if (!enabledKeys.has(effectiveKey)) continue;
+    let color;
+    if (colorArr && colorArr[i] !== null && colorArr[i] !== undefined) {
+      color = varToHex(colorArr[i], colorVarMin, colorVarMax);
+    } else {
+      color = colorArr ? '#CCCCCC' : (elecData.colors[i] || '#9CA3AF');
+    }
     features.push({
       type: 'Feature',
       geometry: { type: 'Point', coordinates: [IRIS_LON[i], IRIS_LAT[i]] },
-      properties: { idx: i, color: elecData.colors[i] || '#9CA3AF', size: MARKER_SIZES[i] || 3 }
+      properties: { idx: i, color, size: MARKER_SIZES[i] || 3 }
     });
   }
   return { type: 'FeatureCollection', features };
@@ -928,11 +1028,11 @@ function initMap() {
   mapInstance = new maplibregl.Map({
     container: 'mapDiv',
     style: 'https://tiles.openfreemap.org/styles/bright',
-    center: [2.35, 46.8],
-    zoom: 5,
+    bounds: [[-5.2, 41.3], [9.6, 51.2]],
+    fitBoundsOptions: { padding: 20 },
     minZoom: 4,
     maxZoom: 16,
-    maxBounds: [[-9.5, 36.0], [12.0, 56.0]],
+    maxBounds: [[-7.0, 39.5], [11.5, 52.5]],
   });
   mapInstance.on('load', () => {
     mapReady = true;
@@ -1076,6 +1176,8 @@ initUI();
   // Construire les selects maintenant que IRIS_X est disponible
   buildSelect('xSelect', PRESETS[0].xVar);
   buildSelect('ySelect', PRESETS[0].yVar);
+  buildColorVarSelect();
+  updateColorLegend();
   document.getElementById('xSelect').disabled = false;
   document.getElementById('ySelect').disabled = false;
   document.getElementById('xInvertChk').checked = PRESETS[0].xInvert || false;
@@ -1093,6 +1195,13 @@ initUI();
 
   setLoadingProgress(100);
   hideLoadingOverlay();
+
+  // Ouvrir la carte par défaut
+  currentPresetId = 'carte';
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  const carteBtnEl = document.querySelector('.preset-btn[data-id="carte"]');
+  if (carteBtnEl) carteBtnEl.classList.add('active');
+  await showCarte();
   } catch(e) {
     const msgEl = document.getElementById('loadingMsg');
     const detailEl = document.getElementById('loadingDetail');
