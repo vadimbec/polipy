@@ -59,7 +59,7 @@ NUANCE_TO_PARTI_BASE = {
     # ── RN ───────────────────────────────────────────────────────────────────
     'RN':   'RN',  'FN':   'RN',  'LRN':  'RN',
     # ── UXD : Ciotti / alliance LR-RN 2024 ──────────────────────────────────
-    'UXD':  'UXD',
+    'UXD':  'UXD', 'LUXD': 'UXD',
     # ── Reconquête ────────────────────────────────────────────────────────────
     'REC':  'REC', 'LREC': 'REC',
     # ── Extrême droite (hors RN) ─────────────────────────────────────────────
@@ -68,13 +68,14 @@ NUANCE_TO_PARTI_BASE = {
     'DLF':  'DLF', 'LDLF': 'DLF',
     # ── LR / Droite classique ────────────────────────────────────────────────
     'LR':   'LR',  'LLR':  'LR',
-    'DVD':  'DVD', 'LDVD': 'DVD',
+    'DVD':  'DVD', 'LDVD': 'DVD', 'LUDR': 'DVD', 'LDSV': 'DVD',
+
     # ── DVC (divers centre) ──────────────────────────────────────────────────
     'DVC':  'DVC', 'LDVC': 'DVC',
     # ── Ensemble / Renaissance ───────────────────────────────────────────────
-    'ENS':  'ENS', 'REM':  'ENS', 'LREM': 'ENS', 'LENS': 'ENS',
+    'ENS':  'ENS', 'REM':  'ENS', 'LREM': 'ENS', 'LENS': 'ENS', 'LREN': 'ENS',
     # ── Horizons ─────────────────────────────────────────────────────────────
-    'HOR':  'HOR',
+    'HOR':  'HOR', 'LHOR': 'HOR',
     # ── MoDem ────────────────────────────────────────────────────────────────
     'MDM':  'MODEM', 'LMDM': 'MODEM',
     # ── UDI ──────────────────────────────────────────────────────────────────

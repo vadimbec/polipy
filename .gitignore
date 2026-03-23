@@ -83,3 +83,18 @@ deploy.sh
 
 #ps1
 *.ps1
+
+#7z
+*.7z
+
+#pdf
+*.pdf
+
+#cpg
+*.cpg
+
+#anything in a CONTOURS-IRIS type directory
+iris/contours_tmp/
+
+#Anything with LISEZMOI in the name
+*LISEZ MOI*
