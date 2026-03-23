@@ -3,7 +3,7 @@ merge_bv_iris.py
 ================
 Agrège les résultats électoraux par bureau de vote au niveau IRIS.
 
-Source : fichiers parquet produits par le projet Jolivet
+Source : fichiers parquet elections/candidats
   - resultats_elections/candidats_results.parquet  (voix par candidat par BV)
   - resultats_elections/general_results.parquet    (inscrits/votants par BV)
   - table_passage_BV_IRIS.csv                      (table de passage BV→IRIS)
