@@ -1339,8 +1339,43 @@ _ONE_DECIMAL_VARS = {'age_moyen', 'pct_etrangers', 'pct_immigres'}
 _COMPOSITE_VARS = _COMPOSITE_VARS | {'tsne_x', 'tsne_y', 'umap_x', 'umap_y'}
 
 
+_DEP_NAMES = {
+    '01':'Ain','02':'Aisne','03':'Allier','04':'Alpes-de-Haute-Provence','05':'Hautes-Alpes',
+    '06':'Alpes-Maritimes','07':'Ardèche','08':'Ardennes','09':'Ariège','10':'Aube',
+    '11':'Aude','12':'Aveyron','13':'Bouches-du-Rhône','14':'Calvados','15':'Cantal',
+    '16':'Charente','17':'Charente-Maritime','18':'Cher','19':'Corrèze','2A':'Corse-du-Sud',
+    '2B':'Haute-Corse','21':'Côte-d\'Or','22':'Côtes-d\'Armor','23':'Creuse','24':'Dordogne',
+    '25':'Doubs','26':'Drôme','27':'Eure','28':'Eure-et-Loir','29':'Finistère',
+    '30':'Gard','31':'Haute-Garonne','32':'Gers','33':'Gironde','34':'Hérault',
+    '35':'Ille-et-Vilaine','36':'Indre','37':'Indre-et-Loire','38':'Isère','39':'Jura',
+    '40':'Landes','41':'Loir-et-Cher','42':'Loire','43':'Haute-Loire','44':'Loire-Atlantique',
+    '45':'Loiret','46':'Lot','47':'Lot-et-Garonne','48':'Lozère','49':'Maine-et-Loire',
+    '50':'Manche','51':'Marne','52':'Haute-Marne','53':'Mayenne','54':'Meurthe-et-Moselle',
+    '55':'Meuse','56':'Morbihan','57':'Moselle','58':'Nièvre','59':'Nord',
+    '60':'Oise','61':'Orne','62':'Pas-de-Calais','63':'Puy-de-Dôme','64':'Pyrénées-Atlantiques',
+    '65':'Hautes-Pyrénées','66':'Pyrénées-Orientales','67':'Bas-Rhin','68':'Haut-Rhin','69':'Rhône',
+    '70':'Haute-Saône','71':'Saône-et-Loire','72':'Sarthe','73':'Savoie','74':'Haute-Savoie',
+    '75':'Paris','76':'Seine-Maritime','77':'Seine-et-Marne','78':'Yvelines','79':'Deux-Sèvres',
+    '80':'Somme','81':'Tarn','82':'Tarn-et-Garonne','83':'Var','84':'Vaucluse',
+    '85':'Vendée','86':'Vienne','87':'Haute-Vienne','88':'Vosges','89':'Yonne',
+    '90':'Territoire de Belfort','91':'Essonne','92':'Hauts-de-Seine','93':'Seine-Saint-Denis',
+    '94':'Val-de-Marne','95':'Val-d\'Oise','971':'Guadeloupe','972':'Martinique',
+    '973':'Guyane','974':'La Réunion','976':'Mayotte',
+}
+
+def _dep_label(iris_code):
+    s = str(iris_code)
+    if s.startswith('97') and len(s) >= 3:
+        key = s[:3]
+    elif s[:2].upper() in ('2A', '2B'):
+        key = s[:2].upper()
+    else:
+        key = s[:2]
+    name = _DEP_NAMES.get(key, '')
+    return f'{name} ({key})' if name else ''
+
 # ── 10. TRACES PLOTLY ─────────────────────────────────────────────────────────
-# Colonnes pour IRIS_INFO (19 champs — scores partis lus depuis IRIS_ELECTION_DATA)
+# Colonnes pour IRIS_INFO (20 champs — scores partis lus depuis IRIS_ELECTION_DATA)
 # [0] LAB_IRIS, [1] nom_commune, [2] pop_totale, [3] DISP_MED21,
 # [4] pct_csp_plus, [5] pct_csp_ouvrier, [6] pct_csp_intermediaire,
 # [7] DISP_PPAT21, [8] inscrits, [9] votants, [10] pct_abstention,
@@ -1377,7 +1412,12 @@ def _make_customdata(sub):
             cd_df[col] = pd.to_numeric(cd_df[col], errors='coerce').round(2)
         except Exception:
             pass
-    return cd_df.fillna('').values.tolist()
+    rows = cd_df.fillna('').values.tolist()
+    # [19] dep_label — dérivé du code IRIS (colonne 'IRIS' du df global)
+    iris_codes = sub['IRIS'].tolist() if 'IRIS' in sub.columns else [''] * len(rows)
+    for i, row in enumerate(rows):
+        row.append(_dep_label(iris_codes[i]))
+    return rows
 
 
 def _build_trace_data(size_scale=1.0, include_data=True):
@@ -1562,6 +1602,27 @@ def build_desktop_html():
     group_indices = {g: df.index[df['parti_dominant'] == g].tolist() for g in ALL_ORDER}
 
     # ── Écriture des fichiers JSON dans data/ ──────────────────────────────
+    def _build_geo_centroids(df_arg):
+        import geopandas as gpd
+        print("  Calcul des centroïdes IRIS depuis iris-stats.geojson...")
+        gdf = gpd.read_file('iris-stats.geojson')
+        gdf = gdf.set_crs('EPSG:2154', allow_override=True)
+        gdf_wgs = gdf.to_crs('EPSG:4326')
+        gdf_wgs = gdf_wgs.copy()
+        gdf_wgs['lat'] = gdf_wgs.geometry.centroid.y
+        gdf_wgs['lon'] = gdf_wgs.geometry.centroid.x
+        lookup = dict(zip(gdf_wgs['index'].astype(str), zip(gdf_wgs['lat'], gdf_wgs['lon'])))
+        lats, lons = [], []
+        for iris_code in df_arg['IRIS']:
+            coords = lookup.get(str(iris_code))
+            if coords:
+                lats.append(round(float(coords[0]), 5))
+                lons.append(round(float(coords[1]), 5))
+            else:
+                lats.append(None)
+                lons.append(None)
+        return lats, lons
+
     _os.makedirs('data', exist_ok=True)
 
     # static.json : IRIS_INFO + IRIS_POPS + MARKER_SIZES + GROUP_INDICES
@@ -1575,6 +1636,15 @@ def build_desktop_html():
     with open(_path, 'w', encoding='utf-8') as _f:
         _json.dump(_static, _f, ensure_ascii=False, separators=(',', ':'))
     print(f"  data/static.json : {_os.path.getsize(_path)//1024} KB")
+
+    _geo_path = 'data/geo.json'
+    if not _os.path.exists(_geo_path):
+        _lats, _lons = _build_geo_centroids(df)
+        with open(_geo_path, 'w', encoding='utf-8') as _f:
+            _json.dump({'lat': _lats, 'lon': _lons}, _f, separators=(',', ':'))
+        print(f"  data/geo.json : {_os.path.getsize(_geo_path)//1024} KB")
+    else:
+        print(f"  data/geo.json : déjà présent ({_os.path.getsize(_geo_path)//1024} KB)")
 
     # Un fichier par élection
     for eid_s, elec_obj in iris_elec.items():
@@ -1780,6 +1850,10 @@ html, body {{ background: #FAF9F7; font-family: 'Helvetica Neue', system-ui, san
     <div class="group-filters" id="groupFilters"></div>
     <div class="chart-wrapper">
       <div id="chartDiv"></div>
+      <div id="mapDiv" style="width:100%;height:640px;display:none;position:relative;">
+        <div id="carteLoadingMsg" style="display:none;position:absolute;top:8px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,0.92);padding:6px 16px;border-radius:20px;font-size:12px;color:#555;z-index:10;box-shadow:0 1px 4px rgba(0,0,0,0.1)">Chargement des coordonnées géographiques…</div>
+        <button id="mapResetBtn" onclick="mapInstance && mapInstance.flyTo({{center:[2.35,46.8],zoom:5}})" style="position:absolute;bottom:16px;right:8px;z-index:20;background:rgba(255,255,255,0.95);border:1px solid #ccc;border-radius:6px;padding:6px 10px;font-size:13px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.15)">↺ Recentrer</button>
+      </div>
       <div class="corner-label corner-tl" id="cornerTL" style="color:{sg['corners'][0]['color']}"></div>
       <div class="corner-label corner-tr" id="cornerTR" style="color:{sg['corners'][1]['color']}"></div>
       <div class="corner-label corner-bl" id="cornerBL" style="color:{sg['corners'][2]['color']}"></div>
@@ -1806,6 +1880,8 @@ html, body {{ background: #FAF9F7; font-family: 'Helvetica Neue', system-ui, san
 </div>
 
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<link href='https://unpkg.com/maplibre-gl@4/dist/maplibre-gl.css' rel='stylesheet'/>
+<script src='https://unpkg.com/maplibre-gl@4/dist/maplibre-gl.js'></script>
 <script>
 const figData = {fig_json};
 
@@ -1823,6 +1899,11 @@ const ORDER = {order_str};
 
 // ── Données globales (chargées en async depuis data/) ─────────────────────
 let IRIS_X = null, IRIS_Y = null;
+let IRIS_LAT = null, IRIS_LON = null;
+let mapInstance = null;
+let mapReady = false;
+let mapInitialized = false;
+let isCarteActive = false;
 let IRIS_INFO = null, IRIS_POPS = null, MARKER_SIZES = null, GROUP_INDICES = null;
 const elecCache = {{}};  // cache élections déjà fetché
 
@@ -2047,8 +2128,8 @@ function updateToggleLabel() {{
 
 function setGroupVisible(b, visible) {{
   const el = filtersDiv.querySelector('[data-key="' + b.key + '"]');
-  const xr = chartDiv.layout.xaxis.range.slice();
-  const yr = chartDiv.layout.yaxis.range.slice();
+  const xr = (chartDiv.layout && chartDiv.layout.xaxis) ? chartDiv.layout.xaxis.range.slice() : currentXRange.slice();
+  const yr = (chartDiv.layout && chartDiv.layout.yaxis) ? chartDiv.layout.yaxis.range.slice() : currentYRange.slice();
   if (visible) {{
     activeGroups.add(b.key);
     if (el) {{ el.classList.replace('off','on'); el.style.backgroundColor = b.color; el.style.color = '#fff'; }}
@@ -2057,7 +2138,8 @@ function setGroupVisible(b, visible) {{
     if (el) {{ el.classList.replace('on','off'); el.style.backgroundColor = 'transparent'; el.style.color = b.color; }}
   }}
   restyleIRIS();
-  Plotly.relayout(chartDiv, {{'xaxis.range': xr, 'yaxis.range': yr}});
+  updateMapColors();
+  if (!isCarteActive) Plotly.relayout(chartDiv, {{'xaxis.range': xr, 'yaxis.range': yr}});
 }}
 
 function rebuildFilterButtons() {{
@@ -2226,6 +2308,7 @@ async function applyElection(electionId) {{
       card.innerHTML = '<div style="color:#AAA;padding:16px;font-size:12px;text-align:center">Pas de données pour cet IRIS<br>dans cette élection.</div>';
     }}
   }}
+  updateMapColors();
 }}
 
 function updateYearBtns(type) {{
@@ -2289,6 +2372,7 @@ PRESETS.forEach(p => {{
   btn.dataset.id = p.id;
   btn.textContent = p.emoji + ' ' + p.label;
   btn.addEventListener('click', () => {{
+    hideCarte();
     document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     currentPresetId = p.id;
@@ -2300,6 +2384,18 @@ PRESETS.forEach(p => {{
   presetBtnsDiv.appendChild(btn);
 }});
 
+const carteBtn = document.createElement('button');
+carteBtn.className = 'preset-btn';
+carteBtn.dataset.id = 'carte';
+carteBtn.textContent = '🗺️ Carte';
+carteBtn.addEventListener('click', async () => {{
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  carteBtn.classList.add('active');
+  currentPresetId = 'carte';
+  await showCarte();
+}});
+presetBtnsDiv.appendChild(carteBtn);
+
 const customToggle = document.getElementById('customToggle');
 const customPanel = document.getElementById('customPanel');
 customToggle.addEventListener('click', () => {{
@@ -2309,6 +2405,7 @@ customToggle.addEventListener('click', () => {{
 }});
 
 function onCustomChange() {{
+  hideCarte();
   const xVar = document.getElementById('xSelect').value;
   const yVar = document.getElementById('ySelect').value;
   const xInvert = document.getElementById('xInvertChk').checked;
@@ -2346,6 +2443,7 @@ toggleAllBtn.addEventListener('click', () => {{
     }});
   }}
   restyleIRIS();
+  updateMapColors();
   restyleBarycentres();
   Plotly.relayout(chartDiv, {{'xaxis.range': xr, 'yaxis.range': yr}});
   updateToggleLabel();
@@ -2430,13 +2528,13 @@ function showDesktopCardElec(irisGlobalIdx) {{
   const card = document.getElementById('infoCard');
   card.classList.remove('empty');
 
-  const xRaw = (IRIS_X[currentXVar] || [])[irisGlobalIdx];
-  const yRaw = (IRIS_Y[currentYVar] || [])[irisGlobalIdx];
+  const xRaw = IRIS_X ? (IRIS_X[currentXVar] || [])[irisGlobalIdx] : undefined;
+  const yRaw = IRIS_Y ? (IRIS_Y[currentYVar] || [])[irisGlobalIdx] : undefined;
   const xDisp = xRaw !== undefined ? (currentXInvert ? -xRaw : xRaw) : undefined;
 
   const elecData = elecCache[currentElectionId];
   const sticky = document.getElementById('sidebarSticky');
-  if (sticky) {{ sticky.style.display = 'block'; sticky.style.color = elecData?.colors[irisGlobalIdx] || '#9CA3AF'; sticky.textContent = cd[0] || ''; }}
+  if (sticky) {{ sticky.style.display = 'block'; sticky.style.color = elecData?.colors[irisGlobalIdx] || '#9CA3AF'; sticky.textContent = cd[1] || cd[0] || ''; }}
   const elecScores = elecData ? elecData.scores[irisGlobalIdx] : null;
   const currentMeta = ELECTIONS_META[currentElectionId];
   const currentColor = elecData?.colors[irisGlobalIdx] || '#9CA3AF';
@@ -2459,8 +2557,8 @@ function showDesktopCardElec(irisGlobalIdx) {{
   }}
 
   card.innerHTML = `
-    <div class="name">${{cd[0] || 'IRIS inconnu'}}</div>
-    <div class="party" style="color:${{currentColor}}">${{(currentParti || '').replace('_',' ')}} · ${{cd[1] || ''}}</div>
+    <div class="name">${{cd[1] || cd[0] || 'IRIS inconnu'}}</div>
+    <div class="party" style="color:#666;font-size:12px">${{cd[19] || ''}}</div>
     <div class="row"><span class="lbl">Population :</span> <b>${{fmtNum(cd[2], ' hab.')}}</b> &nbsp;·&nbsp; <span class="lbl">Âge moyen :</span> <b>${{cd[18] !== '' ? Number(cd[18]).toFixed(1) + ' ans' : '—'}}</b></div>
     <div class="row"><span class="lbl">Revenu médian :</span> <b>${{fmtNum(cd[3], ' €/UC')}}</b></div>
     <div class="section-title">Catégories socio-professionnelles</div>
@@ -2480,6 +2578,114 @@ function showDesktopCardElec(irisGlobalIdx) {{
     <div class="dynamic-row"><span class="lbl">Axe X (${{currentXVar}}) :</span> <b>${{xDisp !== undefined ? Number(xDisp).toFixed(3) : '—'}}</b></div>
     <div class="dynamic-row"><span class="lbl">Axe Y (${{currentYVar}}) :</span> <b>${{yRaw !== undefined ? Number(yRaw).toFixed(3) : '—'}}</b></div>
   `;
+}}
+
+// ── Carte MapLibre ────────────────────────────────────────────────────────
+function buildMapGeoJSON() {{
+  const elecData = elecCache[currentElectionId];
+  if (!elecData || !IRIS_LAT || !IRIS_LON) return null;
+  const enabledKeys = new Set(btns.filter(b => activeGroups.has(b.key)).map(b => b.key));
+  const features = [];
+  for (let i = 0; i < IRIS_LAT.length; i++) {{
+    if (IRIS_LAT[i] === null) continue;
+    const parti = elecData.partis[i];
+    const key = enabledKeys.has(parti) ? parti : (enabledKeys.has('AUTRE') ? 'AUTRE' : null);
+    if (!key) continue;
+    features.push({{
+      type: 'Feature',
+      geometry: {{ type: 'Point', coordinates: [IRIS_LON[i], IRIS_LAT[i]] }},
+      properties: {{ idx: i, color: elecData.colors[i] || '#9CA3AF', size: MARKER_SIZES[i] || 3 }}
+    }});
+  }}
+  return {{ type: 'FeatureCollection', features }};
+}}
+
+function updateMapColors() {{
+  if (!isCarteActive || !mapReady) return;
+  const gj = buildMapGeoJSON();
+  if (gj) mapInstance.getSource('iris').setData(gj);
+}}
+
+function initMap() {{
+  if (mapInitialized) return;
+  mapInitialized = true;
+  mapInstance = new maplibregl.Map({{
+    container: 'mapDiv',
+    style: 'https://tiles.openfreemap.org/styles/bright',
+    center: [2.35, 46.8],
+    zoom: 5,
+    minZoom: 4,
+    maxZoom: 16,
+    maxBounds: [[-9.5, 36.0], [12.0, 56.0]],
+  }});
+  mapInstance.on('load', () => {{
+    mapReady = true;
+    // Overlay blanc semi-transparent pour atténuer le fond de carte
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:absolute;inset:0;background:rgba(255,255,255,0.22);pointer-events:none;z-index:2';
+    document.getElementById('mapDiv').appendChild(overlay);
+    mapInstance.addSource('iris', {{
+      type: 'geojson',
+      data: {{ type: 'FeatureCollection', features: [] }}
+    }});
+    mapInstance.addLayer({{
+      id: 'iris-circles',
+      type: 'circle',
+      source: 'iris',
+      paint: {{
+        'circle-color': ['get', 'color'],
+        'circle-radius': ['interpolate', ['linear'], ['zoom'],
+          5, ['*', ['get', 'size'], 0.35],
+          10, ['*', ['get', 'size'], 1.3],
+          14, ['*', ['get', 'size'], 2.5]
+        ],
+        'circle-opacity': 0.85,
+        'circle-stroke-width': 0.5,
+        'circle-stroke-color': 'rgba(255,255,255,0.4)',
+      }}
+    }});
+    mapInstance.on('click', 'iris-circles', e => {{
+      const idx = e.features[0].properties.idx;
+      currentClickedGlobalIdx = idx;
+      showDesktopCardElec(idx);
+    }});
+    mapInstance.on('mouseenter', 'iris-circles', () => {{
+      mapInstance.getCanvas().style.cursor = 'pointer';
+    }});
+    mapInstance.on('mouseleave', 'iris-circles', () => {{
+      mapInstance.getCanvas().style.cursor = '';
+    }});
+    updateMapColors();
+  }});
+}}
+
+async function showCarte() {{
+  isCarteActive = true;
+  document.getElementById('chartDiv').style.display = 'none';
+  document.querySelectorAll('.corner-label').forEach(el => el.style.display = 'none');
+  document.getElementById('axisDesc').style.display = 'none';
+  document.getElementById('mapDiv').style.display = 'block';
+  if (!IRIS_LAT) {{
+    document.getElementById('carteLoadingMsg').style.display = 'block';
+    const geoData = await fetch('data/geo.json').then(r => r.json());
+    IRIS_LAT = geoData.lat;
+    IRIS_LON = geoData.lon;
+    document.getElementById('carteLoadingMsg').style.display = 'none';
+  }}
+  if (!mapInitialized) {{
+    initMap();
+  }} else {{
+    updateMapColors();
+  }}
+}}
+
+function hideCarte() {{
+  if (!isCarteActive) return;
+  isCarteActive = false;
+  document.getElementById('mapDiv').style.display = 'none';
+  document.getElementById('chartDiv').style.display = 'block';
+  document.querySelectorAll('.corner-label').forEach(el => el.style.display = '');
+  document.getElementById('axisDesc').style.display = '';
 }}
 
 // ── Helpers overlay de chargement ─────────────────────────────────────────
