@@ -73,3 +73,12 @@ Thumbs.db
 
 #MD
 *.md
+
+#bat
+*.bat
+
+#sh
+*.sh
+
+#ps1
+*.ps1
