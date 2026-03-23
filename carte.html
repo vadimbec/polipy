@@ -166,6 +166,10 @@ html, body { background: #FAF9F7; font-family: 'Helvetica Neue', system-ui, sans
     <div class="group-filters" id="groupFilters"></div>
     <div class="chart-wrapper">
       <div id="chartDiv"></div>
+      <div id="mapDiv" style="width:100%;height:640px;display:none;position:relative;">
+        <div id="carteLoadingMsg" style="display:none;position:absolute;top:8px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,0.92);padding:6px 16px;border-radius:20px;font-size:12px;color:#555;z-index:10;box-shadow:0 1px 4px rgba(0,0,0,0.1)">Chargement des coordonnées géographiques…</div>
+        <button id="mapResetBtn" onclick="mapInstance && mapInstance.flyTo({center:[2.35,46.8],zoom:5})" style="position:absolute;bottom:16px;right:8px;z-index:20;background:rgba(255,255,255,0.95);border:1px solid #ccc;border-radius:6px;padding:6px 10px;font-size:13px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.15)">↺ Recentrer</button>
+      </div>
       <div class="corner-label corner-tl" id="cornerTL" style="color:#E87070"></div>
       <div class="corner-label corner-tr" id="cornerTR" style="color:#6B8FD4"></div>
       <div class="corner-label corner-bl" id="cornerBL" style="color:#60B87A"></div>
@@ -192,6 +196,8 @@ html, body { background: #FAF9F7; font-family: 'Helvetica Neue', system-ui, sans
 </div>
 
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<link href='https://unpkg.com/maplibre-gl@4/dist/maplibre-gl.css' rel='stylesheet'/>
+<script src='https://unpkg.com/maplibre-gl@4/dist/maplibre-gl.js'></script>
 <script>
 const figData = {"data":[{"hovertemplate":"\u003cb\u003eBarycentre %{text}\u003c\u002fb\u003e\u003cbr\u003eX : \u003cb\u003e%{x:.3f}\u003c\u002fb\u003e\u003cbr\u003eY : \u003cb\u003e%{y:.3f}\u003c\u002fb\u003e\u003cextra\u003e\u003c\u002fextra\u003e","marker":{"color":[],"line":{"color":[],"width":3},"size":[],"symbol":"cross-thin"},"mode":"markers+text","name":"barycentres","opacity":0.9,"showlegend":false,"text":[],"textfont":{"color":[],"family":"Helvetica Neue, sans-serif","size":9},"textposition":"top right","x":[],"y":[],"type":"scattergl"},{"customdata":[],"hoverinfo":"none","marker":{"color":[],"line":{"color":"rgba(255,255,255,0.4)","width":0.4},"opacity":0.75,"size":[]},"mode":"markers","name":"iris","showlegend":false,"x":[],"y":[],"type":"scattergl"}],"layout":{"template":{"data":{"histogram2dcontour":[{"type":"histogram2dcontour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"choropleth":[{"type":"choropleth","colorbar":{"outlinewidth":0,"ticks":""}}],"histogram2d":[{"type":"histogram2d","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"heatmap":[{"type":"heatmap","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"contourcarpet":[{"type":"contourcarpet","colorbar":{"outlinewidth":0,"ticks":""}}],"contour":[{"type":"contour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"surface":[{"type":"surface","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"mesh3d":[{"type":"mesh3d","colorbar":{"outlinewidth":0,"ticks":""}}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"parcoords":[{"type":"parcoords","line":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolargl":[{"type":"scatterpolargl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"scattergeo":[{"type":"scattergeo","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolar":[{"type":"scatterpolar","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"scattergl":[{"type":"scattergl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatter3d":[{"type":"scatter3d","line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermap":[{"type":"scattermap","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermapbox":[{"type":"scattermapbox","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterternary":[{"type":"scatterternary","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattercarpet":[{"type":"scattercarpet","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"type":"carpet"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}],"barpolar":[{"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"pie":[{"automargin":true,"type":"pie"}]},"layout":{"autotypenumbers":"strict","colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"hovermode":"closest","hoverlabel":{"align":"left"},"paper_bgcolor":"white","plot_bgcolor":"#E5ECF6","polar":{"bgcolor":"#E5ECF6","angularaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"radialaxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"ternary":{"bgcolor":"#E5ECF6","aaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"baxis":{"gridcolor":"white","linecolor":"white","ticks":""},"caxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]]},"xaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"yaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"scene":{"xaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"yaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"zaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"geo":{"bgcolor":"white","landcolor":"#E5ECF6","subunitcolor":"white","showland":true,"showlakes":true,"lakecolor":"white"},"title":{"x":0.05},"mapbox":{"style":"light"}}},"shapes":[{"line":{"color":"#BBBBBB","dash":"dot","width":1.5},"type":"line","x0":0,"x1":0,"xref":"x","y0":0,"y1":1,"yref":"y domain"},{"line":{"color":"#BBBBBB","dash":"dot","width":1.5},"type":"line","x0":0,"x1":1,"xref":"x domain","y0":0,"y1":0,"yref":"y"}],"margin":{"t":20,"b":60,"l":70,"r":30},"xaxis":{"title":{"font":{"size":11,"color":"#555","family":"Helvetica Neue, sans-serif"},"text":"\u2190 Exploit\u00e9 (prol\u00e9taire) \u2500\u2500\u2500 Position dans le rapport capital\u002ftravail \u2500\u2500\u2500 Exploiteur (bourgeois) \u2192","standoff":10},"tickfont":{"size":9.5,"color":"#AAA"},"range":[-50,50],"showgrid":true,"gridcolor":"#EBEBEB","gridwidth":0.8,"zeroline":false,"linecolor":"#DDD","linewidth":1},"yaxis":{"title":{"font":{"size":11,"color":"#555","family":"Helvetica Neue, sans-serif"},"text":"\u2190 Domin\u00e9 \u2500\u2500\u2500 Domination sociale (Bourdieu) \u2500\u2500\u2500 Dominant \u2192","standoff":8},"tickfont":{"size":9.5,"color":"#AAA"},"range":[-50,50],"showgrid":true,"gridcolor":"#EBEBEB","gridwidth":0.8,"zeroline":false,"linecolor":"#DDD","linewidth":1},"hoverlabel":{"font":{"size":12,"family":"Helvetica Neue, sans-serif","color":"#1a1a1a"},"bgcolor":"rgba(255,255,255,0.97)","bordercolor":"#E0E0E0"},"paper_bgcolor":"#FAF9F7","plot_bgcolor":"#FEFDFB","dragmode":"pan","showlegend":false}};
 
@@ -209,6 +215,11 @@ const ORDER = ["LFI","MELENCHON","PCF","ROUSSEL","EXG","EELV","JADOT","PS","DVG"
 
 // ── Données globales (chargées en async depuis data/) ─────────────────────
 let IRIS_X = null, IRIS_Y = null;
+let IRIS_LAT = null, IRIS_LON = null;
+let mapInstance = null;
+let mapReady = false;
+let mapInitialized = false;
+let isCarteActive = false;
 let IRIS_INFO = null, IRIS_POPS = null, MARKER_SIZES = null, GROUP_INDICES = null;
 const elecCache = {};  // cache élections déjà fetché
 
@@ -433,8 +444,8 @@ function updateToggleLabel() {
 
 function setGroupVisible(b, visible) {
   const el = filtersDiv.querySelector('[data-key="' + b.key + '"]');
-  const xr = chartDiv.layout.xaxis.range.slice();
-  const yr = chartDiv.layout.yaxis.range.slice();
+  const xr = (chartDiv.layout && chartDiv.layout.xaxis) ? chartDiv.layout.xaxis.range.slice() : currentXRange.slice();
+  const yr = (chartDiv.layout && chartDiv.layout.yaxis) ? chartDiv.layout.yaxis.range.slice() : currentYRange.slice();
   if (visible) {
     activeGroups.add(b.key);
     if (el) { el.classList.replace('off','on'); el.style.backgroundColor = b.color; el.style.color = '#fff'; }
@@ -443,7 +454,8 @@ function setGroupVisible(b, visible) {
     if (el) { el.classList.replace('on','off'); el.style.backgroundColor = 'transparent'; el.style.color = b.color; }
   }
   restyleIRIS();
-  Plotly.relayout(chartDiv, {'xaxis.range': xr, 'yaxis.range': yr});
+  updateMapColors();
+  if (!isCarteActive) Plotly.relayout(chartDiv, {'xaxis.range': xr, 'yaxis.range': yr});
 }
 
 function rebuildFilterButtons() {
@@ -612,6 +624,7 @@ async function applyElection(electionId) {
       card.innerHTML = '<div style="color:#AAA;padding:16px;font-size:12px;text-align:center">Pas de données pour cet IRIS<br>dans cette élection.</div>';
     }
   }
+  updateMapColors();
 }
 
 function updateYearBtns(type) {
@@ -675,6 +688,7 @@ PRESETS.forEach(p => {
   btn.dataset.id = p.id;
   btn.textContent = p.emoji + ' ' + p.label;
   btn.addEventListener('click', () => {
+    hideCarte();
     document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     currentPresetId = p.id;
@@ -686,6 +700,18 @@ PRESETS.forEach(p => {
   presetBtnsDiv.appendChild(btn);
 });
 
+const carteBtn = document.createElement('button');
+carteBtn.className = 'preset-btn';
+carteBtn.dataset.id = 'carte';
+carteBtn.textContent = '🗺️ Carte';
+carteBtn.addEventListener('click', async () => {
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  carteBtn.classList.add('active');
+  currentPresetId = 'carte';
+  await showCarte();
+});
+presetBtnsDiv.appendChild(carteBtn);
+
 const customToggle = document.getElementById('customToggle');
 const customPanel = document.getElementById('customPanel');
 customToggle.addEventListener('click', () => {
@@ -695,6 +721,7 @@ customToggle.addEventListener('click', () => {
 });
 
 function onCustomChange() {
+  hideCarte();
   const xVar = document.getElementById('xSelect').value;
   const yVar = document.getElementById('ySelect').value;
   const xInvert = document.getElementById('xInvertChk').checked;
@@ -732,6 +759,7 @@ toggleAllBtn.addEventListener('click', () => {
     });
   }
   restyleIRIS();
+  updateMapColors();
   restyleBarycentres();
   Plotly.relayout(chartDiv, {'xaxis.range': xr, 'yaxis.range': yr});
   updateToggleLabel();
@@ -816,13 +844,13 @@ function showDesktopCardElec(irisGlobalIdx) {
   const card = document.getElementById('infoCard');
   card.classList.remove('empty');
 
-  const xRaw = (IRIS_X[currentXVar] || [])[irisGlobalIdx];
-  const yRaw = (IRIS_Y[currentYVar] || [])[irisGlobalIdx];
+  const xRaw = IRIS_X ? (IRIS_X[currentXVar] || [])[irisGlobalIdx] : undefined;
+  const yRaw = IRIS_Y ? (IRIS_Y[currentYVar] || [])[irisGlobalIdx] : undefined;
   const xDisp = xRaw !== undefined ? (currentXInvert ? -xRaw : xRaw) : undefined;
 
   const elecData = elecCache[currentElectionId];
   const sticky = document.getElementById('sidebarSticky');
-  if (sticky) { sticky.style.display = 'block'; sticky.style.color = elecData?.colors[irisGlobalIdx] || '#9CA3AF'; sticky.textContent = cd[0] || ''; }
+  if (sticky) { sticky.style.display = 'block'; sticky.style.color = elecData?.colors[irisGlobalIdx] || '#9CA3AF'; sticky.textContent = cd[1] || cd[0] || ''; }
   const elecScores = elecData ? elecData.scores[irisGlobalIdx] : null;
   const currentMeta = ELECTIONS_META[currentElectionId];
   const currentColor = elecData?.colors[irisGlobalIdx] || '#9CA3AF';
@@ -845,8 +873,8 @@ function showDesktopCardElec(irisGlobalIdx) {
   }
 
   card.innerHTML = `
-    <div class="name">${cd[0] || 'IRIS inconnu'}</div>
-    <div class="party" style="color:${currentColor}">${(currentParti || '').replace('_',' ')} · ${cd[1] || ''}</div>
+    <div class="name">${cd[1] || cd[0] || 'IRIS inconnu'}</div>
+    <div class="party" style="color:#666;font-size:12px">${cd[19] || ''}</div>
     <div class="row"><span class="lbl">Population :</span> <b>${fmtNum(cd[2], ' hab.')}</b> &nbsp;·&nbsp; <span class="lbl">Âge moyen :</span> <b>${cd[18] !== '' ? Number(cd[18]).toFixed(1) + ' ans' : '—'}</b></div>
     <div class="row"><span class="lbl">Revenu médian :</span> <b>${fmtNum(cd[3], ' €/UC')}</b></div>
     <div class="section-title">Catégories socio-professionnelles</div>
@@ -866,6 +894,114 @@ function showDesktopCardElec(irisGlobalIdx) {
     <div class="dynamic-row"><span class="lbl">Axe X (${currentXVar}) :</span> <b>${xDisp !== undefined ? Number(xDisp).toFixed(3) : '—'}</b></div>
     <div class="dynamic-row"><span class="lbl">Axe Y (${currentYVar}) :</span> <b>${yRaw !== undefined ? Number(yRaw).toFixed(3) : '—'}</b></div>
   `;
+}
+
+// ── Carte MapLibre ────────────────────────────────────────────────────────
+function buildMapGeoJSON() {
+  const elecData = elecCache[currentElectionId];
+  if (!elecData || !IRIS_LAT || !IRIS_LON) return null;
+  const enabledKeys = new Set(btns.filter(b => activeGroups.has(b.key)).map(b => b.key));
+  const features = [];
+  for (let i = 0; i < IRIS_LAT.length; i++) {
+    if (IRIS_LAT[i] === null) continue;
+    const parti = elecData.partis[i];
+    const key = enabledKeys.has(parti) ? parti : (enabledKeys.has('AUTRE') ? 'AUTRE' : null);
+    if (!key) continue;
+    features.push({
+      type: 'Feature',
+      geometry: { type: 'Point', coordinates: [IRIS_LON[i], IRIS_LAT[i]] },
+      properties: { idx: i, color: elecData.colors[i] || '#9CA3AF', size: MARKER_SIZES[i] || 3 }
+    });
+  }
+  return { type: 'FeatureCollection', features };
+}
+
+function updateMapColors() {
+  if (!isCarteActive || !mapReady) return;
+  const gj = buildMapGeoJSON();
+  if (gj) mapInstance.getSource('iris').setData(gj);
+}
+
+function initMap() {
+  if (mapInitialized) return;
+  mapInitialized = true;
+  mapInstance = new maplibregl.Map({
+    container: 'mapDiv',
+    style: 'https://tiles.openfreemap.org/styles/bright',
+    center: [2.35, 46.8],
+    zoom: 5,
+    minZoom: 4,
+    maxZoom: 16,
+    maxBounds: [[-9.5, 36.0], [12.0, 56.0]],
+  });
+  mapInstance.on('load', () => {
+    mapReady = true;
+    // Overlay blanc semi-transparent pour atténuer le fond de carte
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:absolute;inset:0;background:rgba(255,255,255,0.22);pointer-events:none;z-index:2';
+    document.getElementById('mapDiv').appendChild(overlay);
+    mapInstance.addSource('iris', {
+      type: 'geojson',
+      data: { type: 'FeatureCollection', features: [] }
+    });
+    mapInstance.addLayer({
+      id: 'iris-circles',
+      type: 'circle',
+      source: 'iris',
+      paint: {
+        'circle-color': ['get', 'color'],
+        'circle-radius': ['interpolate', ['linear'], ['zoom'],
+          5, ['*', ['get', 'size'], 0.35],
+          10, ['*', ['get', 'size'], 1.3],
+          14, ['*', ['get', 'size'], 2.5]
+        ],
+        'circle-opacity': 0.85,
+        'circle-stroke-width': 0.5,
+        'circle-stroke-color': 'rgba(255,255,255,0.4)',
+      }
+    });
+    mapInstance.on('click', 'iris-circles', e => {
+      const idx = e.features[0].properties.idx;
+      currentClickedGlobalIdx = idx;
+      showDesktopCardElec(idx);
+    });
+    mapInstance.on('mouseenter', 'iris-circles', () => {
+      mapInstance.getCanvas().style.cursor = 'pointer';
+    });
+    mapInstance.on('mouseleave', 'iris-circles', () => {
+      mapInstance.getCanvas().style.cursor = '';
+    });
+    updateMapColors();
+  });
+}
+
+async function showCarte() {
+  isCarteActive = true;
+  document.getElementById('chartDiv').style.display = 'none';
+  document.querySelectorAll('.corner-label').forEach(el => el.style.display = 'none');
+  document.getElementById('axisDesc').style.display = 'none';
+  document.getElementById('mapDiv').style.display = 'block';
+  if (!IRIS_LAT) {
+    document.getElementById('carteLoadingMsg').style.display = 'block';
+    const geoData = await fetch('data/geo.json').then(r => r.json());
+    IRIS_LAT = geoData.lat;
+    IRIS_LON = geoData.lon;
+    document.getElementById('carteLoadingMsg').style.display = 'none';
+  }
+  if (!mapInitialized) {
+    initMap();
+  } else {
+    updateMapColors();
+  }
+}
+
+function hideCarte() {
+  if (!isCarteActive) return;
+  isCarteActive = false;
+  document.getElementById('mapDiv').style.display = 'none';
+  document.getElementById('chartDiv').style.display = 'block';
+  document.querySelectorAll('.corner-label').forEach(el => el.style.display = '');
+  document.getElementById('axisDesc').style.display = '';
 }
 
 // ── Helpers overlay de chargement ─────────────────────────────────────────
