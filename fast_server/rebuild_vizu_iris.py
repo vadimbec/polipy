@@ -1060,6 +1060,7 @@ ELECTIONS_AVAILABLE = {
     '2017_pres_t2': {'type': 'pres', 'year': 2017, 'tour': 2, 'label': 'Présidentielles 2017 — 2e tour'},
     '2020_muni_t1': {'type': 'muni', 'year': 2020, 'tour': 1, 'label': 'Municipales 2020 — 1er tour'},
     '2020_muni_t2': {'type': 'muni', 'year': 2020, 'tour': 2, 'label': 'Municipales 2020 — 2e tour'},
+    '2026_muni_t1': {'type': 'muni', 'year': 2026, 'tour': 1, 'label': 'Municipales 2026 — 1er tour'},
 }
 DEFAULT_ELECTION = '2022_legi_t1'
 

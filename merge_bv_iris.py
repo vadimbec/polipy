@@ -27,8 +27,11 @@ if hasattr(sys.stdout, 'reconfigure'):
 
 # ── CONFIGURATION ─────────────────────────────────────────────────────────────
 
-DEFAULT_CAND   = "resultats_elections/candidats_results.parquet"
-DEFAULT_GEN    = "resultats_elections/general_results.parquet"
+# DEFAULT_CAND   = "resultats_elections/candidats_results.parquet"
+# DEFAULT_GEN    = "resultats_elections/general_results.parquet"
+
+DEFAULT_CAND   = "resultats_elections/candidats_results_2026.parquet"
+DEFAULT_GEN    = "resultats_elections/general_results_2026.parquet"
 DEFAULT_TABLE  = "table_passage_BV_IRIS.csv"
 DEFAULT_OUTDIR = "iris/elections"
 
@@ -45,6 +48,7 @@ DEFAULT_ELECTIONS = [
     "2022_pres_t1", "2022_pres_t2",
     # Municipales
     "2020_muni_t1", "2020_muni_t2",
+    "2026_muni_t1",
 ]
 
 # ── MAPPING NUANCES → PARTIS ───────────────────────────────────────────────────
