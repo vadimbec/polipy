@@ -16,8 +16,12 @@ venv/
 # Jupyter
 .ipynb_checkpoints/
 
-# Generated output
-*.html
+# Generated output except saint_graphique_iris. html et saint_graphique_iris_mobile.html
+output/
+!output/saint_graphique_iris.html
+!output/saint_graphique_iris_mobile.html
+BPE*.html
+desktop.html
 
 # Binary / large formats
 *.parquet
