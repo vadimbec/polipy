@@ -1140,6 +1140,10 @@ q95 = pop.quantile(0.95)
 pop_clipped = pop.clip(q5, q95)
 marker_size = 2.5 + (pop_clipped - q5) / (q95 - q5) * (6 - 2.5)  # 2.5–6px
 
+
+### test
+
+
 # ── 6. JITTER ET DONNÉES PAR VARIABLE ─────────────────────────────────────────
 np.random.seed(42)
 N = len(df)
