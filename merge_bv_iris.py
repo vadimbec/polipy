@@ -246,7 +246,23 @@ def process_election(
     bv_all = bv_base.join(bv_voix, how='left').reset_index()
     bv_all = bv_all.rename(columns={'id_brut_miom': 'ID_BUREAU_VOTE'})
 
-    # ── 6. Merge avec table de passage ─────────────────────────────────────
+    # ── 6. Normaliser les anciens codes BV Paris (arr 2/3/4 renumérotés en 2024) ─
+    # Paris a renuméroté arr2/3/4 entre 2022 et 2024 ; la table de passage utilise
+    # les nouveaux codes. On traduit les anciens → nouveaux pour les élections antérieures.
+    PARIS_BV_REMAP = {
+        # Arr 2 : +10
+        **{f'75056_{arr:02d}{old:02d}': f'75056_{arr:02d}{old+10:02d}'
+           for arr in [2] for old in range(1, 11)},
+        # Arr 3 : +20
+        **{f'75056_{arr:02d}{old:02d}': f'75056_{arr:02d}{old+20:02d}'
+           for arr in [3] for old in range(1, 16)},
+        # Arr 4 : +35
+        **{f'75056_{arr:02d}{old:02d}': f'75056_{arr:02d}{old+35:02d}'
+           for arr in [4] for old in range(1, 15)},
+    }
+    bv_all['ID_BUREAU_VOTE'] = bv_all['ID_BUREAU_VOTE'].replace(PARIS_BV_REMAP)
+
+    # ── 7. Merge avec table de passage ─────────────────────────────────────
     merged = bv_all.merge(passage, on='ID_BUREAU_VOTE', how='inner')
     n_matched = merged['ID_BUREAU_VOTE'].nunique()
     n_total   = len(bv_all)
