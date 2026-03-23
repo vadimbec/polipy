@@ -926,11 +926,9 @@ pop = df['_pop'].copy()
 q5  = pop.quantile(0.05)
 q95 = pop.quantile(0.95)
 pop_clipped = pop.clip(q5, q95)
-lower_size = 1.5
-upper_size = 2.8
+lower_size = 1.2
+upper_size = 2.5
 marker_size = lower_size + (pop_clipped - q5) / (q95 - q5) * (upper_size - lower_size)  # 2.5–4px
-
-###testcommit
 
 # ── 6. JITTER ET DONNÉES PAR VARIABLE ─────────────────────────────────────────
 np.random.seed(42)
