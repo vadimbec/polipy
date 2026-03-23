@@ -3,8 +3,8 @@ set -e
 PYTHON="C:/Users/vbecquet/AppData/Local/miniconda3/envs/vadim_env/python.exe"
 
 # echo "=== Régénération des HTML + JSON ==="
-# $PYTHON fast_server/rebuild_vizu_iris.py
-# $PYTHON fast_server/rebuild_vizu_iris_mobile.py
+$PYTHON fast_server/rebuild_vizu_iris.py
+$PYTHON fast_server/rebuild_vizu_iris_mobile.py
 
 echo "=== Déploiement sur gh-pages ==="
 git checkout gh-pages
