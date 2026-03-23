@@ -22,6 +22,7 @@ output/
 !output/saint_graphique_iris_mobile.html
 BPE*.html
 desktop.html
+*.html
 
 # Binary / large formats
 *.parquet
