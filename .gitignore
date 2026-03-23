@@ -79,6 +79,7 @@ Thumbs.db
 
 #sh
 *.sh
+deploy.sh
 
 #ps1
 *.ps1
