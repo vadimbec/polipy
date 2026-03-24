@@ -1605,14 +1605,23 @@ def build_desktop_html():
     # ── Écriture des fichiers JSON dans data/ ──────────────────────────────
     def _build_geo_centroids(df_arg):
         import geopandas as gpd
-        print("  Calcul des centroïdes IRIS depuis iris-stats.geojson...")
-        gdf = gpd.read_file('iris-stats.geojson')
-        gdf = gdf.set_crs('EPSG:2154', allow_override=True)
-        gdf_wgs = gdf.to_crs('EPSG:4326')
-        gdf_wgs = gdf_wgs.copy()
-        gdf_wgs['lat'] = gdf_wgs.geometry.centroid.y
-        gdf_wgs['lon'] = gdf_wgs.geometry.centroid.x
-        lookup = dict(zip(gdf_wgs['index'].astype(str), zip(gdf_wgs['lat'], gdf_wgs['lon'])))
+        # Source principale : contours_iris_2025.gpkg (EPSG:4326, contient DROM)
+        print("  Calcul des centroïdes IRIS depuis contours_iris_2025.gpkg...")
+        gdf = gpd.read_file('iris/contours_iris_2025.gpkg')
+        centroids = gdf.to_crs('EPSG:2154').geometry.centroid.to_crs('EPSG:4326')
+        gdf['lat'] = centroids.y
+        gdf['lon'] = centroids.x
+        lookup = dict(zip(gdf['CODE_IRIS'].astype(str), zip(gdf['lat'], gdf['lon'])))
+        # Fallback : iris-stats.geojson pour les IRIS manquants
+        missing = [str(c) for c in df_arg['IRIS'] if str(c) not in lookup]
+        if missing:
+            gdf2 = gpd.read_file('iris-stats.geojson')
+            gdf2 = gdf2.set_crs('EPSG:2154', allow_override=True)
+            centroids2 = gdf2.geometry.centroid.to_crs('EPSG:4326')
+            gdf2['lat'] = centroids2.y
+            gdf2['lon'] = centroids2.x
+            for _, row in gdf2[gdf2['index'].astype(str).isin(set(missing))].iterrows():
+                lookup[str(row['index'])] = (row['lat'], row['lon'])
         lats, lons = [], []
         for iris_code in df_arg['IRIS']:
             coords = lookup.get(str(iris_code))
@@ -1739,7 +1748,7 @@ html, body {{ background: #FAF9F7; font-family: 'Helvetica Neue', system-ui, san
 .dom-map-label {{ position: absolute; top: 4px; left: 6px; z-index: 10; font-size: 10px;
                   font-weight: 800; color: #333; background: rgba(255,255,255,0.82);
                   padding: 1px 6px; border-radius: 8px; pointer-events: none; }}
-.dom-map-canvas {{ width: 100%; height: 160px; border-radius: 8px; overflow: hidden;
+.dom-map-canvas {{ width: 100%; height: 185px; border-radius: 8px; overflow: hidden;
                    border: 1px solid #E8E8E8; }}
 .corner-label {{ position: absolute; font-size: 10px; font-weight: 800; line-height: 1.2;
                  pointer-events: none; opacity: 0.65; }}
@@ -1868,7 +1877,6 @@ html, body {{ background: #FAF9F7; font-family: 'Helvetica Neue', system-ui, san
         <div class="dom-map-wrap"><div class="dom-map-label">Martinique</div><div class="dom-map-canvas" id="domMap1"></div></div>
         <div class="dom-map-wrap"><div class="dom-map-label">Guyane</div><div class="dom-map-canvas" id="domMap2"></div></div>
         <div class="dom-map-wrap"><div class="dom-map-label">La Réunion</div><div class="dom-map-canvas" id="domMap3"></div></div>
-        <div class="dom-map-wrap"><div class="dom-map-label">Mayotte</div><div class="dom-map-canvas" id="domMap4"></div></div>
       </div>
       <div class="corner-label corner-tl" id="cornerTL" style="color:{sg['corners'][0]['color']}"></div>
       <div class="corner-label corner-tr" id="cornerTR" style="color:{sg['corners'][1]['color']}"></div>
@@ -1928,7 +1936,6 @@ const DOM_TOM_CONFIGS = [
   {{ id: 'domMap1', center: [-61.0,  14.65], zoom: 9.0, bounds: [[-61.3,14.37],[-60.75,14.90]] }},
   {{ id: 'domMap2', center: [-53.1,   4.0],  zoom: 5.5, bounds: [[-54.6,2.1],[-51.5,5.8]] }},
   {{ id: 'domMap3', center: [55.55, -21.1],  zoom: 8.5, bounds: [[55.21,-21.4],[55.84,-20.87]] }},
-  {{ id: 'domMap4', center: [45.15, -12.85], zoom: 9.5, bounds: [[44.97,-13.0],[45.31,-12.64]] }},
 ];
 let IRIS_INFO = null, IRIS_POPS = null, MARKER_SIZES = null, GROUP_INDICES = null;
 const elecCache = {{}};  // cache élections déjà fetché
