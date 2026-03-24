@@ -54,6 +54,11 @@ LABELS = {
     "JADOT":         "Yannick Jadot",
     "ROUSSEL":       "Fabien Roussel",
     "HIDALGO":       "Anne Hidalgo",
+    # Présidentielles 2012
+    "HOLLANDE":      "François Hollande",
+    "SARKOZY":       "Nicolas Sarkozy",
+    "BAYROU":        "François Bayrou",
+    "JOLY":          "Éva Joly",
 }
 SHORT = {
     "RN":            "RN",
@@ -91,6 +96,11 @@ SHORT = {
     "JADOT":         "Jadot",
     "ROUSSEL":       "Roussel",
     "HIDALGO":       "Hidalgo",
+    # Présidentielles 2012
+    "HOLLANDE":      "Hollande",
+    "SARKOZY":       "Sarkozy",
+    "BAYROU":        "Bayrou",
+    "JOLY":          "Joly",
 }
 # RN/REC/ZEMMOUR/LE_PEN rendered semi-transparent
 OPACITY = {
@@ -100,10 +110,10 @@ OPACITY = {
 ORDER = ["LFI","PCF","EELV","PS","ENS","LR","RN","REC","AUTRE"]
 # ALL_ORDER : tous les partis/candidats possibles (pour créer une trace Plotly par parti)
 ALL_ORDER = [
-    "LFI","MELENCHON","PCF","ROUSSEL","EXG","EELV","JADOT","PS","DVG","HAMON",
+    "LFI","MELENCHON","PCF","ROUSSEL","EXG","EELV","JADOT","JOLY","PS","DVG","HAMON","HOLLANDE",
     "NFP","NUPES","PS_PP","UG",
     "ENS","MODEM","HOR","UDI","MACRON",
-    "LR","DVD","DVC","FILLON","PECRESSE","UXD",
+    "LR","DVD","DVC","FILLON","PECRESSE","SARKOZY","BAYROU","UXD",
     "RN","LE_PEN","REC","EXD","DLF","ZEMMOUR","DUPONT_AIGNAN",
     "REG",
     "HIDALGO",
@@ -150,22 +160,15 @@ SCORES_CONFIG = {
         'neg_vars': ['pct_immigres', 'pct_actifs_velo', 'pct_actifs_transports', 'pct_actifs_marche', 'pct_etudiants', 'P21_ACTOCC15P_ILT1'],
     },
     'score_urbanite': {
-        'pos_vars': ['pct_appart', 'pct_locataires', 'pct_petits_logements',
-                     'pct_voiture_0', 'pct_chauffage_gaz_ville',
-                     'bpe_E_transports_pour1000', 'bpe_total_pour1000'],
-        'neg_vars': ['pct_maison', 'pct_voiture_2plus', 'pct_chauffage_fioul',
-                     'pct_grands_logements', 'surface_moyenne', 'pct_garage'],
+        'pos_vars': ['pct_appart', 'pct_locataires', 'pct_petits_logements', 'pct_voiture_0', 'pct_chauffage_gaz_ville', 'bpe_E_transports_pour1000', 'bpe_total_pour1000'],
+        'neg_vars': ['pct_maison', 'pct_voiture_2plus', 'pct_chauffage_fioul', 'pct_grands_logements', 'surface_moyenne', 'pct_garage'],
     },
     'score_confort_residentiel': {
-        'pos_vars': ['pct_proprietaires', 'pct_grands_logements', 'surface_moyenne',
-                     'pct_garage', 'nb_pieces_moyen', 'pct_logements_5p_plus'],
-        'neg_vars': ['pct_suroccupation', 'pct_petits_logements', 'pct_hlm',
-                     'pct_logvac', 'pct_studios'],
+        'pos_vars': ['pct_proprietaires', 'pct_grands_logements', 'surface_moyenne', 'pct_garage', 'nb_pieces_moyen', 'pct_logements_5p_plus'],
+        'neg_vars': ['pct_suroccupation', 'pct_petits_logements', 'pct_hlm', 'pct_logvac', 'pct_studios'],
     },
     'score_equipement_public': {
-        'pos_vars': ['bpe_total_pour1000', 'bpe_D_sante_pour1000',
-                     'bpe_C_enseignement_pour1000', 'bpe_F_sports_culture_pour1000',
-                     'bpe_A_services_pour1000', 'bpe_B_commerces_pour1000'],
+        'pos_vars': ['bpe_total_pour1000', 'bpe_D_sante_pour1000', 'bpe_C_enseignement_pour1000', 'bpe_F_sports_culture_pour1000', 'bpe_A_services_pour1000', 'bpe_B_commerces_pour1000'],
         'neg_vars': [],
     },
     # ── Scores ACP (composantes principales) ──
@@ -346,81 +349,6 @@ AXIS_PRESETS = [
         }
     },
     {
-        'id': 'urbanisme', 'label': 'Urbanisme', 'emoji': '\U0001f3d7\ufe0f',
-        'xVar': 'score_urbanite', 'xInvert': False,
-        'yVar': 'score_equipement_public',
-        'xTitle': '\u2190 Rural / Pavillonnaire \u2500\u2500\u2500 Urbanit\u00e9 \u2500\u2500\u2500 Urbain dense \u2192',
-        'yTitle': '\u2190 Sous-\u00e9quip\u00e9 \u2500\u2500\u2500 \u00c9quipement public \u2500\u2500\u2500 Bien \u00e9quip\u00e9 \u2192',
-        'xRange': [-50, 50], 'yRange': [-50, 50],
-        'corners': [
-            {'pos': 'tl', 'text': 'RURAL<br>\u00c9QUIP\u00c9', 'color': '#6B8FD4'},
-            {'pos': 'tr', 'text': 'URBAIN<br>\u00c9QUIP\u00c9', 'color': '#E87070'},
-            {'pos': 'bl', 'text': 'RURAL<br>SOUS-\u00c9QUIP\u00c9', 'color': '#C49A30'},
-            {'pos': 'br', 'text': 'URBAIN<br>SOUS-\u00c9QUIP\u00c9', 'color': '#60B87A'},
-        ],
-        'desc': {
-            'title': 'Urbanisme \u2014 Urbanit\u00e9 \u00d7 \u00c9quipement public',
-            'x': '<b>Axe X \u2014 Score d\'urbanit\u00e9</b> : composite int\u00e9grant type de logement, mode de chauffage, motorisation et transports. Gauche = rural/pavillonnaire, droite = urbain dense.',
-            'y': '<b>Axe Y \u2014 Score d\'\u00e9quipement public</b> : composite sant\u00e9, enseignement, sport, commerces, services pour 1000 hab.',
-            'quadrants': {
-                'tl': '<b>Rural \u00e9quip\u00e9</b> \u2014 Bourgs-centres avec bons services malgr\u00e9 l\'habitat pavillonnaire.',
-                'tr': '<b>Urbain \u00e9quip\u00e9</b> \u2014 C\u0153urs de ville denses et bien dot\u00e9s.',
-                'bl': '<b>Rural sous-\u00e9quip\u00e9</b> \u2014 P\u00e9riurbain \u00e9loign\u00e9, d\u00e9serts de services.',
-                'br': '<b>Urbain sous-\u00e9quip\u00e9</b> \u2014 Quartiers denses type grands ensembles, peu de services de proximit\u00e9.',
-            }
-        }
-    },
-    {
-        'id': 'confort', 'label': 'Confort r\u00e9sidentiel', 'emoji': '\U0001f3e0',
-        'xVar': 'score_confort_residentiel', 'xInvert': False,
-        'yVar': 'score_precarite',
-        'xTitle': '\u2190 Parc d\u00e9grad\u00e9 \u2500\u2500\u2500 Confort r\u00e9sidentiel \u2500\u2500\u2500 Parc confortable \u2192',
-        'yTitle': '\u2190 Ais\u00e9 \u2500\u2500\u2500 Pr\u00e9carit\u00e9 \u2500\u2500\u2500 Pr\u00e9caire \u2192',
-        'xRange': [-50, 50], 'yRange': [-50, 50],
-        'corners': [
-            {'pos': 'tl', 'text': 'D\u00c9GRAD\u00c9<br>PR\u00c9CAIRE', 'color': '#E87070'},
-            {'pos': 'tr', 'text': 'CONFORTABLE<br>PR\u00c9CAIRE', 'color': '#C49A30'},
-            {'pos': 'bl', 'text': 'D\u00c9GRAD\u00c9<br>AIS\u00c9', 'color': '#60B87A'},
-            {'pos': 'br', 'text': 'CONFORTABLE<br>AIS\u00c9', 'color': '#6B8FD4'},
-        ],
-        'desc': {
-            'title': 'Confort r\u00e9sidentiel \u00d7 Pr\u00e9carit\u00e9',
-            'x': '<b>Axe X \u2014 Confort r\u00e9sidentiel</b> : composite propri\u00e9t\u00e9, surface, garage, pi\u00e8ces vs suroccupation, HLM, studios, vacance.',
-            'y': '<b>Axe Y \u2014 Pr\u00e9carit\u00e9</b> : composite ch\u00f4mage, prestations sociales, taux de pauvret\u00e9 vs revenu m\u00e9dian.',
-            'quadrants': {
-                'tl': '<b>Parc d\u00e9grad\u00e9 & pr\u00e9caire</b> \u2014 HLM, suroccupation, ch\u00f4mage : quartiers populaires en difficult\u00e9.',
-                'tr': '<b>Confortable & pr\u00e9caire</b> \u2014 Propri\u00e9taires modestes, p\u00e9riurbain peu cher mais d\u00e9pendant de la voiture.',
-                'bl': '<b>D\u00e9grad\u00e9 & ais\u00e9</b> \u2014 Studios \u00e9tudiants, petits logements en centre-ville ais\u00e9.',
-                'br': '<b>Confortable & ais\u00e9</b> \u2014 Quartiers r\u00e9sidentiels bourgeois, grandes propri\u00e9t\u00e9s.',
-            }
-        }
-    },
-    {
-        'id': 'energie', 'label': 'Transition \u00e9nerg\u00e9tique', 'emoji': '\u26a1',
-        'xVar': 'pct_chauffage_fioul', 'xInvert': False,
-        'yVar': 'pct_chauffage_elec',
-        'xTitle': '\u2190 Peu de fioul \u2500\u2500\u2500 Chauffage fioul \u2500\u2500\u2500 Beaucoup de fioul \u2192',
-        'yTitle': '\u2190 Peu \u00e9lectrique \u2500\u2500\u2500 Chauffage \u00e9lectrique \u2500\u2500\u2500 Tr\u00e8s \u00e9lectrique \u2192',
-        'xRange': [0, 60], 'yRange': [0, 80],
-        'corners': [
-            {'pos': 'tl', 'text': 'PEU FIOUL<br>\u00c9LEC', 'color': '#C49A30'},
-            {'pos': 'tr', 'text': 'FIOUL +<br>\u00c9LEC', 'color': '#60B87A'},
-            {'pos': 'bl', 'text': 'PEU FIOUL<br>GAZ/AUTRE', 'color': '#E87070'},
-            {'pos': 'br', 'text': 'FIOUL<br>GAZ/AUTRE', 'color': '#6B8FD4'},
-        ],
-        'desc': {
-            'title': 'Transition \u00e9nerg\u00e9tique \u2014 Fioul \u00d7 \u00c9lectricit\u00e9',
-            'x': '<b>Axe X \u2014 Chauffage fioul</b> : % des RP chauff\u00e9es au fioul. Gauche = transition effectu\u00e9e, droite = forte d\u00e9pendance fioul.',
-            'y': '<b>Axe Y \u2014 Chauffage \u00e9lectrique</b> : % des RP chauff\u00e9es \u00e0 l\'\u00e9lectricit\u00e9.',
-            'quadrants': {
-                'tl': '<b>\u00c9lectrique, peu de fioul</b> \u2014 Logements r\u00e9cents ou r\u00e9nov\u00e9s, transition avanc\u00e9e.',
-                'tr': '<b>Fioul + \u00e9lectricit\u00e9</b> \u2014 Zones mixtes, habitat ancien en partie r\u00e9nov\u00e9.',
-                'bl': '<b>Peu de fioul ni d\'\u00e9lectricit\u00e9</b> \u2014 Urbain dense au gaz de ville ou r\u00e9seau de chaleur.',
-                'br': '<b>Fioul, peu d\'\u00e9lectricit\u00e9</b> \u2014 Rural ancien, passoires thermiques, gaz ou bois.',
-            }
-        }
-    },
-    {
         'id': 'precarite_peripherie',
         'label': 'Fractures territoriales',
         'emoji': '🏘️',
@@ -437,13 +365,13 @@ AXIS_PRESETS = [
         ],
         'desc': {
             'title': 'Fractures territoriales — Precarite x Peripherie-Metropole',
-            'x': "<b>Axe X — Score peripherie-metropole</b> : construit a partir des variables qui separent le mieux les electorats Le Pen/Zemmour (peripherie) de ceux de Macron/Jadot (metropole). A droite : zones periurbaines (voiture, maison, CAP-BEP, fioul). A gauche : centres-villes connectes (BAC+5, cadres, velo, petits logements). Ce score utilise directement l'information electorale pour maximiser la separation.",
+            'x': "<b>Axe X — Score peripherie-metropole</b> : construit a partir des variables qui separent le mieux les electorats Le Pen/Zemmour (peripherie) de ceux de Macron/Jadot (metropole). A droite : zones periurbaines (voiture, maison, CAP-BEP, fioul). A gauche : centres-villes connectes (BAC+5, cadres, velo, petits logements).",
             'y': "<b>Axe Y — Score precarite</b> : composite chomage, minimas sociaux, taux de pauvrete vs revenu median et patrimoine. En haut : zones precaires. En bas : zones aisees.",
             'quadrants': {
-                'tr': '<b>Peripherie precaire</b> — Zones rurales ou periurbaines en difficulte economique. Terre d\'election du RN : cumul de l\'eloignement geographique et de la precarite sociale.',
-                'tl': '<b>Banlieue populaire</b> — Grands ensembles et quartiers denses en difficulte. Fort vote LFI : proximite des services mais forte precarite.',
-                'br': '<b>Periurbain confortable</b> — Lotissements pavillonnaires aises. Vote droite traditionnelle ou RN modere : confort materiel malgre la distance aux centres.',
-                'bl': '<b>Metropole aisee</b> — Centres-villes bourgeois et quartiers connectes. Vote Macron/EELV : cumul du capital culturel, economique et de l\'acces aux services.',
+                'tr': '<b>Peripherie precaire</b> — Zones rurales ou periurbaines en difficulte economique. Terre d\'election du RN.',
+                'tl': '<b>Banlieue populaire</b> — Grands ensembles et quartiers denses en difficulte. Fort vote LFI.',
+                'br': '<b>Periurbain confortable</b> — Lotissements pavillonnaires aises. Vote droite traditionnelle ou RN modere.',
+                'bl': '<b>Metropole aisee</b> — Centres-villes bourgeois et quartiers connectes. Vote Macron/EELV.',
             }
         }
     },
@@ -464,13 +392,13 @@ AXIS_PRESETS = [
         ],
         'desc': {
             'title': 'Analyse en Composantes Principales — PC1 \u00d7 PC2',
-            'x': "<b>Axe X — ACP PC1 : Logement & confort</b> (1\u00e8re composante, ~20% de variance). L'ACP (Analyse en Composantes Principales) cherche les axes de plus grande variabilit\u00e9 dans les donn\u00e9es, sans utiliser d'information \u00e9lectorale. PC1 r\u00e9sume l'opposition entre habitat pavillonnaire propri\u00e9taire et habitat collectif dense. <br><b>+</b> grands logements, garage, voiture, maison, propri\u00e9taires, surface, logements 5 pi\u00e8ces+, 2 voitures+. <br><b>\u2212</b> appartements, locataires, sans voiture, immigr\u00e9s/\u00e9trangers, petits logements, transports en commun, studios.",
-            'y': "<b>Axe Y — ACP PC2 : Composition sociale</b> (2\u00e8me composante, ~12% de variance, orthogonale \u00e0 PC1). S\u00e9pare les zones ouvri\u00e8res pr\u00e9caires des zones de cadres dipl\u00f4m\u00e9s. C'est le clivage de classe au sein de chaque type d'habitat. <br><b>+</b> CAP-BEP, int\u00e9rim, ch\u00f4mage, ouvriers, taux de pauvret\u00e9, aides logement, minimas sociaux, allocations familiales, prestations sociales, sans dipl\u00f4me, imp\u00f4ts faibles. <br><b>\u2212</b> revenu m\u00e9dian, BAC+, cadres sup\u00e9rieurs, BAC+5, revenus d'activit\u00e9, salaires.",
+            'x': "<b>Axe X — ACP PC1 : Logement & confort</b> (1\u00e8re composante). L'ACP cherche les axes de plus grande variabilit\u00e9 sans utiliser l'information \u00e9lectorale. PC1 r\u00e9sume l'opposition entre habitat pavillonnaire et habitat collectif dense. <br><b>+</b> grands logements, garage, voiture, maison, propri\u00e9taires. <br><b>\u2212</b> appartements, locataires, immigr\u00e9s, transports, studios.",
+            'y': "<b>Axe Y — ACP PC2 : Composition sociale</b> (2\u00e8me composante, orthogonale \u00e0 PC1). S\u00e9pare zones ouvri\u00e8res pr\u00e9caires des zones de cadres dipl\u00f4m\u00e9s. <br><b>+</b> CAP-BEP, ch\u00f4mage, ouvriers, minimas sociaux, sans dipl\u00f4me. <br><b>\u2212</b> revenu m\u00e9dian, BAC+, cadres, BAC+5, revenus d'activit\u00e9.",
             'quadrants': {
-                'tr': '<b>Pavillonnaire ouvrier</b> — Lotissements p\u00e9riurbains, population peu qualifi\u00e9e. Zones de la France p\u00e9riph\u00e9rique o\u00f9 le vote RN est fort.',
-                'tl': '<b>HLM pr\u00e9caire</b> — Grands ensembles denses avec forte pr\u00e9carit\u00e9 : quartiers prioritaires, fort vote LFI.',
-                'br': '<b>R\u00e9sidentiel bourgeois</b> — Quartiers verts, grandes propri\u00e9t\u00e9s, cadres sup\u00e9rieurs. Bastions du vote Macron/P\u00e9cresse.',
-                'bl': '<b>Urbain dipl\u00f4m\u00e9</b> — Centres-villes avec jeunes actifs dipl\u00f4m\u00e9s, locataires. \u00c9lectorat EELV/Macron.',
+                'tr': '<b>Pavillonnaire ouvrier</b> — Lotissements p\u00e9riurbains peu qualifi\u00e9s. Vote RN.',
+                'tl': '<b>HLM pr\u00e9caire</b> — Grands ensembles avec forte pr\u00e9carit\u00e9. Vote LFI.',
+                'br': '<b>R\u00e9sidentiel bourgeois</b> — Grandes propri\u00e9t\u00e9s, cadres sup\u00e9rieurs. Vote Macron.',
+                'bl': '<b>Urbain dipl\u00f4m\u00e9</b> — Centres-villes, jeunes actifs. \u00c9lectorat EELV/Macron.',
             }
         }
     },
@@ -486,8 +414,8 @@ AXIS_PRESETS = [
         'corners': [],
         'desc': {
             'title': 't-SNE \u2014 Carte des similarit\u00e9s entre IRIS',
-            'x': "<b>Technique : t-SNE</b> (t-distributed Stochastic Neighbor Embedding) : algorithme de r\u00e9duction non-lin\u00e9aire qui projette les ~80 variables socio-\u00e9conomiques de chaque IRIS en 2 dimensions. Contrairement \u00e0 l'ACP (qui cherche les axes de plus grande <em>variance globale</em>), le t-SNE optimise la pr\u00e9servation des <em>voisinages locaux</em> : il place proches sur la carte les IRIS qui se ressemblent, m\u00eame si leurs profils ne varient pas beaucoup \u00e0 l'\u00e9chelle nationale. Param\u00e8tres utilis\u00e9s : perplexit\u00e9=30, 1000 it\u00e9rations, initialisation par ACP \u00e0 20 composantes.",
-            'y': "<b>Comment lire cette carte</b> : les axes X et Y n'ont aucune signification propre (on ne peut pas dire \u00ab plus \u00e0 droite = plus riche \u00bb). Ce qui compte, ce sont les <em>regroupements visuels</em> : un amas compact = un type de territoire sociologiquement coh\u00e9rent. Les couleurs des partis dominants r\u00e9v\u00e8lent comment le vote s'organise dans cet espace. Limite : le t-SNE ne pr\u00e9serve pas bien les distances entre groupes \u00e9loign\u00e9s \u2014 voir UMAP pour \u00e7a.",
+            'x': "<b>Technique : t-SNE</b> (t-distributed Stochastic Neighbor Embedding) : projette les ~80 variables socio-\u00e9conomiques en 2D en pr\u00e9servant les <em>voisinages locaux</em>. Deux IRIS proches sur cette carte ont des profils sociologiques similaires.",
+            'y': "<b>Comment lire</b> : les axes X et Y n'ont aucune signification propre. Ce qui compte, ce sont les <em>regroupements visuels</em>. Les couleurs r\u00e9v\u00e8lent comment le vote s'organise dans cet espace.",
             'quadrants': {}
         }
     },
@@ -502,9 +430,9 @@ AXIS_PRESETS = [
         'xRange': None, 'yRange': None,
         'corners': [],
         'desc': {
-            'title': 'UMAP \u2014 Topologie des territoires fran\u00e7ais',
-            'x': "<b>Technique : UMAP</b> (Uniform Manifold Approximation and Projection) : comme le t-SNE, l'UMAP projette les ~80 variables socio-\u00e9conomiques en 2D, mais avec deux avantages : il pr\u00e9serve \u00e0 la fois la structure <em>locale</em> (les IRIS similaires sont proches) ET <em>globale</em> (les distances entre groupes \u00e9loign\u00e9s restent interpr\u00e9tables). Deux amas s\u00e9par\u00e9s sur cette carte correspondent \u00e0 des types de territoires v\u00e9ritablement diff\u00e9rents. Param\u00e8tres : n_neighbors=15, min_dist=0.1, m\u00e9trique euclidienne apr\u00e8s r\u00e9duction PCA \u00e0 20 composantes.",
-            'y': "<b>Comment lire cette carte</b> : les axes X et Y n'ont aucune signification propre. L'int\u00e9r\u00eat est dans la <em>topologie</em> : la forme des amas, leur s\u00e9paration, les ponts entre types de territoires. L'UMAP tend \u00e0 produire des groupes plus nets et plus s\u00e9par\u00e9s que le t-SNE, ce qui facilite l'identification des grands types de territoires fran\u00e7ais et de leur vote. Les couleurs r\u00e9v\u00e8lent comment l'espace sociologique se partitionne \u00e9lectoralement.",
+            'title': 'UMAP \u2014 Topologie des territoires',
+            'x': "<b>Technique : UMAP</b> (Uniform Manifold Approximation and Projection) : comme le t-SNE mais pr\u00e9serve aussi la structure <em>globale</em>. Deux amas \u00e9loign\u00e9s = territoires v\u00e9ritablement diff\u00e9rents.",
+            'y': "<b>Comment lire</b> : les axes n'ont pas de signification propre. L'int\u00e9r\u00eat est dans la topologie : forme des amas, s\u00e9paration, ponts entre types de territoires.",
             'quadrants': {}
         }
     },
@@ -746,129 +674,6 @@ VAR_LABELS = {
     'P21_ACT_SUP2':             'Actifs 15-64 ans titulaires BAC+2',
     'P21_ACT_SUP34':            'Actifs 15-64 ans titulaires BAC+3 ou BAC+4',
     'P21_ACT_SUP5':             'Actifs 15-64 ans titulaires BAC+5 ou plus',
-    # ── Structure démographique 2020 (base-ic-evol-struct-pop-2020) ────────────
-    'pop_totale':               'Population totale (2021)',
-    'age_moyen':                'Âge moyen de la population (2021)',
-    'pct_0_19':                 '% population 0-19 ans (2021)',
-    'pct_20_64':                '% population 20-64 ans (2021)',
-    'pct_65_plus':              '% population 65 ans et plus (2021)',
-    'pct_etrangers':            '% population de nationalité étrangère (2021)',
-    'pct_immigres':             '% population immigrée (2021)',
-    'pct_femmes':               '% population féminine (2021)',
-    'taille_menage_moy':        'Taille moyenne des ménages (2021)',
-    'pct_hors_menage':          '% vivant hors ménage (institutions, EHPAD, prisons…) (2021)',
-    'ecart_csp_plus_hf':        'Écart H/F dans les cadres CSP+ (pts %, positif = plus d\'hommes) (2021)',
-    # ── Effectifs bruts population 2020 ────────────────────────────────────────
-    'P21_POP':                  'Population en 2021',
-    'P21_POP0002':              'Nombre de personnes de 0 à 2 ans (2021)',
-    'P21_POP0305':              'Nombre de personnes de 3 à 5 ans (2021)',
-    'P21_POP0610':              'Nombre de personnes de 6 à 10 ans (2021)',
-    'P21_POP1117':              'Nombre de personnes de 11 à 17 ans (2021)',
-    'P21_POP1824':              'Nombre de personnes de 18 à 24 ans (2021)',
-    'P21_POP2539':              'Nombre de personnes de 25 à 39 ans (2021)',
-    'P21_POP4054':              'Nombre de personnes de 40 à 54 ans (2021)',
-    'P21_POP5564':              'Nombre de personnes de 55 à 64 ans (2021)',
-    'P21_POP6579':              'Nombre de personnes de 65 à 79 ans (2021)',
-    'P21_POP80P':               'Nombre de personnes de 80 ans ou plus (2021)',
-    'P21_POP0014':              'Nombre de personnes de 0 à 14 ans (2021)',
-    'P21_POP1529':              'Nombre de personnes de 15 à 29 ans (2021)',
-    'P21_POP3044':              'Nombre de personnes de 30 à 44 ans (2021)',
-    'P21_POP4559':              'Nombre de personnes de 45 à 59 ans (2021)',
-    'P21_POP6074':              'Nombre de personnes de 60 à 74 ans (2021)',
-    'P21_POP75P':               'Nombre de personnes de 75 ans ou plus (2021)',
-    'P21_POP0019':              'Nombre de personnes de 0 à 19 ans (2021)',
-    'P21_POP2064':              'Nombre de personnes de 20 à 64 ans (2021)',
-    'P21_POP65P':               'Nombre de personnes de 65 ans ou plus (2021)',
-    'P21_POPH':                 'Nombre d\'hommes (2021)',
-    'P21_H0014':                'Nombre d\'hommes de 0 à 14 ans (2021)',
-    'P21_H1529':                'Nombre d\'hommes de 15 à 29 ans (2021)',
-    'P21_H3044':                'Nombre d\'hommes de 30 à 44 ans (2021)',
-    'P21_H4559':                'Nombre d\'hommes de 45 à 59 ans (2021)',
-    'P21_H6074':                'Nombre d\'hommes de 60 à 74 ans (2021)',
-    'P21_H75P':                 'Nombre d\'hommes de 75 ans ou plus (2021)',
-    'P21_H0019':                'Nombre d\'hommes de 0 à 19 ans (2021)',
-    'P21_H2064':                'Nombre d\'hommes de 20 à 64 ans (2021)',
-    'P21_H65P':                 'Nombre d\'hommes de 65 ans ou plus (2021)',
-    'P21_POPF':                 'Nombre de femmes (2021)',
-    'P21_F0014':                'Nombre de femmes de 0 à 14 ans (2021)',
-    'P21_F1529':                'Nombre de femmes de 15 à 29 ans (2021)',
-    'P21_F3044':                'Nombre de femmes de 30 à 44 ans (2021)',
-    'P21_F4559':                'Nombre de femmes de 45 à 59 ans (2021)',
-    'P21_F6074':                'Nombre de femmes de 60 à 74 ans (2021)',
-    'P21_F75P':                 'Nombre de femmes de 75 ans ou plus (2021)',
-    'P21_F0019':                'Nombre de femmes de 0 à 19 ans (2021)',
-    'P21_F2064':                'Nombre de femmes de 20 à 64 ans (2021)',
-    'P21_F65P':                 'Nombre de femmes de 65 ans ou plus (2021)',
-    'P21_POP_FR':               'Nombre de personnes de nationalité française (2021)',
-    'P21_POP_ETR':              'Nombre de personnes étrangères (2021)',
-    'P21_POP_IMM':              'Nombres de personnes immigrées (2021)',
-    'P21_PMEN':                 'Population des ménages (2021)',
-    'P21_PHORMEN':              'Population hors ménages (2021)',
-    # ── CSP population 15 ans et plus 2021 (C21_) ──────────────────────────────
-    'C21_POP15P':               'Nombre de personnes de 15 ans ou plus (2021)',
-    'C21_POP15P_CS1':           'Nombre de personnes 15+ agriculteurs exploitants (2021)',
-    'C21_POP15P_CS2':           'Nombre de personnes 15+ artisans, commerçants, chefs d\'entreprise (2021)',
-    'C21_POP15P_CS3':           'Nombre de personnes 15+ cadres et professions intellectuelles supérieures (2021)',
-    'C21_POP15P_CS4':           'Nombre de personnes 15+ professions intermédiaires (2021)',
-    'C21_POP15P_CS5':           'Nombre de personnes 15+ employés (2021)',
-    'C21_POP15P_CS6':           'Nombre de personnes 15+ ouvriers (2021)',
-    'C21_POP15P_CS7':           'Nombre de personnes 15+ retraités (2021)',
-    'C21_POP15P_CS8':           'Nombre de personnes 15+ autres sans activité professionnelle (2021)',
-    'C21_H15P':                 'Nombre d\'hommes de 15 ans ou plus (2021)',
-    'C21_H15P_CS1':             'Nombre d\'hommes 15+ agriculteurs exploitants (2021)',
-    'C21_H15P_CS2':             'Nombre d\'hommes 15+ artisans, commerçants, chefs d\'entreprise (2021)',
-    'C21_H15P_CS3':             'Nombre d\'hommes 15+ cadres et professions intellectuelles supérieures (2021)',
-    'C21_H15P_CS4':             'Nombre d\'hommes 15+ professions intermédiaires (2021)',
-    'C21_H15P_CS5':             'Nombre d\'hommes 15+ employés (2021)',
-    'C21_H15P_CS6':             'Nombre d\'hommes 15+ ouvriers (2021)',
-    'C21_H15P_CS7':             'Nombre d\'hommes 15+ retraités (2021)',
-    'C21_H15P_CS8':             'Nombre d\'hommes 15+ autres sans activité professionnelle (2021)',
-    'C21_F15P':                 'Nombre de femmes de 15 ans ou plus (2021)',
-    'C21_F15P_CS1':             'Nombre de femmes 15+ agriculteurs exploitants (2021)',
-    'C21_F15P_CS2':             'Nombre de femmes 15+ artisans, commerçants, chefs d\'entreprise (2021)',
-    'C21_F15P_CS3':             'Nombre de femmes 15+ cadres et professions intellectuelles supérieures (2021)',
-    'C21_F15P_CS4':             'Nombre de femmes 15+ professions intermédiaires (2021)',
-    'C21_F15P_CS5':             'Nombre de femmes 15+ employés (2021)',
-    'C21_F15P_CS6':             'Nombre de femmes 15+ ouvriers (2021)',
-    'C21_F15P_CS7':             'Nombre de femmes 15+ retraités (2021)',
-    'C21_F15P_CS8':             'Nombre de femmes 15+ autres sans activité professionnelle (2021)',
-    # ── Logement (2022) ──
-    'pct_proprietaires':        '% résidences principales occupées par propriétaires (2022)',
-    'pct_locataires':           '% résidences principales en location (2022)',
-    'pct_hlm':                  '% résidences principales en HLM (2022)',
-    'pct_logvac':               '% logements vacants (2022)',
-    'pct_maison':               '% maisons (vs appartements) (2022)',
-    'pct_appart':               '% appartements (2022)',
-    'pct_petits_logements':     '% logements < 40 m² (2022)',
-    'pct_grands_logements':     '% logements ≥ 120 m² (2022)',
-    'pct_logements_anciens':    '% logements construits avant 1919 (2022)',
-    'pct_logements_recents':    '% logements construits 2006-2018 (2022)',
-    'pct_voiture_0':            '% ménages sans voiture (2022)',
-    'pct_voiture_2plus':        '% ménages avec 2 voitures ou plus (2022)',
-    'surface_moyenne':          'Surface moyenne des résidences principales en m² (2022)',
-    'pct_suroccupation':        '% résidences principales en suroccupation (2022)',
-    'pct_chauffage_elec':       '% RP chauffées à l\'électricité (2022)',
-    'pct_chauffage_fioul':      '% RP chauffées au fioul (2022)',
-    'pct_chauffage_gaz_ville':  '% RP chauffées au gaz de ville / réseau de chaleur (2022)',
-    'pct_chauffage_gaz_bouteille':'% RP chauffées au gaz bouteille/citerne (2022)',
-    'pct_chauffage_autre':      '% RP chauffées à un autre combustible (bois, charbon…) (2022)',
-    'pct_garage':               '% RP disposant d\'un stationnement réservé (2022)',
-    'nb_pieces_moyen':          'Nombre moyen de pièces par résidence principale (2022)',
-    'pct_studios':              '% RP d\'une seule pièce — studios (2022)',
-    'pct_logements_5p_plus':    '% RP de 5 pièces ou plus (2022)',
-    # ── Équipements BPE (2024) ──
-    'bpe_total_pour1000':           'Équipements totaux pour 1000 habitants (BPE 2024)',
-    'bpe_A_services_pour1000':      'Services (police, poste, banque…) pour 1000 hab. (BPE 2024)',
-    'bpe_B_commerces_pour1000':     'Commerces (supermarchés, boulangeries…) pour 1000 hab. (BPE 2024)',
-    'bpe_C_enseignement_pour1000':  'Enseignement (écoles, collèges…) pour 1000 hab. (BPE 2024)',
-    'bpe_D_sante_pour1000':         'Santé (médecins, pharmacies…) pour 1000 hab. (BPE 2024)',
-    'bpe_E_transports_pour1000':    'Transports (gares, taxis…) pour 1000 hab. (BPE 2024)',
-    'bpe_F_sports_culture_pour1000':'Sports, loisirs, culture pour 1000 hab. (BPE 2024)',
-    'bpe_G_tourisme_pour1000':      'Tourisme pour 1000 hab. (BPE 2024)',
-    'bpe_educ_prioritaire_pour1000':'Établissements en éducation prioritaire pour 1000 hab. (BPE 2024)',
-    'bpe_ecole_privee_pour1000':    'Écoles privées pour 1000 hab. (BPE 2024)',
-    'bpe_sport_indoor_pour1000':    'Équipements sportifs couverts pour 1000 hab. (BPE 2024)',
-    'pct_sport_accessible':         '% équipements sportifs accessibles PMR (BPE 2024)',
 }
 
 ALL_VARS = []
@@ -879,7 +684,9 @@ for cat_vars in VARS_BY_CAT.values():
 
 # ── 1. CHARGEMENT DES DONNÉES ─────────────────────────────────────────────────
 # Source unique : iris_final_socio_politique.csv contient toutes les colonnes nécessaires
-df_socio = pd.read_csv("iris/iris_final_socio_politique_bis.csv", low_memory=False)
+df_socio = pd.read_csv("iris/iris_final_socio_politique.csv", low_memory=False)
+# df_socio = pd.read_csv("iris/iris_final_socio_politique_bis.csv", low_memory=False)
+
 # On garde aussi les coordonnées pour AXE_X / AXE_Y (optionnel)
 # mais toutes les variables clés sont dans df_socio
 df = df_socio.copy()
@@ -982,11 +789,14 @@ for score_name, cfg in SCORES_CONFIG.items():
 
 # ── 4. PARTI DOMINANT PAR IRIS ────────────────────────────────────────────────
 score_party_cols = [c for c in df.columns if c.startswith('score_') and c[6:] in ALL_ORDER]
+score_party_cols = [c for c in score_party_cols if c in df.columns]
+for c in score_party_cols:
+    df[c] = pd.to_numeric(df[c], errors='coerce').fillna(0.0)
+
 if score_party_cols:
-    for c in score_party_cols:
-        df[c] = pd.to_numeric(df[c], errors='coerce').fillna(0.0)
     party_map = {c: c[6:] for c in score_party_cols}  # 'score_RN' → 'RN'
     df['parti_dominant'] = df[score_party_cols].idxmax(axis=1).map(party_map).fillna('AUTRE')
+    # IRIS with all-zero scores → AUTRE
     all_zero = (df[score_party_cols] == 0).all(axis=1)
     df.loc[all_zero, 'parti_dominant'] = 'AUTRE'
 else:
@@ -1036,6 +846,11 @@ ALL_PARTIES_COLORS = {
     'FILLON':       '#1D4ED8',
     'HAMON':        '#EC4899',
     'DUPONT_AIGNAN':'#6B7280',
+    # Présidentielles 2012
+    'HOLLANDE':     '#EC4899',
+    'SARKOZY':      '#1D4ED8',
+    'BAYROU':       '#FB923C',
+    'JOLY':         '#16A34A',
     # Présidentielles 2022
     'ZEMMOUR':      '#0F172A',
     'PECRESSE':     '#3B82F6',
@@ -1053,15 +868,25 @@ ELECTIONS_AVAILABLE = {
     '2024_legi_t2': {'type': 'legi', 'year': 2024, 'tour': 2, 'label': 'Législatives 2024 — 2e tour'},
     '2017_legi_t1': {'type': 'legi', 'year': 2017, 'tour': 1, 'label': 'Législatives 2017 — 1er tour'},
     '2017_legi_t2': {'type': 'legi', 'year': 2017, 'tour': 2, 'label': 'Législatives 2017 — 2e tour'},
+    '2012_legi_t1': {'type': 'legi', 'year': 2012, 'tour': 1, 'label': 'Législatives 2012 — 1er tour'},
+    '2012_legi_t2': {'type': 'legi', 'year': 2012, 'tour': 2, 'label': 'Législatives 2012 — 2e tour'},
     '2024_euro_t1': {'type': 'euro', 'year': 2024, 'tour': 1, 'label': 'Européennes 2024'},
+    '2019_euro_t1': {'type': 'euro', 'year': 2019, 'tour': 1, 'label': 'Européennes 2019'},
+    '2014_euro_t1': {'type': 'euro', 'year': 2014, 'tour': 1, 'label': 'Européennes 2014'},
     '2022_pres_t1': {'type': 'pres', 'year': 2022, 'tour': 1, 'label': 'Présidentielles 2022 — 1er tour'},
     '2022_pres_t2': {'type': 'pres', 'year': 2022, 'tour': 2, 'label': 'Présidentielles 2022 — 2e tour'},
     '2017_pres_t1': {'type': 'pres', 'year': 2017, 'tour': 1, 'label': 'Présidentielles 2017 — 1er tour'},
     '2017_pres_t2': {'type': 'pres', 'year': 2017, 'tour': 2, 'label': 'Présidentielles 2017 — 2e tour'},
+    '2012_pres_t1': {'type': 'pres', 'year': 2012, 'tour': 1, 'label': 'Présidentielles 2012 — 1er tour'},
+    '2012_pres_t2': {'type': 'pres', 'year': 2012, 'tour': 2, 'label': 'Présidentielles 2012 — 2e tour'},
+    '2014_muni_t1': {'type': 'muni', 'year': 2014, 'tour': 1, 'label': 'Municipales 2014 — 1er tour'},
+    '2014_muni_t2': {'type': 'muni', 'year': 2014, 'tour': 2, 'label': 'Municipales 2014 — 2e tour'},
     '2020_muni_t1': {'type': 'muni', 'year': 2020, 'tour': 1, 'label': 'Municipales 2020 — 1er tour'},
     '2020_muni_t2': {'type': 'muni', 'year': 2020, 'tour': 2, 'label': 'Municipales 2020 — 2e tour'},
     '2026_muni_t1': {'type': 'muni', 'year': 2026, 'tour': 1, 'label': 'Municipales 2026 — 1er tour'},
+    '2026_muni_t2': {'type': 'muni', 'year': 2026, 'tour': 2, 'label': 'Municipales 2026 — 2e tour'},
 }
+
 DEFAULT_ELECTION = '2022_legi_t1'
 
 
@@ -1138,7 +963,9 @@ pop = df['_pop'].copy()
 q5  = pop.quantile(0.05)
 q95 = pop.quantile(0.95)
 pop_clipped = pop.clip(q5, q95)
-marker_size = 2.5 + (pop_clipped - q5) / (q95 - q5) * (6 - 2.5)  # 2.5–6px
+lower_size = 1.2
+upper_size = 2.5
+marker_size = lower_size + (pop_clipped - q5) / (q95 - q5) * (upper_size - lower_size)  # 2.5–4px
 
 # ── 6. JITTER ET DONNÉES PAR VARIABLE ─────────────────────────────────────────
 np.random.seed(42)
@@ -1334,11 +1161,38 @@ def _round2(arr):
 def _round3(arr):
     return [round(float(v), 3) for v in arr]
 
-# Composite score vars get 3 decimals; age_moyen gets 1 decimal; pct vars get 0 (integer %)
-_COMPOSITE_VARS = set(VARS_BY_CAT.get('Scores composites', []))
-_ONE_DECIMAL_VARS = {'age_moyen', 'pct_etrangers', 'pct_immigres'}
-_COMPOSITE_VARS = _COMPOSITE_VARS | {'tsne_x', 'tsne_y', 'umap_x', 'umap_y'}
+def _round_bary(bm):
+    result = {}
+    for g, vars_dict in bm.items():
+        result[g] = {v: round(float(val), 3) for v, val in vars_dict.items()}
+    return result
 
+# Composite score vars get 3 decimals; age_moyen gets 1 decimal; pct vars get 0 (integer %)
+_COMPOSITE_VARS = set(VARS_BY_CAT.get('Scores composites', [])) | {'tsne_x', 'tsne_y', 'umap_x', 'umap_y'}
+_ONE_DECIMAL_VARS = {'age_moyen', 'pct_etrangers', 'pct_immigres'}
+
+def _build_js_data():
+    gd_x_js = {}
+    gd_y_js = {}
+    for g in ORDER:
+        if g not in group_data_x:
+            continue
+        gd_x_js[g] = {}
+        gd_y_js[g] = {}
+        for v, arr in group_data_x[g].items():
+            fn = _round3 if v in _COMPOSITE_VARS else (_round1 if v in _ONE_DECIMAL_VARS else _round0)
+            gd_x_js[g][v] = fn(arr)
+        for v, arr in group_data_y[g].items():
+            fn = _round3 if v in _COMPOSITE_VARS else (_round1 if v in _ONE_DECIMAL_VARS else _round0)
+            gd_y_js[g][v] = fn(arr)
+    return (
+        _json.dumps(gd_x_js, ensure_ascii=False, separators=(',', ':')),
+        _json.dumps(gd_y_js, ensure_ascii=False, separators=(',', ':')),
+        _json.dumps(_round_bary(bary_means), ensure_ascii=False, separators=(',', ':')),
+        _json.dumps(AXIS_PRESETS, ensure_ascii=False),
+        _json.dumps(VARS_BY_CAT, ensure_ascii=False),
+        _json.dumps(VAR_LABELS, ensure_ascii=False),
+    )
 
 _DEP_NAMES = {
     '01':'Ain','02':'Aisne','03':'Allier','04':'Alpes-de-Haute-Provence','05':'Hautes-Alpes',
@@ -1537,51 +1391,25 @@ VOTE_PARTIES_JS = [
 
 
 
-# ── 12. BUILD DESKTOP HTML ─────────────────────────────────────────────────────
-def build_desktop_html():
-    traces = _build_trace_data_single()
 
-    fig = go.Figure()
-    fig.add_vline(x=0, line_dash="dot", line_color="#BBBBBB", line_width=1.5)
-    fig.add_hline(y=0, line_dash="dot", line_color="#BBBBBB", line_width=1.5)
-    for tr in traces:
-        fig.add_trace(tr)
-    fig.update_layout(
-        paper_bgcolor="#FAF9F7", plot_bgcolor="#FEFDFB",
-        margin=dict(t=20, b=60, l=70, r=30),
-        dragmode="pan",
-        xaxis=dict(
-            title=dict(text=AXIS_PRESETS[0]['xTitle'],
-                       font=dict(size=11, color="#555", family="Helvetica Neue, sans-serif"), standoff=10),
-            range=AXIS_PRESETS[0]['xRange'],
-            showgrid=True, gridcolor="#EBEBEB", gridwidth=0.8, zeroline=False,
-            tickfont=dict(size=9.5, color="#AAA"), linecolor="#DDD", linewidth=1),
-        yaxis=dict(
-            title=dict(text=AXIS_PRESETS[0]['yTitle'],
-                       font=dict(size=11, color="#555", family="Helvetica Neue, sans-serif"), standoff=8),
-            range=AXIS_PRESETS[0]['yRange'],
-            showgrid=True, gridcolor="#EBEBEB", gridwidth=0.8, zeroline=False,
-            tickfont=dict(size=9.5, color="#AAA"), linecolor="#DDD", linewidth=1),
-        showlegend=False,
-        hoverlabel=dict(bgcolor="rgba(255,255,255,0.97)", bordercolor="#E0E0E0",
-                        font=dict(size=12, family="Helvetica Neue, sans-serif", color="#1a1a1a")),
-    )
-    fig_json = fig.to_json()
 
-    # ── Sérialisation données ───────────────────────────────────────────────
-    import math, os as _os
+# ── 12. BUILD MOBILE HTML ─────────────────────────────────────────────────────
+def build_mobile_html():
+    import math
     def _is_nan(v):
         return v is None or (isinstance(v, float) and math.isnan(v))
 
-    # Données socio (IRIS_X / IRIS_Y) → fichiers JSON externes
+    traces = _build_trace_data_single()
+
+    # Données socio (IRIS_X / IRIS_Y) → fichiers JSON externes (précision réduite mobile)
+    import math as _math2, os as _os
     iris_x_js = {}
     iris_y_js = {}
     for v in var_data_x:
-        fn = _round3 if v in _COMPOSITE_VARS else _round2
+        fn = _round3 if v in _COMPOSITE_VARS else (_round1 if v in _ONE_DECIMAL_VARS else _round0)
         iris_x_js[v] = fn(var_data_x[v])
         iris_y_js[v] = fn(var_data_y[v])
 
-    # Données électorales → fichiers JSON externes (un par élection)
     iris_elec = {}
     for eid_s, data_list in iris_election_data.items():
         iris_elec[eid_s] = {
@@ -1596,7 +1424,6 @@ def build_desktop_html():
             **iris_election_precomputed.get(eid_s, {}),
         }
 
-    # IRIS info, populations, marker sizes
     all_customdata = _make_customdata(df)
     iris_pops = [int(round(float(v))) for v in df['_pop'].fillna(1).tolist()]
     marker_sizes_list = [round(float(marker_size.loc[i]), 1) for i in df.index]
@@ -1605,23 +1432,14 @@ def build_desktop_html():
     # ── Écriture des fichiers JSON dans data/ ──────────────────────────────
     def _build_geo_centroids(df_arg):
         import geopandas as gpd
-        # Source principale : contours_iris_2025.gpkg (EPSG:4326, contient DROM)
-        print("  Calcul des centroïdes IRIS depuis contours_iris_2025.gpkg...")
-        gdf = gpd.read_file('iris/contours_iris_2025.gpkg')
-        centroids = gdf.to_crs('EPSG:2154').geometry.centroid.to_crs('EPSG:4326')
-        gdf['lat'] = centroids.y
-        gdf['lon'] = centroids.x
-        lookup = dict(zip(gdf['CODE_IRIS'].astype(str), zip(gdf['lat'], gdf['lon'])))
-        # Fallback : iris-stats.geojson pour les IRIS manquants
-        missing = [str(c) for c in df_arg['IRIS'] if str(c) not in lookup]
-        if missing:
-            gdf2 = gpd.read_file('iris-stats.geojson')
-            gdf2 = gdf2.set_crs('EPSG:2154', allow_override=True)
-            centroids2 = gdf2.geometry.centroid.to_crs('EPSG:4326')
-            gdf2['lat'] = centroids2.y
-            gdf2['lon'] = centroids2.x
-            for _, row in gdf2[gdf2['index'].astype(str).isin(set(missing))].iterrows():
-                lookup[str(row['index'])] = (row['lat'], row['lon'])
+        print("  Calcul des centroïdes IRIS depuis iris-stats.geojson...")
+        gdf = gpd.read_file('iris-stats.geojson')
+        gdf = gdf.set_crs('EPSG:2154', allow_override=True)
+        gdf_wgs = gdf.to_crs('EPSG:4326')
+        gdf_wgs = gdf_wgs.copy()
+        gdf_wgs['lat'] = gdf_wgs.geometry.centroid.y
+        gdf_wgs['lon'] = gdf_wgs.geometry.centroid.x
+        lookup = dict(zip(gdf_wgs['index'].astype(str), zip(gdf_wgs['lat'], gdf_wgs['lon'])))
         lats, lons = [], []
         for iris_code in df_arg['IRIS']:
             coords = lookup.get(str(iris_code))
@@ -1635,17 +1453,20 @@ def build_desktop_html():
 
     _os.makedirs('data', exist_ok=True)
 
-    # static.json : IRIS_INFO + IRIS_POPS + MARKER_SIZES + GROUP_INDICES
-    _static = {
-        'IRIS_INFO': all_customdata,
-        'IRIS_POPS': iris_pops,
-        'MARKER_SIZES': marker_sizes_list,
-        'GROUP_INDICES': group_indices,
-    }
-    _path = 'data/static.json'
-    with open(_path, 'w', encoding='utf-8') as _f:
-        _json.dump(_static, _f, ensure_ascii=False, separators=(',', ':'))
-    print(f"  data/static.json : {_os.path.getsize(_path)//1024} KB")
+    # static.json (partagé avec desktop — ne réécrire que si absent ou si desktop a déjà écrit)
+    _static_path = 'data/static.json'
+    if not _os.path.exists(_static_path):
+        _static = {
+            'IRIS_INFO': all_customdata,
+            'IRIS_POPS': iris_pops,
+            'MARKER_SIZES': marker_sizes_list,
+            'GROUP_INDICES': group_indices,
+        }
+        with open(_static_path, 'w', encoding='utf-8') as _f:
+            _json.dump(_static, _f, ensure_ascii=False, separators=(',', ':'))
+        print(f"  data/static.json : {_os.path.getsize(_static_path)//1024} KB")
+    else:
+        print(f"  data/static.json : déjà présent ({_os.path.getsize(_static_path)//1024} KB)")
 
     _geo_path = 'data/geo.json'
     if not _os.path.exists(_geo_path):
@@ -1656,22 +1477,23 @@ def build_desktop_html():
     else:
         print(f"  data/geo.json : déjà présent ({_os.path.getsize(_geo_path)//1024} KB)")
 
-    # Un fichier par élection
+    # Fichiers élection (partagés avec desktop)
     for eid_s, elec_obj in iris_elec.items():
         _path = f'data/elec_{eid_s}.json'
-        with open(_path, 'w', encoding='utf-8') as _f:
-            _json.dump(elec_obj, _f, ensure_ascii=False, separators=(',', ':'))
-        print(f"  data/elec_{eid_s}.json : {_os.path.getsize(_path)//1024} KB")
+        if not _os.path.exists(_path):
+            with open(_path, 'w', encoding='utf-8') as _f:
+                _json.dump(elec_obj, _f, ensure_ascii=False, separators=(',', ':'))
+            print(f"  data/elec_{eid_s}.json : {_os.path.getsize(_path)//1024} KB")
 
-    # iris_x_desktop.json et iris_y_desktop.json
-    _path = 'data/iris_x_desktop.json'
+    # iris_x_mobile.json et iris_y_mobile.json (précision réduite)
+    _path = 'data/iris_x_mobile.json'
     with open(_path, 'w', encoding='utf-8') as _f:
         _json.dump(iris_x_js, _f, separators=(',', ':'))
-    print(f"  data/iris_x_desktop.json : {_os.path.getsize(_path)//1024} KB")
-    _path = 'data/iris_y_desktop.json'
+    print(f"  data/iris_x_mobile.json : {_os.path.getsize(_path)//1024} KB")
+    _path = 'data/iris_y_mobile.json'
     with open(_path, 'w', encoding='utf-8') as _f:
         _json.dump(iris_y_js, _f, separators=(',', ':'))
-    print(f"  data/iris_y_desktop.json : {_os.path.getsize(_path)//1024} KB")
+    print(f"  data/iris_y_mobile.json : {_os.path.getsize(_path)//1024} KB")
 
     # ── Métadonnées inline (petites, <500 KB) ─────────────────────────────
     elections_meta_str = _json.dumps(ELECTIONS_AVAILABLE, ensure_ascii=False, separators=(',', ':'))
@@ -1683,11 +1505,37 @@ def build_desktop_html():
     vote_parties_str = _json.dumps(VOTE_PARTIES_JS, separators=(',', ':'))
     all_parties_colors_str = _json.dumps(ALL_PARTIES_COLORS, ensure_ascii=False, separators=(',', ':'))
 
-    buttons_data = [{'key': g, 'short': SHORT.get(g,g), 'label': LABELS.get(g,g),
-                     'color': ALL_PARTIES_COLORS.get(g,'#9CA3AF'),
+    buttons_data = [{'key': g, 'short': SHORT.get(g, g), 'label': LABELS.get(g, g),
+                     'color': ALL_PARTIES_COLORS.get(g, '#9CA3AF'),
                      'count': int((df['parti_dominant'] == g).sum())} for g in ALL_ORDER]
     btns_str = _json.dumps(buttons_data, ensure_ascii=False, separators=(',', ':'))
     order_str = _json.dumps(ALL_ORDER, ensure_ascii=False, separators=(',', ':'))
+
+    fig = go.Figure()
+    fig.add_vline(x=0, line_dash="dot", line_color="#CCC", line_width=1)
+    fig.add_hline(y=0, line_dash="dot", line_color="#CCC", line_width=1)
+    for tr in traces:
+        fig.add_trace(tr)
+    fig.update_layout(
+        paper_bgcolor="#FAF9F7", plot_bgcolor="#FEFDFB",
+        margin=dict(t=8, b=8, l=52, r=10),
+        dragmode=False,
+        hovermode="closest",
+        xaxis=dict(
+            range=AXIS_PRESETS[0]['xRange'],
+            showgrid=True, gridcolor="#EBEBEB", gridwidth=0.5, zeroline=False,
+            tickfont=dict(size=8, color="#AAA"), linecolor="#DDD", fixedrange=False,
+            title=dict(text=AXIS_PRESETS[0]['xTitle'],
+                       font=dict(size=8.5, color="#888", family="Helvetica Neue, sans-serif"), standoff=4)),
+        yaxis=dict(
+            range=AXIS_PRESETS[0]['yRange'],
+            showgrid=True, gridcolor="#EBEBEB", gridwidth=0.5, zeroline=False,
+            tickfont=dict(size=8, color="#AAA"), linecolor="#DDD", fixedrange=False,
+            title=dict(text=AXIS_PRESETS[0]['yTitle'],
+                       font=dict(size=8.5, color="#888", family="Helvetica Neue, sans-serif"), standoff=2)),
+        showlegend=False,
+    )
+    fig_json = fig.to_json()
 
     sg = AXIS_PRESETS[0]
     n_iris = len(df)
@@ -1696,141 +1544,153 @@ def build_desktop_html():
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sociologie des IRIS</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Sociologie des IRIS — Mobile</title>
 <style>
 * {{ margin: 0; padding: 0; box-sizing: border-box; }}
-html, body {{ background: #FAF9F7; font-family: 'Helvetica Neue', system-ui, sans-serif; color: #1a1a1a; }}
-.page-header {{ text-align: center; padding: 20px 20px 8px; }}
-.page-header h1 {{ font-size: 24px; font-weight: 900; letter-spacing: -0.5px; margin-bottom: 4px; }}
-.page-header p {{ font-size: 12px; color: #888; }}
+html, body {{ background: #FAF9F7; font-family: 'Helvetica Neue', system-ui, sans-serif;
+               color: #1a1a1a; overflow-x: hidden; -webkit-text-size-adjust: 100%; }}
+.header {{ text-align: center; padding: 12px 12px 4px; }}
+.header h1 {{ font-size: 17px; font-weight: 900; letter-spacing: -0.5px; margin-bottom: 2px; }}
+.header p {{ font-size: 9px; color: #888; line-height: 1.4; }}
 
-.axis-bar {{ display: flex; align-items: center; gap: 10px; padding: 10px 20px;
-             background: #fff; border-bottom: 1px solid #E8E8E8; flex-wrap: wrap; }}
-.axis-bar-label {{ font-size: 12px; font-weight: 700; color: #666; white-space: nowrap; }}
-.preset-btns {{ display: flex; gap: 6px; flex-wrap: wrap; }}
-.preset-btn {{ padding: 5px 13px; border-radius: 20px; border: 1.5px solid #D0D0D0;
-               background: transparent; font-size: 12px; font-weight: 600; color: #555;
-               font-family: inherit; cursor: pointer; transition: all 0.15s; white-space: nowrap; }}
-.preset-btn:hover {{ border-color: #888; color: #222; }}
+.axis-bar {{ padding: 6px 10px; background: #fff; border-bottom: 1px solid #EEE; }}
+.axis-bar-label {{ font-size: 10px; font-weight: 700; color: #666; margin-bottom: 4px; }}
+.preset-btns {{ display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 4px; }}
+.preset-btn {{ padding: 4px 8px; border-radius: 14px; border: 1.5px solid #D0D0D0;
+               background: transparent; font-size: 10px; font-weight: 600; color: #555;
+               font-family: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent;
+               white-space: nowrap; }}
 .preset-btn.active {{ background: #1a1a1a; border-color: #1a1a1a; color: #fff; }}
-.custom-toggle {{ padding: 5px 13px; border-radius: 20px; border: 1.5px dashed #C0C0C0;
-                  background: transparent; font-size: 12px; font-weight: 600; color: #888;
-                  font-family: inherit; cursor: pointer; transition: all 0.15s; white-space: nowrap; margin-left: 4px; }}
-.custom-toggle:hover {{ border-color: #888; color: #444; }}
-.custom-toggle.open {{ border-color: #1a1a1a; color: #1a1a1a; background: #f5f5f5; }}
-.custom-panel {{ display: none; padding: 10px 20px; background: #f9f9f9;
-                 border-bottom: 1px solid #E8E8E8; gap: 16px; align-items: center; flex-wrap: wrap; }}
+.custom-toggle {{ padding: 4px 10px; border-radius: 14px; border: 1.5px dashed #C0C0C0;
+                  background: transparent; font-size: 10px; font-weight: 600; color: #888;
+                  font-family: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }}
+.custom-panel {{ display: none; padding: 6px 0 2px; gap: 8px; flex-direction: column; }}
 .custom-panel.open {{ display: flex; }}
-.custom-panel label {{ font-size: 12px; font-weight: 600; color: #555; }}
-.custom-panel select {{ padding: 5px 8px; border-radius: 8px; border: 1px solid #D0D0D0;
-                        background: #fff; font-size: 12px; font-family: inherit; color: #222;
-                        cursor: pointer; min-width: 220px; }}
+.custom-panel select {{ padding: 4px 6px; border-radius: 6px; border: 1px solid #D0D0D0;
+                        background: #fff; font-size: 11px; font-family: inherit; width: 100%; }}
+.custom-panel label {{ font-size: 10px; font-weight: 600; color: #555; }}
 
-.main-layout {{ display: flex; gap: 0; }}
-.chart-col {{ flex: 1; min-width: 0; position: relative; }}
-.sidebar {{ width: 300px; flex-shrink: 0; padding: 16px; border-left: 1px solid #EBEBEB;
-            overflow-y: auto; }}
+.filters {{ display: flex; flex-wrap: wrap; gap: 4px; padding: 4px 10px; justify-content: center; }}
+.toggle-all {{ display: block; width: calc(100% - 20px); margin: 2px 10px 4px;
+               padding: 3px 0; border-radius: 8px; border: 1.5px solid #CCC;
+               background: transparent; font-size: 9px; font-weight: 700; color: #888;
+               font-family: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; text-align: center; }}
+.fbtn {{ display: inline-flex; align-items: center; gap: 3px; padding: 2px 8px; border-radius: 12px;
+         border: 2px solid; font-size: 9px; font-weight: 700; font-family: inherit;
+         cursor: pointer; transition: all 0.12s; -webkit-tap-highlight-color: transparent; }}
+.fbtn.on {{ color: #fff; }}
+.fbtn.off {{ background: transparent !important; opacity: 0.3; }}
 
-.group-filters {{ padding: 10px 20px 6px; display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }}
-.toggle-all-btn {{ padding: 3px 10px; border-radius: 12px; border: 1px solid #CCC;
-                   background: transparent; font-size: 10px; font-weight: 700; color: #888;
-                   font-family: inherit; cursor: pointer; }}
-.grp-btn {{ padding: 3px 10px; border-radius: 12px; border: 2px solid; font-size: 10px;
-            font-weight: 700; font-family: inherit; cursor: pointer; transition: all 0.12s; }}
-.grp-btn.on {{ color: #fff; }}
-.grp-btn.off {{ background: transparent !important; opacity: 0.3; }}
-
-.chart-wrapper {{ position: relative; }}
-#chartDiv {{ width: 100%; height: 640px; }}
-#domMapsRow {{ display: none; gap: 6px; padding: 6px 0 0; flex-wrap: wrap; }}
-.dom-map-wrap {{ flex: 1; min-width: 140px; max-width: 200px; position: relative; }}
-.dom-map-label {{ position: absolute; top: 4px; left: 6px; z-index: 10; font-size: 10px;
-                  font-weight: 800; color: #333; background: rgba(255,255,255,0.82);
-                  padding: 1px 6px; border-radius: 8px; pointer-events: none; }}
-.dom-map-canvas {{ width: 100%; height: 185px; border-radius: 8px; overflow: hidden;
-                   border: 1px solid #E8E8E8; }}
-.corner-label {{ position: absolute; font-size: 10px; font-weight: 800; line-height: 1.2;
+#chartWrap {{ position: relative; width: 100%; }}
+#chart {{ width: 100%; aspect-ratio: 9 / 11; touch-action: none; }}
+.corner-label {{ position: absolute; font-size: 8px; font-weight: 800; line-height: 1.2;
                  pointer-events: none; opacity: 0.65; }}
-.corner-tl {{ top: 12px; left: 80px; text-align: left; }}
-.corner-tr {{ top: 12px; right: 40px; text-align: right; }}
-.corner-bl {{ bottom: 70px; left: 80px; text-align: left; }}
-.corner-br {{ bottom: 70px; right: 40px; text-align: right; }}
+.corner-tl {{ top: 8px; left: 56px; text-align: left; }}
+.corner-tr {{ top: 8px; right: 8px; text-align: right; }}
+.corner-bl {{ bottom: 40px; left: 56px; text-align: left; }}
+.corner-br {{ bottom: 40px; right: 8px; text-align: right; }}
 
-.info-card-desktop {{ background: #fff; border: 1px solid #E8E8E8; border-radius: 12px;
-                      padding: 16px; font-size: 13px; line-height: 1.6; }}
-.info-card-desktop .name {{ font-size: 15px; font-weight: 900; margin-bottom: 2px; }}
-.info-card-desktop .party {{ font-weight: 700; font-size: 11px; margin-bottom: 10px; }}
-.info-card-desktop .row {{ color: #555; margin-bottom: 2px; }}
-.info-card-desktop .row b {{ color: #1a1a1a; }}
-.info-card-desktop .lbl {{ color: #999; }}
-.info-card-desktop.empty {{ color: #AAA; font-size: 12px; text-align: center; padding: 40px 16px; }}
-.info-card-desktop .dynamic-row {{ color: #555; margin-bottom: 2px; border-top: 1px solid #F0F0F0; padding-top: 6px; margin-top: 4px; }}
-.info-card-desktop .vote-bars {{ margin-top: 8px; }}
-.info-card-desktop .vote-bar-row {{ display: flex; align-items: center; gap: 6px; margin-bottom: 3px; font-size: 11px; }}
-.info-card-desktop .vote-bar-label {{ width: 36px; color: #888; font-size: 10px; font-weight: 700; text-align: right; }}
-.info-card-desktop .vote-bar-bg {{ flex: 1; height: 5px; background: #F0F0F0; border-radius: 3px; overflow: hidden; }}
-.info-card-desktop .vote-bar-fill {{ height: 100%; border-radius: 3px; }}
-.info-card-desktop .vote-bar-pct {{ width: 30px; text-align: right; color: #555; font-size: 10px; }}
-.info-card-desktop .stat-bar-row {{ display: flex; align-items: center; gap: 6px; margin-bottom: 3px; font-size: 11px; }}
-.info-card-desktop .stat-bar-label {{ width: 80px; color: #888; font-size: 10px; text-align: right; flex-shrink: 0; }}
-.info-card-desktop .stat-bar-bg {{ flex: 1; height: 5px; background: #F0F0F0; border-radius: 3px; overflow: hidden; }}
-.info-card-desktop .stat-bar-fill {{ height: 100%; border-radius: 3px; }}
-.info-card-desktop .stat-bar-pct {{ width: 32px; text-align: right; color: #555; font-size: 10px; }}
-.info-card-desktop .section-title {{ font-size: 10px; font-weight: 800; text-transform: uppercase;
-                                      letter-spacing: 0.5px; color: #BBB; margin: 8px 0 4px; }}
+#resetBtn {{ position: absolute; top: 6px; right: 6px; z-index: 50;
+             background: rgba(255,255,255,0.92); border: 1px solid #DDD;
+             border-radius: 6px; padding: 3px 8px; font-size: 9px; font-weight: 700;
+             color: #888; font-family: inherit; cursor: pointer; display: none;
+             -webkit-tap-highlight-color: transparent; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }}
+#resetBtn.show {{ display: block; }}
 
+.info-card {{ position: fixed; bottom: 0; left: 0; right: 0;
+              background: rgba(255,255,255,0.98); border-top: 1px solid #E0E0E0;
+              padding: 12px 16px calc(env(safe-area-inset-bottom, 8px) + 12px);
+              font-size: 11px; line-height: 1.55; box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+              transform: translateY(100%); transition: transform 0.25s ease; z-index: 100;
+              backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+              max-height: 65vh; overflow-y: auto; }}
+.info-card.show {{ transform: translateY(0); }}
+.info-card .name {{ font-size: 14px; font-weight: 900; }}
+.info-card .party {{ font-weight: 700; font-size: 10px; margin-bottom: 4px; }}
+.info-card .row {{ color: #555; margin-bottom: 1px; }}
+.info-card .row b {{ color: #1a1a1a; }}
+.info-card .lbl {{ color: #999; }}
+.info-card .close {{ position: absolute; top: 8px; right: 14px; font-size: 22px; color: #BBB;
+                     cursor: pointer; -webkit-tap-highlight-color: transparent; padding: 4px 8px; }}
+.info-card .dynamic-row {{ color: #555; border-top: 1px solid #F0F0F0; padding-top: 4px; margin-top: 4px; }}
+.info-card .section-title {{ font-size: 9px; font-weight: 800; text-transform: uppercase;
+                              letter-spacing: 0.5px; color: #BBB; margin: 6px 0 3px; }}
+.info-card .vote-grid {{ display: flex; flex-direction: column; gap: 3px; margin-top: 4px; font-size: 10px; }}
+.info-card .vote-cell {{ display: flex; align-items: center; gap: 4px; }}
+.info-card .vote-parti {{ min-width: 52px; font-weight: 700; font-size: 9.5px; flex-shrink: 0; }}
+.info-card .vote-bar-bg {{ flex: 1; background: #F0F0F0; border-radius: 2px; height: 5px; overflow: hidden; }}
+.info-card .vote-bar-fill {{ height: 100%; border-radius: 2px; }}
+.info-card .vote-score {{ min-width: 34px; text-align: right; color: #444; font-size: 9.5px; }}
+.info-card .stat-row {{ display: flex; align-items: center; gap: 4px; margin-bottom: 3px; font-size: 10px; }}
+.info-card .stat-lbl {{ min-width: 70px; color: #999; font-size: 9px; flex-shrink: 0; }}
+.info-card .stat-bar-bg {{ flex: 1; background: #F0F0F0; border-radius: 2px; height: 4px; overflow: hidden; }}
+.info-card .stat-bar-fill {{ height: 100%; border-radius: 2px; }}
+.info-card .stat-pct {{ min-width: 30px; text-align: right; color: #444; font-size: 9.5px; }}
+.footer {{ text-align: center; padding: 6px 12px 4px; font-size: 8px; color: #AAA; line-height: 1.6; }}
 
-.footer {{ text-align: center; padding: 10px 20px 6px; font-size: 9px; color: #AAA; }}
-
-.axis-desc {{ padding: 14px 20px 20px; font-size: 12px; color: #555; line-height: 1.65;
-              border-top: 1px solid #EBEBEB; background: #FDFCFA; }}
+.axis-desc {{ padding: 12px 14px 20px; font-size: 11px; color: #555; line-height: 1.6;
+              border-top: 1px solid #EEE; background: #FDFCFA; }}
 .axis-desc:empty {{ display: none; }}
-.axis-desc .desc-title {{ font-size: 14px; font-weight: 900; color: #1a1a1a; margin-bottom: 10px; }}
-.axis-desc .desc-axes {{ display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 12px; }}
-.axis-desc .desc-ax {{ background: #fff; border: 1px solid #E8E8E8; border-radius: 8px; padding: 10px 12px; }}
-.axis-desc .desc-quadrants {{ background: #fff; border: 1px solid #E8E8E8; border-radius: 8px; padding: 10px 12px; }}
-.axis-desc .desc-q-grid {{ display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; }}
-.axis-desc .desc-q {{ font-size: 11px; padding: 6px 8px; border-radius: 6px; background: #F8F8F8; }}
-.axis-desc .desc-q-label {{ font-size: 9px; font-weight: 800; text-transform: uppercase;
-                             letter-spacing: 0.5px; opacity: 0.6; margin-bottom: 2px; }}
+.axis-desc .desc-title {{ font-size: 13px; font-weight: 900; color: #1a1a1a; margin-bottom: 8px; }}
+.axis-desc .desc-ax {{ background: #fff; border: 1px solid #E8E8E8; border-radius: 8px;
+                        padding: 8px 10px; margin-bottom: 8px; }}
+.axis-desc .desc-quadrants {{ background: #fff; border: 1px solid #E8E8E8; border-radius: 8px;
+                               padding: 8px 10px; }}
+.axis-desc .desc-q-grid {{ display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px; }}
+.axis-desc .desc-q {{ font-size: 10px; padding: 5px 7px; border-radius: 6px; background: #F8F8F8; }}
+.axis-desc .desc-q-label {{ font-size: 8px; font-weight: 800; text-transform: uppercase;
+                              letter-spacing: 0.4px; opacity: 0.6; margin-bottom: 2px; }}
 
-.election-bar {{ display: flex; align-items: center; gap: 10px; padding: 8px 20px;
+.election-bar {{ display: flex; align-items: center; gap: 6px; padding: 5px 10px;
                  background: #F8F7F5; border-bottom: 1px solid #E8E8E8; flex-wrap: wrap; }}
-.election-bar-label {{ font-size: 11px; font-weight: 700; color: #888; white-space: nowrap; }}
-.election-type-btns {{ display: flex; gap: 4px; flex-wrap: wrap; }}
-.elec-type-btn {{ padding: 3px 10px; border-radius: 14px; border: 1.5px solid #D0D0D0;
-                  background: transparent; font-size: 11px; font-weight: 600; color: #777;
-                  font-family: inherit; cursor: pointer; transition: all 0.12s; white-space: nowrap; }}
-.elec-type-btn:hover {{ border-color: #888; color: #333; }}
+.election-bar-label {{ font-size: 9px; font-weight: 700; color: #888; white-space: nowrap; }}
+.election-type-btns {{ display: flex; gap: 3px; flex-wrap: wrap; }}
+.elec-type-btn {{ padding: 2px 7px; border-radius: 12px; border: 1.5px solid #D0D0D0;
+                  background: transparent; font-size: 9px; font-weight: 600; color: #777;
+                  font-family: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; white-space: nowrap; }}
 .elec-type-btn.active {{ background: #3B3B3B; border-color: #3B3B3B; color: #fff; }}
-.elec-year-btns {{ display: flex; gap: 4px; flex-wrap: wrap; }}
-.elec-year-btn {{ padding: 3px 10px; border-radius: 14px; border: 1.5px solid #D0D0D0;
-                  background: transparent; font-size: 11px; font-weight: 600; color: #777;
-                  font-family: inherit; cursor: pointer; transition: all 0.12s; white-space: nowrap; }}
-.elec-year-btn:hover {{ border-color: #888; color: #333; }}
+.elec-year-btns {{ display: flex; gap: 3px; flex-wrap: wrap; }}
+.elec-year-btn {{ padding: 2px 7px; border-radius: 12px; border: 1.5px solid #D0D0D0;
+                  background: transparent; font-size: 9px; font-weight: 600; color: #777;
+                  font-family: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; white-space: nowrap; }}
 .elec-year-btn.active {{ background: #555; border-color: #555; color: #fff; }}
-.tour-btns {{ display: flex; gap: 4px; margin-left: auto; }}
-.tour-btn {{ padding: 3px 10px; border-radius: 14px; border: 1.5px solid #D0D0D0;
-             background: transparent; font-size: 11px; font-weight: 700; color: #777;
-             font-family: inherit; cursor: pointer; transition: all 0.12s; }}
-.tour-btn:hover {{ border-color: #888; color: #333; }}
+.tour-btns {{ display: flex; gap: 3px; }}
+.tour-btn {{ padding: 2px 7px; border-radius: 12px; border: 1.5px solid #D0D0D0;
+             background: transparent; font-size: 9px; font-weight: 700; color: #777;
+             font-family: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }}
 .tour-btn.active {{ background: #1a1a1a; border-color: #1a1a1a; color: #fff; }}
 .tour-btn:disabled {{ opacity: 0.3; cursor: default; }}
-.election-current-label {{ font-size: 10px; color: #AAA; font-style: italic; padding: 0 6px; }}
+.election-current-label {{ font-size: 8px; color: #AAA; font-style: italic; }}
+
+#abst-stats-panel {{ padding: 5px 10px; font-size: 9px; color: #555;
+                     border-top: 1px solid #E8E8E8; display: none; line-height: 1.6; word-break: break-word; }}
 </style>
 </head>
 <body>
 
-<div class="page-header">
+<div class="header">
   <h1>Sociologie des IRIS</h1>
-  <p>Sociologie des {n_iris} zones IRIS · taille = population IRIS · données INSEE 2021</p>
+  <p>Sociologie des {n_iris} zones IRIS · données INSEE 2021</p>
 </div>
 
-<div class="axis-bar" id="axisBar">
-  <span class="axis-bar-label">Axes :</span>
+<div class="axis-bar">
+  <div class="axis-bar-label">Axes :</div>
   <div class="preset-btns" id="presetBtns"></div>
   <button class="custom-toggle" id="customToggle">Personnaliser ▾</button>
+  <div class="custom-panel" id="customPanel">
+    <div>
+      <label>Axe X :</label>
+      <select id="xSelect"></select>
+    </div>
+    <div>
+      <label>Axe Y :</label>
+      <select id="ySelect"></select>
+    </div>
+    <label style="font-size:10px; display:flex; align-items:center; gap:4px;">
+      <input type="checkbox" id="xInvertChk"> Inverser X
+    </label>
+  </div>
 </div>
 
 <div class="election-bar" id="electionBar">
@@ -1838,88 +1698,83 @@ html, body {{ background: #FAF9F7; font-family: 'Helvetica Neue', system-ui, san
   <div class="election-type-btns" id="elecTypeBtns"></div>
   <div class="elec-year-btns" id="elecYearBtns"></div>
   <div class="tour-btns">
-    <button class="tour-btn" id="tourBtn1" data-tour="1">Tour 1</button>
-    <button class="tour-btn" id="tourBtn2" data-tour="2">Tour 2</button>
+    <button class="tour-btn" id="tourBtn1">T1</button>
+    <button class="tour-btn" id="tourBtn2">T2</button>
   </div>
   <span class="election-current-label" id="electionCurrentLabel"></span>
-  <span id="elecSpinner" style="display:none;font-size:11px;color:#888;margin-left:6px">chargement…</span>
-  <select id="colorVarSelect" disabled style="margin-left:10px;padding:3px 8px;border-radius:8px;border:1px solid #D0D0D0;font-size:11px;font-family:inherit;color:#555;background:#fff;cursor:pointer;min-width:180px"><option value="">Couleur : élection</option></select>
+  <span id="elecSpinner" style="display:none;font-size:10px;color:#888;margin-left:4px">…</span>
+  <select id="colorVarSelect" disabled style="margin-left:6px;padding:2px 6px;border-radius:8px;border:1px solid #D0D0D0;font-size:9px;font-family:inherit;color:#555;background:#fff;cursor:pointer;max-width:160px"><option value="">Couleur : élection</option></select>
 </div>
 
-<div class="custom-panel" id="customPanel">
-  <div>
-    <label for="xSelect">Axe X : </label>
-    <select id="xSelect"></select>
+<button class="toggle-all" id="toggleAll">Tout décocher</button>
+<div class="filters" id="filters"></div>
+
+<div id="chartWrap">
+  <div id="chart"></div>
+  <div id="mapDiv" style="width:100%;height:calc(100vh - 160px);min-height:300px;display:none;position:relative;">
+    <div id="carteLoadingMsg" style="display:none;position:absolute;top:8px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,0.92);padding:6px 16px;border-radius:20px;font-size:12px;color:#555;z-index:10;box-shadow:0 1px 4px rgba(0,0,0,0.1)">Chargement des coordonnées géographiques…</div>
+    <button id="mapResetBtn" onclick="mapInstance && mapInstance.fitBounds([[-5.2,41.3],[9.6,51.2]],{{padding:10}})" style="position:absolute;bottom:16px;right:8px;z-index:20;background:rgba(255,255,255,0.95);border:1px solid #ccc;border-radius:6px;padding:6px 10px;font-size:13px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.15)">↺ Recentrer</button>
   </div>
-  <div>
-    <label for="ySelect">Axe Y : </label>
-    <select id="ySelect"></select>
-  </div>
-  <label style="font-size:11px; display:flex; align-items:center; gap:4px;">
-    <input type="checkbox" id="xInvertChk"> Inverser X
-  </label>
+  <div class="corner-label corner-tl" id="cornerTL" style="color:{sg['corners'][0]['color']}"></div>
+  <div class="corner-label corner-tr" id="cornerTR" style="color:{sg['corners'][1]['color']}"></div>
+  <div class="corner-label corner-bl" id="cornerBL" style="color:{sg['corners'][2]['color']}"></div>
+  <div class="corner-label corner-br" id="cornerBR" style="color:{sg['corners'][3]['color']}"></div>
+  <button id="resetBtn">↺ Zoom</button>
 </div>
 
-<div class="main-layout">
-  <div class="chart-col">
-    <div style="padding:10px 20px 2px;display:flex;align-items:center;gap:8px">
-      <button class="toggle-all-btn" id="toggleAllBtn">Tout décocher</button>
-    </div>
-    <div class="group-filters" id="groupFilters"></div>
-    <div class="chart-wrapper">
-      <div id="chartDiv"></div>
-      <div id="mapDiv" style="width:100%;height:640px;display:none;position:relative;">
-        <div id="carteLoadingMsg" style="display:none;position:absolute;top:8px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,0.92);padding:6px 16px;border-radius:20px;font-size:12px;color:#555;z-index:10;box-shadow:0 1px 4px rgba(0,0,0,0.1)">Chargement des coordonnées géographiques…</div>
-        <button id="mapResetBtn" onclick="mapInstance && mapInstance.fitBounds([[-5.2,41.3],[9.6,51.2]],{{padding:20}})" style="position:absolute;bottom:16px;right:8px;z-index:20;background:rgba(255,255,255,0.95);border:1px solid #ccc;border-radius:6px;padding:6px 10px;font-size:13px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.15)">↺ Recentrer</button>
-      </div>
-      <div id="domMapsRow">
-        <div class="dom-map-wrap"><div class="dom-map-label">Guadeloupe</div><div class="dom-map-canvas" id="domMap0"></div></div>
-        <div class="dom-map-wrap"><div class="dom-map-label">Martinique</div><div class="dom-map-canvas" id="domMap1"></div></div>
-        <div class="dom-map-wrap"><div class="dom-map-label">Guyane</div><div class="dom-map-canvas" id="domMap2"></div></div>
-        <div class="dom-map-wrap"><div class="dom-map-label">La Réunion</div><div class="dom-map-canvas" id="domMap3"></div></div>
-      </div>
-      <div class="corner-label corner-tl" id="cornerTL" style="color:{sg['corners'][0]['color']}"></div>
-      <div class="corner-label corner-tr" id="cornerTR" style="color:{sg['corners'][1]['color']}"></div>
-      <div class="corner-label corner-bl" id="cornerBL" style="color:{sg['corners'][2]['color']}"></div>
-      <div class="corner-label corner-br" id="cornerBR" style="color:{sg['corners'][3]['color']}"></div>
-    </div>
-    <div class="footer">⊕ = barycentre du groupe &nbsp;·&nbsp; taille = population IRIS &nbsp;·&nbsp; couleur = parti dominant &nbsp;·&nbsp; N={n_iris}</div>
-    <div id="colorLegend" style="display:none;flex-direction:column;padding:6px 20px;background:#fff;border-top:1px solid #E8E8E8"></div>
-    <div id="abst-stats-panel" style="padding:6px 20px 4px;font-size:12px;color:#555;border-top:1px solid #e5e7eb;margin-top:2px;display:none"></div>
-    <div class="axis-desc" id="axisDesc"></div>
-  </div>
-  <div class="sidebar">
-    <div id="sidebarSticky" style="display:none;position:sticky;top:0;background:#FAF9F7;border-bottom:1px solid #EEE;padding:5px 16px;font-size:11px;font-weight:700;z-index:10;border-radius:8px 8px 0 0"></div>
-    <div class="info-card-desktop empty" id="infoCard">
-      <p>Cliquez sur un point<br>pour voir les infos de l'IRIS</p>
-    </div>
-  </div>
+<div class="info-card" id="infoCard">
+  <span class="close" id="closeCard">×</span>
+  <div class="name" id="cardName"></div>
+  <div class="party" id="cardParty"></div>
+  <div class="row"><span class="lbl">Population :</span> <b id="cardPop"></b> &nbsp;·&nbsp; <span class="lbl">Âge moyen :</span> <b id="cardAge"></b></div>
+  <div class="row"><span class="lbl">Revenu médian :</span> <b id="cardRev"></b></div>
+  <div class="section-title">CSP</div>
+  <div id="cardCSP"></div>
+  <div class="section-title">Formation &amp; Emploi</div>
+  <div id="cardFormation"></div>
+  <div class="section-title">Logement</div>
+  <div id="cardHousing"></div>
+  <div class="section-title" id="cardElecLabel"></div>
+  <div class="row" id="cardAbstElecRow" style="display:none"><span class="lbl">Abst. élec. :</span> <b id="cardAbstElec"></b></div>
+  <div class="vote-grid" id="cardVotes"></div>
+  <div class="dynamic-row"><span class="lbl">Axe X (<span id="cardXVar"></span>) :</span> <b id="cardXVal"></b> &nbsp;·&nbsp; <span class="lbl">Axe Y (<span id="cardYVar"></span>) :</span> <b id="cardYVal"></b></div>
 </div>
+
+<div class="footer">⊕ = barycentre · taille = population IRIS · couleur = parti dominant · N={n_iris}</div>
+<div id="colorLegend" style="display:none;flex-direction:column;padding:4px 10px;background:#fff;border-top:1px solid #E8E8E8"></div>
+<div id="abst-stats-panel"></div>
+<div class="axis-desc" id="axisDesc"></div>
 
 <div id="loadingOverlay" style="position:fixed;inset:0;background:rgba(250,249,247,0.96);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;font-family:'Helvetica Neue',system-ui,sans-serif">
-  <div style="font-size:14px;color:#555;margin-bottom:12px" id="loadingMsg">Chargement des données…</div>
-  <div style="width:280px;height:4px;background:#EEE;border-radius:2px">
+  <div style="font-size:13px;color:#555;margin-bottom:12px" id="loadingMsg">Initialisation…</div>
+  <div style="width:240px;height:4px;background:#EEE;border-radius:2px">
     <div id="loadingBar" style="height:4px;background:#F97316;border-radius:2px;width:0%;transition:width 0.4s ease"></div>
   </div>
-  <div style="font-size:11px;color:#AAA;margin-top:8px" id="loadingDetail"></div>
+  <div style="font-size:10px;color:#AAA;margin-top:8px" id="loadingDetail"></div>
 </div>
 
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
 <link href='https://unpkg.com/maplibre-gl@4/dist/maplibre-gl.css' rel='stylesheet'/>
 <script src='https://unpkg.com/maplibre-gl@4/dist/maplibre-gl.js'></script>
 <script>
+window.onerror = function(msg, src, line, col, err) {{
+  var el = document.getElementById('loadingMsg');
+  if (el) el.textContent = 'JS Error: ' + msg + ' (line ' + line + ')';
+  var el2 = document.getElementById('loadingDetail');
+  if (el2) el2.textContent = src + ':' + line;
+}};
 const figData = {fig_json};
 
 // ── Métadonnées inline (petites, <500 KB) ────────────────────────────────
 const ELECTIONS_META = {elections_meta_str};
 const DEFAULT_ELECTION_ID = {default_elec_str};
-const PRESETS = {presets_str};
-const VARS = {vars_str};
-const varLabels = {var_labels_str};
+const PRESETS    = {presets_str};
+const VARS       = {vars_str};
+const varLabels  = {var_labels_str};
 const COULEURS_JS = {couleurs_str};
 const VOTE_PARTIES = {vote_parties_str};
 const ALL_PARTIES_COLORS_JS = {all_parties_colors_str};
-const btns = {btns_str};
+const btns       = {btns_str};
 const ORDER = {order_str};
 
 // ── Données globales (chargées en async depuis data/) ─────────────────────
@@ -1929,28 +1784,30 @@ let mapInstance = null;
 let mapReady = false;
 let mapInitialized = false;
 let isCarteActive = false;
-const domMaps = [];       // instances MapLibre des mini-maps DOM-TOM
-const domMapsReady = [];  // bool par mini-map
-const DOM_TOM_CONFIGS = [
-  {{ id: 'domMap0', center: [-61.55, 16.25], zoom: 8.5, bounds: [[-62.0,15.83],[-61.0,16.56]] }},
-  {{ id: 'domMap1', center: [-61.0,  14.65], zoom: 9.0, bounds: [[-61.3,14.37],[-60.75,14.90]] }},
-  {{ id: 'domMap2', center: [-53.1,   4.0],  zoom: 5.5, bounds: [[-54.6,2.1],[-51.5,5.8]] }},
-  {{ id: 'domMap3', center: [55.55, -21.1],  zoom: 8.5, bounds: [[55.21,-21.4],[55.84,-20.87]] }},
-];
 let IRIS_INFO = null, IRIS_POPS = null, MARKER_SIZES = null, GROUP_INDICES = null;
 const elecCache = {{}};  // cache élections déjà fetché
-
-const chartDiv = document.getElementById('chartDiv');
 
 let currentXVar = 'score_exploitation';
 let currentYVar = 'score_domination';
 let currentXInvert = false;
-let currentPresetId = 'saint_graphique';
+let currentPresetId = 'carte';
+let currentColorVar = null;   // null = couleur par élection, sinon nom de variable
+let colorVarMin = 0, colorVarMax = 1;  // percentile 2–98 de la variable
 let currentXRange = PRESETS[0].xRange.slice();
 let currentYRange = PRESETS[0].yRange.slice();
 let currentCorners = PRESETS[0].corners;
-let currentColorVar = null;   // null = couleur par élection, sinon nom de variable
-let colorVarMin = 0, colorVarMax = 1;
+
+let activeGroups;
+let currentElectionId;
+let currentElectionType, currentElectionYear, currentElectionTour;
+let currentClickedGlobalIdx = null;
+let currentGroupIndices = {{}};
+let elecByType = {{}};
+let baryMeans = {{}};
+let currentBarySizeMap = {{}};
+const typeLabels = {{legi:'Législatives', euro:'Européennes', pres:'Présidentielles', muni:'Municipales'}};
+
+const chartDiv = document.getElementById('chart');
 
 // ── Corner labels ─────────────────────────────────────────────────────────
 function setCorners(corners) {{
@@ -1963,7 +1820,6 @@ function setCorners(corners) {{
     else {{ el.innerHTML = ''; }}
   }}
 }}
-setCorners(currentCorners);
 
 // ── Auto-range helper ─────────────────────────────────────────────────────
 function computeDataRange(varName, invert) {{
@@ -1985,6 +1841,7 @@ function computeDataRange(varName, invert) {{
 // ── Colorscale variable ────────────────────────────────────────────────────
 function lerp(a, b, t) {{ return a + (b - a) * t; }}
 function varToHex(val, mn, mx) {{
+  // Diverging: blue (low) → white (mid) → red (high)
   const t = Math.max(0, Math.min(1, (val - mn) / (mx - mn || 1)));
   let r, g, b;
   if (t < 0.5) {{
@@ -2024,7 +1881,7 @@ function buildColorVarSelect() {{
     avail.forEach(v => {{
       const opt = document.createElement('option');
       opt.value = v;
-      opt.textContent = (varLabels[v] || v).substring(0, 60);
+      opt.textContent = (varLabels[v] || v).substring(0, 55);
       if (v === currentColorVar) opt.selected = true;
       og.appendChild(opt);
     }});
@@ -2037,15 +1894,15 @@ function updateColorLegend() {{
   const leg = document.getElementById('colorLegend');
   if (!leg) return;
   if (!currentColorVar) {{ leg.style.display = 'none'; return; }}
-  const label = (varLabels[currentColorVar] || currentColorVar).substring(0, 80);
+  const label = (varLabels[currentColorVar] || currentColorVar).substring(0, 60);
   const mn = colorVarMin.toFixed(2), mx = colorVarMax.toFixed(2);
   leg.style.display = 'flex';
   leg.innerHTML = `
-    <div style="font-size:10px;color:#555;margin-bottom:3px;font-weight:600">${{label}}</div>
-    <div style="display:flex;align-items:center;gap:8px">
-      <span style="font-size:10px;color:#3B82F6">${{mn}}</span>
-      <div style="flex:1;height:10px;border-radius:5px;background:linear-gradient(to right,#3B82F6,#fff,#EF4444)"></div>
-      <span style="font-size:10px;color:#EF4444">${{mx}}</span>
+    <div style="font-size:9px;color:#555;margin-bottom:2px;font-weight:600">${{label}}</div>
+    <div style="display:flex;align-items:center;gap:6px">
+      <span style="font-size:9px;color:#3B82F6">${{mn}}</span>
+      <div style="flex:1;height:8px;border-radius:4px;background:linear-gradient(to right,#3B82F6,#fff,#EF4444)"></div>
+      <span style="font-size:9px;color:#EF4444">${{mx}}</span>
     </div>`;
 }}
 
@@ -2068,25 +1925,114 @@ function updateDesc(preset, xVar, yVar) {{
       </div>`).join('');
     descDiv.innerHTML = `
       <div class="desc-title">${{d.title}}</div>
-      <div class="desc-axes">
-        <div class="desc-ax">${{d.x}}</div>
-        <div class="desc-ax">${{d.y}}</div>
-      </div>
-      ${{qHtml ? `<div class="desc-quadrants"><b style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.5px">Quadrants</b><div class="desc-q-grid">${{qHtml}}</div></div>` : ''}}`;
+      <div class="desc-ax">${{d.x}}</div>
+      <div class="desc-ax" style="margin-top:6px">${{d.y}}</div>
+      ${{qHtml ? `<div class="desc-quadrants" style="margin-top:8px"><b style="font-size:9px;color:#888;text-transform:uppercase;letter-spacing:.4px">Quadrants</b><div class="desc-q-grid">${{qHtml}}</div></div>` : ''}}`;
   }} else {{
     const xl = varLabels[xVar] || xVar;
     const yl = varLabels[yVar] || yVar;
     descDiv.innerHTML = `
-      <div class="desc-axes" style="grid-template-columns:1fr 1fr">
-        <div class="desc-ax"><b>Axe X — ${{xVar}}</b><br>${{xl}}</div>
-        <div class="desc-ax"><b>Axe Y — ${{yVar}}</b><br>${{yl}}</div>
-      </div>`;
+      <div class="desc-ax"><b>Axe X — ${{xVar}}</b><br>${{xl}}</div>
+      <div class="desc-ax" style="margin-top:6px"><b>Axe Y — ${{yVar}}</b><br>${{yl}}</div>`;
   }}
 }}
 
-// ── Restyle all IRIS points (single trace 1) ─────────────────────────────
+// ── Shared helpers (copied from desktop) ──────────────────────────────────
+function fmtPct(v) {{ return (v !== '' && v !== null && !isNaN(Number(v))) ? Number(v).toFixed(1) + '%' : '—'; }}
+function fmtNum(v, suffix) {{ return (v !== '' && v !== null && !isNaN(Number(v))) ? Math.round(Number(v)).toLocaleString('fr-FR') + (suffix||'') : '—'; }}
+
+// ── Info card ──────────────────────────────────────────────────────────────
+function showCard(irisGlobalIdx) {{
+  const cd = IRIS_INFO[irisGlobalIdx];
+  if (!cd) return;
+  currentClickedGlobalIdx = irisGlobalIdx;
+  const card = document.getElementById('infoCard');
+
+  const xRaw = IRIS_X ? (IRIS_X[currentXVar] || [])[irisGlobalIdx] : undefined;
+  const yRaw = IRIS_Y ? (IRIS_Y[currentYVar] || [])[irisGlobalIdx] : undefined;
+  const xDisp = xRaw !== undefined ? (currentXInvert ? -xRaw : xRaw) : undefined;
+
+  const elecData = elecCache[currentElectionId];
+  const elecScores = elecData ? elecData.scores[irisGlobalIdx] : null;
+  const currentMeta = ELECTIONS_META[currentElectionId];
+  const currentColor = elecData?.colors[irisGlobalIdx] || '#9CA3AF';
+  const currentParti = elecData?.partis[irisGlobalIdx] || '—';
+
+  const abstElec = elecData ? elecData.abst[irisGlobalIdx] : null;
+
+  let voteGridHtml = '';
+  if (elecScores && Object.keys(elecScores).length > 0) {{
+    const allScores = Object.entries(elecScores).filter(([,v]) => v > 0).sort((a,b) => b[1]-a[1]);
+    const maxScore = allScores[0]?.[1] || 1;
+    voteGridHtml = allScores.map(([p, score]) => {{
+      const color = ALL_PARTIES_COLORS_JS[p] || '#9CA3AF';
+      const barW = Math.round(score / maxScore * 100);
+      return `<div class="vote-cell">` +
+        `<span class="vote-parti" style="color:${{color}}">${{p.replace('_',' ')}}</span>` +
+        `<div class="vote-bar-bg"><div class="vote-bar-fill" style="width:${{barW}}%;background:${{color}}"></div></div>` +
+        `<span class="vote-score">${{score.toFixed(1)}}%</span>` +
+        `</div>`;
+    }}).join('');
+  }}
+
+  document.getElementById('cardName').textContent = cd[1] || cd[0] || 'IRIS inconnu';
+  const partyEl = document.getElementById('cardParty');
+  partyEl.textContent = cd[19] || '';
+  partyEl.style.color = '#666';
+  document.getElementById('cardPop').textContent = fmtNum(cd[2], ' hab.');
+  document.getElementById('cardAge').textContent = cd[18] !== '' && cd[18] != null ? Number(cd[18]).toFixed(1) + ' ans' : '—';
+  document.getElementById('cardRev').textContent = fmtNum(cd[3], ' €/UC');
+  document.getElementById('cardCSP').innerHTML =
+    `<div class="stat-row"><span class="stat-lbl">Cadres sup.</span><div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${{Math.min(100,cd[4]||0)}}%;background:#5B8DB8"></div></div><span class="stat-pct">${{fmtPct(cd[4])}}</span></div>` +
+    `<div class="stat-row"><span class="stat-lbl">Prof. interm.</span><div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${{Math.min(100,cd[6]||0)}}%;background:#82AAC8"></div></div><span class="stat-pct">${{fmtPct(cd[6])}}</span></div>` +
+    `<div class="stat-row"><span class="stat-lbl">Ouvriers</span><div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${{Math.min(100,cd[5]||0)}}%;background:#C97A5A"></div></div><span class="stat-pct">${{fmtPct(cd[5])}}</span></div>`;
+  document.getElementById('cardFormation').innerHTML =
+    `<div class="stat-row"><span class="stat-lbl">Bac+</span><div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${{Math.min(100,cd[16]||0)}}%;background:#7AAD8F"></div></div><span class="stat-pct">${{fmtPct(cd[16])}}</span></div>` +
+    `<div class="stat-row"><span class="stat-lbl">Sans diplôme</span><div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${{Math.min(100,cd[17]||0)}}%;background:#C9A45A"></div></div><span class="stat-pct">${{fmtPct(cd[17])}}</span></div>` +
+    `<div class="stat-row"><span class="stat-lbl">Chômage</span><div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${{Math.min(100,cd[15]||0)}}%;background:#C95A5A"></div></div><span class="stat-pct">${{fmtPct(cd[15])}}</span></div>`;
+  document.getElementById('cardHousing').innerHTML =
+    `<div class="stat-row"><span class="stat-lbl">Propriétaires</span><div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${{Math.min(100,cd[13]||0)}}%;background:#7AA7D0"></div></div><span class="stat-pct">${{fmtPct(cd[13])}}</span></div>` +
+    `<div class="stat-row"><span class="stat-lbl">HLM</span><div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${{Math.min(100,cd[14]||0)}}%;background:#E8975A"></div></div><span class="stat-pct">${{fmtPct(cd[14])}}</span></div>`;
+  document.getElementById('cardElecLabel').textContent = currentMeta ? currentMeta.label : currentElectionId;
+  const abstElecRow = document.getElementById('cardAbstElecRow');
+  if (abstElec != null) {{
+    document.getElementById('cardAbstElec').textContent = fmtPct(abstElec);
+    abstElecRow.style.display = '';
+  }} else {{
+    abstElecRow.style.display = 'none';
+  }}
+  document.getElementById('cardVotes').innerHTML = voteGridHtml || '<span style="color:#AAA;font-size:10px">Données non disponibles</span>';
+  document.getElementById('cardXVar').textContent = currentXVar;
+  document.getElementById('cardYVar').textContent = currentYVar;
+  document.getElementById('cardXVal').textContent = xDisp !== undefined ? Number(xDisp).toFixed(3) : '—';
+  document.getElementById('cardYVal').textContent = yRaw !== undefined ? Number(yRaw).toFixed(3) : '—';
+
+  card.classList.add('show');
+}}
+
+document.getElementById('closeCard').addEventListener('click', () => {{
+  document.getElementById('infoCard').classList.remove('show');
+  currentClickedGlobalIdx = null;
+}});
+(function() {{
+  const card = document.getElementById('infoCard');
+  let startY = 0;
+  card.addEventListener('touchstart', e => {{ startY = e.touches[0].clientY; }}, {{passive: true}});
+  card.addEventListener('touchend', e => {{
+    const dy = e.changedTouches[0].clientY - startY;
+    if (dy > 60) {{ card.classList.remove('show'); currentClickedGlobalIdx = null; }}
+  }}, {{passive: true}});
+}})();
+
+function computeButtonPcts(electionId) {{
+  const data = elecCache[electionId];
+  if (!data || !data.buttonPcts) return;
+  btns.forEach(b => {{ b.pct = data.buttonPcts[b.key] || 0; }});
+}}
+
+// ── Restyle all IRIS (trace 1) ────────────────────────────────────────────
 function restyleIRIS() {{
-  if (!IRIS_X || !IRIS_Y) return;  // axes pas encore chargés
+  if (!IRIS_X || !IRIS_Y) return;
   const data = elecCache[currentElectionId];
   if (!data) return;
   const xArr = IRIS_X[currentXVar] || [];
@@ -2120,14 +2066,19 @@ function restyleIRIS() {{
   }}, [1]);
 }}
 
-// ── Restyle barycentres (trace 0) ────────────────────────────────────────
+// ── Restyle barycentres (trace 0) ─────────────────────────────────────────
+function computeAbstBary(electionId) {{
+  const data = elecCache[electionId];
+  return (data && data.abstBary) ? data.abstBary : null;
+}}
+
 function restyleBarycentres() {{
   const baryX = [], baryY = [], baryColors = [], baryTexts = [], barySzs = [];
   const topG = Object.keys(currentGroupIndices)
     .filter(g => {{
       if (g === 'AUTRE') return false;
       const b = btns.find(b2 => b2.key === g);
-      return baryMeans[g] && b && b.pct > 2;
+      return baryMeans[g] && b && b.pct > 1;
     }})
     .sort((a, b2) => {{
       const pa = btns.find(x => x.key === a)?.pct || 0;
@@ -2162,123 +2113,7 @@ function restyleBarycentres() {{
   }}, [0]);
 }}
 
-// ── Apply axes ────────────────────────────────────────────────────────────
-function applyAxes(xVar, xInvert, yVar, preset) {{
-  currentXVar = xVar;
-  currentYVar = yVar;
-  currentXInvert = xInvert;
-  if (preset) {{
-    currentXRange = preset.xRange ? preset.xRange.slice() : computeDataRange(xVar, xInvert);
-    currentYRange = preset.yRange ? preset.yRange.slice() : computeDataRange(yVar, false);
-    currentCorners = preset.corners;
-  }} else {{
-    currentXRange = computeDataRange(xVar, xInvert);
-    currentYRange = computeDataRange(yVar, false);
-  }}
-
-  activeGroups = new Set(btns.filter(b => b.count > 0).map(b => b.key));
-  rebuildFilterButtons();
-  updateToggleLabel();
-  restyleIRIS();
-  restyleBarycentres();
-
-  const xTitle = preset ? preset.xTitle : (varLabels[xVar] || xVar) + (xInvert ? ' (inversé)' : '');
-  const yTitle = preset ? preset.yTitle : (varLabels[yVar] || yVar);
-  Plotly.relayout(chartDiv, {{
-    'xaxis.title.text': xTitle,
-    'yaxis.title.text': yTitle,
-    'xaxis.range': currentXRange.slice(),
-    'yaxis.range': currentYRange.slice(),
-  }});
-
-  setCorners(preset ? preset.corners : []);
-  updateDesc(preset, xVar, yVar);
-  document.getElementById('xInvertChk').checked = xInvert;
-}}
-
-// ── Variables d'état globales (utilisées par restyleIRIS, restyleBarycentres, applyAxes, etc.) ──
-let activeGroups;
-const filtersDiv = document.getElementById('groupFilters');
-const toggleAllBtn = document.getElementById('toggleAllBtn');
-let allOn = true;
-let top4Parties;
-let currentElectionId;
-let currentElectionType, currentElectionYear, currentElectionTour;
-let currentClickedGlobalIdx = null;
-let currentGroupIndices = {{}};
-let elecByType = {{}};
-const typeLabels = {{legi: 'Législatives', euro: 'Européennes', pres: 'Présidentielles', muni: 'Municipales'}};
-const elecTypeBtns = document.getElementById('elecTypeBtns');
-const elecYearBtns = document.getElementById('elecYearBtns');
-const tourBtn1 = document.getElementById('tourBtn1');
-const tourBtn2 = document.getElementById('tourBtn2');
-const electionLabel = document.getElementById('electionCurrentLabel');
-let baryMeans = {{}};
-let currentBarySizeMap = {{}};
-
-// ── Fonctions partagées (utilisées cross-scope) ──────────────────────────
-function computeButtonPcts(electionId) {{
-  const data = elecCache[electionId];
-  if (!data || !data.buttonPcts) return;
-  btns.forEach(b => {{
-    b.pct = data.buttonPcts[b.key] || 0;
-  }});
-}}
-
-function updateToggleLabel() {{
-  const enabledBtns = btns.filter(b => b.count > 0);
-  allOn = enabledBtns.every(b => activeGroups.has(b.key));
-  toggleAllBtn.textContent = allOn ? 'Tout décocher' : 'Tout cocher';
-}}
-
-function setGroupVisible(b, visible) {{
-  const el = filtersDiv.querySelector('[data-key="' + b.key + '"]');
-  const xr = (chartDiv.layout && chartDiv.layout.xaxis) ? chartDiv.layout.xaxis.range.slice() : currentXRange.slice();
-  const yr = (chartDiv.layout && chartDiv.layout.yaxis) ? chartDiv.layout.yaxis.range.slice() : currentYRange.slice();
-  if (visible) {{
-    activeGroups.add(b.key);
-    if (el) {{ el.classList.replace('off','on'); el.style.backgroundColor = b.color; el.style.color = '#fff'; }}
-  }} else {{
-    activeGroups.delete(b.key);
-    if (el) {{ el.classList.replace('on','off'); el.style.backgroundColor = 'transparent'; el.style.color = b.color; }}
-  }}
-  restyleIRIS();
-  updateMapColors();
-  if (!isCarteActive) Plotly.relayout(chartDiv, {{'xaxis.range': xr, 'yaxis.range': yr}});
-}}
-
-function rebuildFilterButtons() {{
-  filtersDiv.innerHTML = '';
-  const activeBtns = btns.filter(b => b.count > 0)
-                         .sort((a, b2) => (b2.pct || 0) - (a.pct || 0));
-  activeBtns.forEach(b => {{
-    const el = document.createElement('button');
-    const isOn = activeGroups.has(b.key);
-    el.className = 'grp-btn ' + (isOn ? 'on' : 'off');
-    el.dataset.key = b.key;
-    el.style.borderColor = b.color;
-    el.style.backgroundColor = isOn ? b.color : 'transparent';
-    el.style.color = isOn ? '#fff' : b.color;
-    el.innerHTML = b.short + ' <span class="grp-count" style="font-size:8px;font-weight:400;opacity:0.7">' + (b.pct || 0).toFixed(1) + '%</span>';
-    el.addEventListener('click', () => {{
-      setGroupVisible(b, !activeGroups.has(b.key));
-      updateToggleLabel();
-    }});
-    filtersDiv.appendChild(el);
-  }});
-}}
-
-function getElectionId(type, year, tour) {{
-  const years = elecByType[type];
-  if (!years || !years[year]) return null;
-  const found = years[year].find(e => e.tour === tour);
-  return found ? found.id : null;
-}}
-
-// ── Info card helpers ──────────────────────────────────────────────────────
-function fmtPct(v) {{ return (v !== '' && v !== null && !isNaN(Number(v))) ? Number(v).toFixed(1) + '%' : '—'; }}
-function fmtNum(v, suffix) {{ return (v !== '' && v !== null && !isNaN(Number(v))) ? Math.round(Number(v)).toLocaleString('fr-FR') + (suffix||'') : '—'; }}
-
+// ── Abstention stats panel ─────────────────────────────────────────────────
 function updateAbstPanel(electionId) {{
   const panel = document.getElementById('abst-stats-panel');
   if (!panel) return;
@@ -2315,10 +2150,10 @@ function updateAbstPanel(electionId) {{
   let html = `<span style="font-weight:600">Abstention&nbsp;:</span> <b>${{fmtP(pctAbst)}}</b>`;
   if (totalInscrits > 0) html += ` (${{fmt(totalAbst)}} / ${{fmt(totalInscrits)}} ins.)`;
   if (hasBlancs || hasNuls) {{
-    html += ' &nbsp;·&nbsp;';
+    html += ' &nbsp;·&nbsp; ';
     if (hasBlancs) {{
       const pctBlancsIns = totalInscrits > 0 ? totalBlancs / totalInscrits * 100 : 0;
-      html += ` <span style="font-weight:600">Blancs&nbsp;:</span> ${{fmtP(pctBlancsIns)}} ins. (${{fmt(totalBlancs)}})`;
+      html += `<span style="font-weight:600">Blancs&nbsp;:</span> ${{fmtP(pctBlancsIns)}} ins. (${{fmt(totalBlancs)}})`;
     }}
     if (hasNuls) {{
       const pctNulsIns = totalInscrits > 0 ? totalNuls / totalInscrits * 100 : 0;
@@ -2336,9 +2171,55 @@ function updateAbstPanel(electionId) {{
   panel.style.display = 'block';
 }}
 
-function computeAbstBary(electionId) {{
-  const data = elecCache[electionId];
-  return (data && data.abstBary) ? data.abstBary : null;
+// ── Election switching ────────────────────────────────────────────────────
+function getElectionId(type, year, tour) {{
+  const years = elecByType[type];
+  if (!years || !years[year]) return null;
+  const found = years[year].find(e => e.tour === tour);
+  return found ? found.id : null;
+}}
+
+const filtersDiv = document.getElementById('filters');
+const toggleAllBtn = document.getElementById('toggleAll');
+let allOn = true;
+
+function updateToggleLabel() {{
+  const enabledBtns = btns.filter(b => b.count > 0);
+  allOn = enabledBtns.every(b => activeGroups.has(b.key));
+  toggleAllBtn.textContent = allOn ? 'Tout décocher' : 'Tout cocher';
+}}
+
+function setGroupVisible(b, visible) {{
+  const el = filtersDiv.querySelector('[data-key="' + b.key + '"]');
+  const xr = (chartDiv.layout && chartDiv.layout.xaxis) ? chartDiv.layout.xaxis.range.slice() : currentXRange.slice();
+  const yr = (chartDiv.layout && chartDiv.layout.yaxis) ? chartDiv.layout.yaxis.range.slice() : currentYRange.slice();
+  if (visible) {{
+    activeGroups.add(b.key);
+    if (el) {{ el.classList.replace('off','on'); el.style.backgroundColor = b.color; el.style.color = '#fff'; }}
+  }} else {{
+    activeGroups.delete(b.key);
+    if (el) {{ el.classList.replace('on','off'); el.style.backgroundColor = 'transparent'; el.style.color = b.color; }}
+  }}
+  restyleIRIS();
+  updateMapColors();
+  if (!isCarteActive) Plotly.relayout(chartDiv, {{'xaxis.range': xr, 'yaxis.range': yr}});
+}}
+
+function rebuildFilterButtons() {{
+  filtersDiv.innerHTML = '';
+  const activeBtns = btns.filter(b => b.count > 0).sort((a, b2) => (b2.pct || 0) - (a.pct || 0));
+  activeBtns.forEach(b => {{
+    const el = document.createElement('button');
+    const isOn = activeGroups.has(b.key);
+    el.className = 'fbtn ' + (isOn ? 'on' : 'off');
+    el.dataset.key = b.key;
+    el.style.borderColor = b.color;
+    el.style.backgroundColor = isOn ? b.color : 'transparent';
+    el.style.color = isOn ? '#fff' : b.color;
+    el.innerHTML = b.short + ' <span style="font-size:7px;font-weight:400;opacity:0.7">' + (b.pct || 0).toFixed(1) + '%</span>';
+    el.addEventListener('click', (e) => {{ e.preventDefault(); setGroupVisible(b, !activeGroups.has(b.key)); updateToggleLabel(); }});
+    filtersDiv.appendChild(el);
+  }});
 }}
 
 async function applyElection(electionId) {{
@@ -2361,16 +2242,12 @@ async function applyElection(electionId) {{
   ORDER.forEach(g => newGroups[g] = []);
   data.partis.forEach((parti, i) => {{
     if (parti === null || parti === undefined) return;
-    if (newGroups[parti] !== undefined) {{
-      newGroups[parti].push(i);
-    }} else if (newGroups['AUTRE'] !== undefined) {{
-      newGroups['AUTRE'].push(i);
-    }}
+    if (newGroups[parti] !== undefined) {{ newGroups[parti].push(i); }}
+    else if (newGroups['AUTRE'] !== undefined) {{ newGroups['AUTRE'].push(i); }}
   }});
   const oldEnabledBtns = btns.filter(b => (currentGroupIndices[b.key] || []).length > 0);
   const wasAllOn = oldEnabledBtns.length > 0 && oldEnabledBtns.every(b => activeGroups.has(b.key));
   const wasAllOff = oldEnabledBtns.every(b => !activeGroups.has(b.key));
-
   currentGroupIndices = newGroups;
 
   const enabledBtns = btns.filter(b => (newGroups[b.key] || []).length > 0);
@@ -2400,23 +2277,23 @@ async function applyElection(electionId) {{
   updateAbstPanel(electionId);
 
   const meta = ELECTIONS_META[electionId];
-  electionLabel.textContent = meta ? meta.label : electionId;
+  document.getElementById('electionCurrentLabel').textContent = meta ? meta.label : electionId;
   updateToggleLabel();
 
   if (currentClickedGlobalIdx !== null) {{
     const partisData = elecCache[currentElectionId];
     if (partisData && partisData.partis[currentClickedGlobalIdx] !== null) {{
-      showDesktopCardElec(currentClickedGlobalIdx);
+      showCard(currentClickedGlobalIdx);
     }} else {{
-      const card = document.getElementById('infoCard');
-      card.classList.remove('empty');
-      card.innerHTML = '<div style="color:#AAA;padding:16px;font-size:12px;text-align:center">Pas de données pour cet IRIS<br>dans cette élection.</div>';
+      document.getElementById('infoCard').classList.remove('show');
+      currentClickedGlobalIdx = null;
     }}
   }}
   updateMapColors();
 }}
 
 function updateYearBtns(type) {{
+  const elecYearBtns = document.getElementById('elecYearBtns');
   elecYearBtns.innerHTML = '';
   const years = elecByType[type] ? Object.keys(elecByType[type]).sort() : [];
   years.forEach(year => {{
@@ -2438,6 +2315,8 @@ function updateYearBtns(type) {{
 }}
 
 function updateTourBtns(type, year) {{
+  const tourBtn1 = document.getElementById('tourBtn1');
+  const tourBtn2 = document.getElementById('tourBtn2');
   const years = elecByType[type];
   const available = years && years[year] ? years[year].map(e => e.tour) : [];
   tourBtn1.disabled = !available.includes(1);
@@ -2446,13 +2325,254 @@ function updateTourBtns(type, year) {{
   tourBtn2.classList.toggle('active', currentElectionTour === 2 && available.includes(2));
 }}
 
-// ── buildSelect (scope global, appelé après chargement de IRIS_X) ─────────
+// ── Apply axes ────────────────────────────────────────────────────────────
+function applyAxes(xVar, xInvert, yVar, preset) {{
+  currentXVar = xVar;
+  currentYVar = yVar;
+  currentXInvert = xInvert;
+  if (preset) {{
+    currentXRange = preset.xRange ? preset.xRange.slice() : computeDataRange(xVar, xInvert);
+    currentYRange = preset.yRange ? preset.yRange.slice() : computeDataRange(yVar, false);
+    currentCorners = preset.corners;
+  }} else {{
+    currentXRange = computeDataRange(xVar, xInvert);
+    currentYRange = computeDataRange(yVar, false);
+  }}
+
+  activeGroups = new Set(btns.filter(b => b.count > 0).map(b => b.key));
+  rebuildFilterButtons();
+  updateToggleLabel();
+  restyleIRIS();
+  restyleBarycentres();
+
+  const xTitle = preset ? preset.xTitle : (varLabels[xVar] || xVar) + (xInvert ? ' (inversé)' : '');
+  const yTitle = preset ? preset.yTitle : (varLabels[yVar] || yVar);
+  Plotly.relayout(chartDiv, {{
+    'xaxis.title.text': xTitle,
+    'yaxis.title.text': yTitle,
+    'xaxis.range': currentXRange.slice(),
+    'yaxis.range': currentYRange.slice(),
+  }});
+
+  setCorners(preset ? preset.corners : []);
+  updateDesc(preset, xVar, yVar);
+  document.getElementById('xInvertChk').checked = xInvert;
+}}
+
+// ── Touch pan + pinch-zoom + tap ──────────────────────────────────────────
+let gesture = null;
+let touch1  = null;
+let pinch   = null;
+let rafId   = null;
+
+function getRange() {{
+  return {{
+    x: chartDiv._fullLayout.xaxis.range.slice(),
+    y: chartDiv._fullLayout.yaxis.range.slice(),
+  }};
+}}
+
+function findNearest(cx, cy) {{
+  const ax = chartDiv._fullLayout.xaxis;
+  const ay = chartDiv._fullLayout.yaxis;
+  let best = null, bestD = Infinity;
+  for (let ti = 1; ti < chartDiv.data.length; ti++) {{
+    const tr = chartDiv.data[ti];
+    if (tr.visible === false || !tr.customdata) continue;
+    for (let pi = 0; pi < tr.x.length; pi++) {{
+      const sx = ax.d2p(tr.x[pi]) + ax._offset;
+      const sy = ay.d2p(tr.y[pi]) + ay._offset;
+      const d = Math.hypot(cx - sx, cy - sy);
+      if (d < bestD && d < 30) {{ bestD = d; best = {{ti, pi}}; }}
+    }}
+  }}
+  return best;
+}}
+
+function doRelayout(xr, yr) {{
+  if (rafId) cancelAnimationFrame(rafId);
+  rafId = requestAnimationFrame(() => {{
+    Plotly.relayout(chartDiv, {{'xaxis.range': xr, 'yaxis.range': yr}});
+    rafId = null;
+  }});
+}}
+
+chartDiv.addEventListener('touchstart', function(e) {{
+  e.stopPropagation();
+  if (e.touches.length >= 2) {{
+    gesture = 'pinch';
+    const t1 = e.touches[0], t2 = e.touches[1];
+    const rect = chartDiv.getBoundingClientRect();
+    pinch = {{
+      dist: Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY),
+      midPxX: (t1.clientX + t2.clientX) / 2 - rect.left,
+      midPxY: (t1.clientY + t2.clientY) / 2 - rect.top,
+      startRanges: getRange(),
+    }};
+    touch1 = null;
+  }} else if (e.touches.length === 1) {{
+    gesture = null;
+    const t = e.touches[0];
+    const rect = chartDiv.getBoundingClientRect();
+    touch1 = {{
+      clientX: t.clientX, clientY: t.clientY,
+      time: Date.now(),
+      startPxX: t.clientX - rect.left,
+      startPxY: t.clientY - rect.top,
+      startRanges: getRange(),
+      moved: false,
+    }};
+  }}
+}}, {{ passive: false, capture: true }});
+
+chartDiv.addEventListener('touchmove', function(e) {{
+  e.preventDefault();
+  e.stopPropagation();
+  if (e.touches.length >= 2 && pinch) {{
+    gesture = 'pinch';
+    const t1 = e.touches[0], t2 = e.touches[1];
+    const rect = chartDiv.getBoundingClientRect();
+    const newDist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+    const newMidPxX = (t1.clientX + t2.clientX) / 2 - rect.left;
+    const newMidPxY = (t1.clientY + t2.clientY) / 2 - rect.top;
+    const scale = pinch.dist / newDist;
+    const sr = pinch.startRanges;
+    const ax = chartDiv._fullLayout.xaxis;
+    const ay = chartDiv._fullLayout.yaxis;
+    const xSpan0 = sr.x[1] - sr.x[0];
+    const ySpan0 = sr.y[1] - sr.y[0];
+    const plotW = ax._length;
+    const plotH = ay._length;
+    const anchorX = sr.x[0] + (pinch.midPxX - ax._offset) / plotW * xSpan0;
+    const anchorY = sr.y[1] - (pinch.midPxY - ay._offset) / plotH * ySpan0;
+    let x0 = anchorX + (sr.x[0] - anchorX) * scale;
+    let x1 = anchorX + (sr.x[1] - anchorX) * scale;
+    let y0 = anchorY + (sr.y[0] - anchorY) * scale;
+    let y1 = anchorY + (sr.y[1] - anchorY) * scale;
+    const newXSpan = x1 - x0;
+    const newYSpan = y1 - y0;
+    const panDx = (newMidPxX - pinch.midPxX) / plotW * newXSpan;
+    const panDy = (newMidPxY - pinch.midPxY) / plotH * newYSpan;
+    doRelayout([x0 - panDx, x1 - panDx], [y0 + panDy, y1 + panDy]);
+  }} else if (e.touches.length === 1 && touch1 && gesture !== 'pinch') {{
+    gesture = 'pan';
+    touch1.moved = true;
+    const t = e.touches[0];
+    const rect = chartDiv.getBoundingClientRect();
+    const curPxX = t.clientX - rect.left;
+    const curPxY = t.clientY - rect.top;
+    const sr = touch1.startRanges;
+    const ax = chartDiv._fullLayout.xaxis;
+    const ay = chartDiv._fullLayout.yaxis;
+    const xSpan = sr.x[1] - sr.x[0];
+    const ySpan = sr.y[1] - sr.y[0];
+    const plotW = ax._length;
+    const plotH = ay._length;
+    const dx = (curPxX - touch1.startPxX) / plotW * xSpan;
+    const dy = (curPxY - touch1.startPxY) / plotH * ySpan;
+    doRelayout([sr.x[0] - dx, sr.x[1] - dx], [sr.y[0] + dy, sr.y[1] + dy]);
+  }}
+}}, {{ passive: false, capture: true }});
+
+chartDiv.addEventListener('touchend', function(e) {{
+  e.stopPropagation();
+  if (gesture === 'pinch' && e.touches.length < 2) {{
+    gesture = null;
+    pinch = null;
+    if (e.touches.length === 1) {{
+      const t = e.touches[0];
+      const rect = chartDiv.getBoundingClientRect();
+      touch1 = {{
+        clientX: t.clientX, clientY: t.clientY,
+        time: Date.now(),
+        startPxX: t.clientX - rect.left,
+        startPxY: t.clientY - rect.top,
+        startRanges: getRange(),
+        moved: false,
+      }};
+    }} else {{
+      touch1 = null;
+    }}
+    return;
+  }}
+  if (e.touches.length === 0 && touch1 && !touch1.moved) {{
+    const t = e.changedTouches[0];
+    const dx = Math.abs(t.clientX - touch1.clientX);
+    const dy = Math.abs(t.clientY - touch1.clientY);
+    const dt = Date.now() - touch1.time;
+    if (dx <= 12 && dy <= 12 && dt <= 300) {{
+      const rect = chartDiv.getBoundingClientRect();
+      const hit = findNearest(t.clientX - rect.left, t.clientY - rect.top);
+      if (hit) {{
+        const globalIdx = chartDiv.data[hit.ti].customdata[hit.pi];
+        if (globalIdx !== undefined && globalIdx !== null) showCard(globalIdx);
+      }} else {{
+        card.classList.remove('show');
+      }}
+    }}
+  }}
+  if (e.touches.length === 0) {{
+    gesture = null; touch1 = null; pinch = null;
+  }}
+}}, {{ passive: false, capture: true }});
+
+chartDiv.addEventListener('touchcancel', function() {{
+  gesture = null; touch1 = null; pinch = null;
+}}, {{ passive: true }});
+
+// ── Axis controls ─────────────────────────────────────────────────────────
+const presetBtnsDiv = document.getElementById('presetBtns');
+function buildPresetButtons() {{
+  presetBtnsDiv.innerHTML = '';
+  PRESETS.forEach(p => {{
+    if (p.id === 'tsne' && !(IRIS_X && IRIS_X['tsne_x'])) return;
+    if (p.id === 'umap' && !(IRIS_X && IRIS_X['umap_x'])) return;
+    const btn = document.createElement('button');
+    btn.className = 'preset-btn' + (p.id === currentPresetId ? ' active' : '');
+    btn.dataset.id = p.id;
+    btn.textContent = p.emoji + ' ' + p.label;
+    btn.addEventListener('click', () => {{
+      hideCarte();
+      document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentPresetId = p.id;
+      document.getElementById('xSelect').value = p.xVar;
+      document.getElementById('ySelect').value = p.yVar;
+      document.getElementById('xInvertChk').checked = p.xInvert;
+      applyAxes(p.xVar, p.xInvert, p.yVar, p);
+    }});
+    presetBtnsDiv.appendChild(btn);
+  }});
+  // Bouton Carte (toujours présent)
+  const carteBtn = document.createElement('button');
+  carteBtn.className = 'preset-btn' + (currentPresetId === 'carte' ? ' active' : '');
+  carteBtn.dataset.id = 'carte';
+  carteBtn.textContent = '🗺️ Carte';
+  carteBtn.addEventListener('click', async () => {{
+    document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+    carteBtn.classList.add('active');
+    currentPresetId = 'carte';
+    await showCarte();
+  }});
+  presetBtnsDiv.appendChild(carteBtn);
+}}
+// Boutons au démarrage (tsne/umap exclus car IRIS_X pas encore chargé)
+buildPresetButtons();
+
+const customToggle = document.getElementById('customToggle');
+const customPanel = document.getElementById('customPanel');
+customToggle.addEventListener('click', () => {{
+  const open = customPanel.classList.toggle('open');
+  customToggle.classList.toggle('open', open);
+  customToggle.textContent = open ? 'Personnaliser ▴' : 'Personnaliser ▾';
+}});
+
 function buildSelect(selectId, selectedVar) {{
   const sel = document.getElementById(selectId);
   sel.innerHTML = '';
   for (const [cat, vars] of Object.entries(VARS)) {{
     const availVars = vars.filter(v => IRIS_X[v] !== undefined);
-    if (availVars.length === 0) continue;
+    if (!availVars.length) continue;
     const og = document.createElement('optgroup');
     og.label = cat;
     availVars.forEach(v => {{
@@ -2465,49 +2585,6 @@ function buildSelect(selectId, selectedVar) {{
     sel.appendChild(og);
   }}
 }}
-
-// ── initUI : construit les boutons et initialise l'état ───────────────────
-function initUI() {{
-// ── Preset buttons ────────────────────────────────────────────────────────
-const presetBtnsDiv = document.getElementById('presetBtns');
-PRESETS.forEach(p => {{
-  // Les presets t-SNE/UMAP seront masqués après chargement de IRIS_X si absents
-  const btn = document.createElement('button');
-  btn.className = 'preset-btn' + (p.id === 'saint_graphique' ? ' active' : '');
-  btn.dataset.id = p.id;
-  btn.textContent = p.emoji + ' ' + p.label;
-  btn.addEventListener('click', () => {{
-    hideCarte();
-    document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    currentPresetId = p.id;
-    document.getElementById('xSelect').value = p.xVar;
-    document.getElementById('ySelect').value = p.yVar;
-    document.getElementById('xInvertChk').checked = p.xInvert;
-    applyAxes(p.xVar, p.xInvert, p.yVar, p);
-  }});
-  presetBtnsDiv.appendChild(btn);
-}});
-
-const carteBtn = document.createElement('button');
-carteBtn.className = 'preset-btn';
-carteBtn.dataset.id = 'carte';
-carteBtn.textContent = '🗺️ Carte';
-carteBtn.addEventListener('click', async () => {{
-  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
-  carteBtn.classList.add('active');
-  currentPresetId = 'carte';
-  await showCarte();
-}});
-presetBtnsDiv.appendChild(carteBtn);
-
-const customToggle = document.getElementById('customToggle');
-const customPanel = document.getElementById('customPanel');
-customToggle.addEventListener('click', () => {{
-  const open = customPanel.classList.toggle('open');
-  customToggle.classList.toggle('open', open);
-  customToggle.textContent = open ? 'Personnaliser ▴' : 'Personnaliser ▾';
-}});
 
 function onCustomChange() {{
   hideCarte();
@@ -2538,7 +2615,6 @@ document.getElementById('colorVarSelect').addEventListener('change', function() 
   updateColorLegend();
 }});
 
-// ── Toggle all button ─────────────────────────────────────────────────────
 toggleAllBtn.addEventListener('click', () => {{
   const enabledBtns = btns.filter(b => b.count > 0);
   const xr = chartDiv.layout ? chartDiv.layout.xaxis.range.slice() : currentXRange.slice();
@@ -2563,31 +2639,28 @@ toggleAllBtn.addEventListener('click', () => {{
   updateToggleLabel();
 }});
 
-// ── Tour buttons ──────────────────────────────────────────────────────────
-tourBtn1.addEventListener('click', () => {{
-  if (tourBtn1.disabled) return;
-  currentElectionTour = 1;
-  updateTourBtns(currentElectionType, currentElectionYear);
-  const eid = getElectionId(currentElectionType, currentElectionYear, 1);
-  if (eid) applyElection(eid);
-}});
-tourBtn2.addEventListener('click', () => {{
-  if (tourBtn2.disabled) return;
-  currentElectionTour = 2;
-  updateTourBtns(currentElectionType, currentElectionYear);
-  const eid = getElectionId(currentElectionType, currentElectionYear, 2);
-  if (eid) applyElection(eid);
-}});
+// ── Helpers overlay de chargement ─────────────────────────────────────────
+function setLoadingProgress(pct, msg, detail) {{
+  const bar = document.getElementById('loadingBar');
+  const msgEl = document.getElementById('loadingMsg');
+  const detailEl = document.getElementById('loadingDetail');
+  if (bar) bar.style.width = pct + '%';
+  if (msg && msgEl) msgEl.textContent = msg;
+  if (detailEl) detailEl.textContent = detail || '';
+}}
+function hideLoadingOverlay() {{
+  const ov = document.getElementById('loadingOverlay');
+  if (ov) {{ ov.style.opacity = '0'; ov.style.transition = 'opacity 0.4s'; setTimeout(() => ov.remove(), 400); }}
+}}
 
-// ── Init state ────────────────────────────────────────────────────────────
+// ── Init state et UI synchrone (métadonnées inline disponibles immédiatement) ──
 currentElectionId = DEFAULT_ELECTION_ID;
-currentElectionType = ELECTIONS_META[DEFAULT_ELECTION_ID]?.type || 'legi';
-currentElectionYear = ELECTIONS_META[DEFAULT_ELECTION_ID]?.year || 2022;
+currentElectionType = ELECTIONS_META[DEFAULT_ELECTION_ID]?.type || 'euro';
+currentElectionYear = ELECTIONS_META[DEFAULT_ELECTION_ID]?.year || 2024;
 currentElectionTour = ELECTIONS_META[DEFAULT_ELECTION_ID]?.tour || 1;
-currentGroupIndices = {{}};  // sera rempli après chargement de GROUP_INDICES (static.json)
+currentGroupIndices = {{}};  // rempli après chargement de static.json
 activeGroups = new Set(btns.map(b => b.key));
 
-// Grouper les élections par type → year
 elecByType = {{}};
 for (const [eid, meta] of Object.entries(ELECTIONS_META)) {{
   if (!elecByType[meta.type]) elecByType[meta.type] = {{}};
@@ -2595,7 +2668,7 @@ for (const [eid, meta] of Object.entries(ELECTIONS_META)) {{
   elecByType[meta.type][meta.year].push({{id: eid, tour: meta.tour}});
 }}
 
-// Build type buttons (après remplissage de elecByType)
+const elecTypeBtns = document.getElementById('elecTypeBtns');
 for (const [type, label] of Object.entries(typeLabels)) {{
   if (!elecByType[type]) continue;
   const btn = document.createElement('button');
@@ -2607,7 +2680,7 @@ for (const [type, label] of Object.entries(typeLabels)) {{
     elecTypeBtns.querySelectorAll('.elec-type-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     const years = Object.keys(elecByType[type] || {{}}).sort();
-    currentElectionYear = parseInt(years[years.length - 1]) || 2022;
+    currentElectionYear = parseInt(years[years.length - 1]) || 2024;
     currentElectionTour = 1;
     updateYearBtns(type);
     updateTourBtns(type, currentElectionYear);
@@ -2618,92 +2691,45 @@ for (const [type, label] of Object.entries(typeLabels)) {{
   elecTypeBtns.appendChild(btn);
 }}
 
-// Init year/tour buttons for default election
 updateYearBtns(currentElectionType);
 updateTourBtns(currentElectionType, currentElectionYear);
-electionLabel.textContent = ELECTIONS_META[DEFAULT_ELECTION_ID]?.label || DEFAULT_ELECTION_ID;
+document.getElementById('electionCurrentLabel').textContent = ELECTIONS_META[DEFAULT_ELECTION_ID]?.label || DEFAULT_ELECTION_ID;
+
+document.getElementById('tourBtn1').addEventListener('click', () => {{
+  if (document.getElementById('tourBtn1').disabled) return;
+  currentElectionTour = 1;
+  updateTourBtns(currentElectionType, currentElectionYear);
+  const eid = getElectionId(currentElectionType, currentElectionYear, 1);
+  if (eid) applyElection(eid);
+}});
+document.getElementById('tourBtn2').addEventListener('click', () => {{
+  if (document.getElementById('tourBtn2').disabled) return;
+  currentElectionTour = 2;
+  updateTourBtns(currentElectionType, currentElectionYear);
+  const eid = getElectionId(currentElectionType, currentElectionYear, 2);
+  if (eid) applyElection(eid);
+}});
 
 // Dropdowns axes désactivés jusqu'au chargement de IRIS_X/IRIS_Y
 document.getElementById('xSelect').disabled = true;
 document.getElementById('ySelect').disabled = true;
 
-// Initialiser les filtres partis (btns.count sera mis à jour après applyElection)
-top4Parties = new Set(btns.slice().sort((a,b) => b.count - a.count).slice(0,4).map(b => b.key));
 rebuildFilterButtons();
 updateToggleLabel();
 
-}} // fin initUI
-
-// ── Info card using election-specific scores (lire depuis IRIS_INFO) ──
-function showDesktopCardElec(irisGlobalIdx) {{
-  const cd = IRIS_INFO[irisGlobalIdx];
-  if (!cd) return;
-  currentClickedGlobalIdx = irisGlobalIdx;
-  const card = document.getElementById('infoCard');
-  card.classList.remove('empty');
-
-  const xRaw = IRIS_X ? (IRIS_X[currentXVar] || [])[irisGlobalIdx] : undefined;
-  const yRaw = IRIS_Y ? (IRIS_Y[currentYVar] || [])[irisGlobalIdx] : undefined;
-  const xDisp = xRaw !== undefined ? (currentXInvert ? -xRaw : xRaw) : undefined;
-
-  const elecData = elecCache[currentElectionId];
-  const sticky = document.getElementById('sidebarSticky');
-  if (sticky) {{ sticky.style.display = 'block'; sticky.style.color = elecData?.colors[irisGlobalIdx] || '#9CA3AF'; sticky.textContent = cd[1] || cd[0] || ''; }}
-  const elecScores = elecData ? elecData.scores[irisGlobalIdx] : null;
-  const currentMeta = ELECTIONS_META[currentElectionId];
-  const currentColor = elecData?.colors[irisGlobalIdx] || '#9CA3AF';
-  const currentParti = elecData?.partis[irisGlobalIdx] || '—';
-
-  let voteBarsHtml = '';
-  if (elecScores && Object.keys(elecScores).length > 0) {{
-    const allScores = Object.entries(elecScores).filter(([,v]) => v > 0).sort((a,b) => b[1]-a[1]);
-    voteBarsHtml = allScores.map(([p, score], idx) => {{
-      const color = ALL_PARTIES_COLORS_JS[p] || '#9CA3AF';
-      const pct = score.toFixed(1) + '%';
-      const w = Math.min(100, score);
-      const isTop = idx === 0;
-      return `<div class="vote-bar-row">
-        <div class="vote-bar-label" style="color:${{color}};${{isTop ? 'font-weight:900' : ''}}">${{p.replace('_',' ')}}</div>
-        <div class="vote-bar-bg" style="${{isTop ? 'height:7px' : ''}}"><div class="vote-bar-fill" style="width:${{w}}%;background:${{color}}"></div></div>
-        <div class="vote-bar-pct" style="${{isTop ? 'font-weight:700;color:#1a1a1a' : ''}}">${{pct}}</div>
-      </div>`;
-    }}).join('');
-  }}
-
-  card.innerHTML = `
-    <div class="name">${{cd[1] || cd[0] || 'IRIS inconnu'}}</div>
-    <div class="party" style="color:#666;font-size:12px">${{cd[19] || ''}}</div>
-    <div class="row"><span class="lbl">Population :</span> <b>${{fmtNum(cd[2], ' hab.')}}</b> &nbsp;·&nbsp; <span class="lbl">Âge moyen :</span> <b>${{cd[18] !== '' ? Number(cd[18]).toFixed(1) + ' ans' : '—'}}</b></div>
-    <div class="row"><span class="lbl">Revenu médian :</span> <b>${{fmtNum(cd[3], ' €/UC')}}</b></div>
-    <div class="section-title">Catégories socio-professionnelles</div>
-    <div class="stat-bar-row"><div class="stat-bar-label">Cadres sup.</div><div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${{Math.min(100,cd[4]||0)}}%;background:#5B8DB8"></div></div><div class="stat-bar-pct">${{fmtPct(cd[4])}}</div></div>
-    <div class="stat-bar-row"><div class="stat-bar-label">Prof. interm.</div><div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${{Math.min(100,cd[6]||0)}}%;background:#82AAC8"></div></div><div class="stat-bar-pct">${{fmtPct(cd[6])}}</div></div>
-    <div class="stat-bar-row"><div class="stat-bar-label">Ouvriers</div><div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${{Math.min(100,cd[5]||0)}}%;background:#C97A5A"></div></div><div class="stat-bar-pct">${{fmtPct(cd[5])}}</div></div>
-    <div class="section-title">Formation &amp; Emploi</div>
-    <div class="stat-bar-row"><div class="stat-bar-label">Bac+</div><div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${{Math.min(100,cd[16]||0)}}%;background:#7AAD8F"></div></div><div class="stat-bar-pct">${{fmtPct(cd[16])}}</div></div>
-    <div class="stat-bar-row"><div class="stat-bar-label">Sans diplôme</div><div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${{Math.min(100,cd[17]||0)}}%;background:#C9A45A"></div></div><div class="stat-bar-pct">${{fmtPct(cd[17])}}</div></div>
-    <div class="stat-bar-row"><div class="stat-bar-label">Chômage</div><div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${{Math.min(100,cd[15]||0)}}%;background:#C95A5A"></div></div><div class="stat-bar-pct">${{fmtPct(cd[15])}}</div></div>
-    <div class="section-title">Logement</div>
-    <div class="stat-bar-row"><div class="stat-bar-label">Propriétaires</div><div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${{Math.min(100,cd[13]||0)}}%;background:#7AA7D0"></div></div><div class="stat-bar-pct">${{fmtPct(cd[13])}}</div></div>
-    <div class="stat-bar-row"><div class="stat-bar-label">HLM</div><div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${{Math.min(100,cd[14]||0)}}%;background:#E8975A"></div></div><div class="stat-bar-pct">${{fmtPct(cd[14])}}</div></div>
-    <div class="section-title">${{currentMeta ? currentMeta.label : currentElectionId}}</div>
-    ${{(function() {{
-      const abstVal = elecData ? elecData.abst[irisGlobalIdx] : null;
-      const blancVal = elecData ? elecData.blancs[irisGlobalIdx] : null;
-      const inscrVal = elecData ? elecData.inscrits[irisGlobalIdx] : null;
-      const blancPct = (blancVal != null && inscrVal != null && inscrVal > 0) ? blancVal / inscrVal * 100 : null;
-      let row = '';
-      if (abstVal != null) row += `<span class="lbl">Abstention :</span> <b>${{fmtPct(abstVal)}}</b>`;
-      if (blancPct != null) row += (row ? ' &nbsp;·&nbsp; ' : '') + `<span class="lbl">Blancs :</span> <b>${{fmtPct(blancPct)}}</b>`;
-      return row ? `<div class="row">${{row}}</div>` : '';
-    }})()}}
-    <div class="vote-bars">${{voteBarsHtml || '<span style="color:#AAA;font-size:11px">Données non disponibles</span>'}}</div>
-    <div class="dynamic-row"><span class="lbl">Axe X (${{currentXVar}}) :</span> <b>${{xDisp !== undefined ? Number(xDisp).toFixed(3) : '—'}}</b></div>
-    <div class="dynamic-row"><span class="lbl">Axe Y (${{currentYVar}}) :</span> <b>${{yRaw !== undefined ? Number(yRaw).toFixed(3) : '—'}}</b></div>
-  `;
+const resetBtn = document.getElementById('resetBtn');
+function checkZoomed() {{
+  const xr = chartDiv.layout.xaxis.range;
+  const yr = chartDiv.layout.yaxis.range;
+  const zoomed = Math.abs(xr[0]-currentXRange[0])>0.05 || Math.abs(xr[1]-currentXRange[1])>0.05 ||
+                 Math.abs(yr[0]-currentYRange[0])>0.05 || Math.abs(yr[1]-currentYRange[1])>0.05;
+  resetBtn.classList.toggle('show', zoomed);
 }}
+resetBtn.addEventListener('click', () => {{
+  Plotly.relayout(chartDiv, {{'xaxis.range': currentXRange.slice(), 'yaxis.range': currentYRange.slice()}});
+}});
 
-// ── Carte MapLibre ────────────────────────────────────────────────────────
+// ── Carte géographique ────────────────────────────────────────────────────
 function buildMapGeoJSON() {{
   const elecData = elecCache[currentElectionId];
   if (!elecData || !IRIS_LAT || !IRIS_LON) return null;
@@ -2734,32 +2760,7 @@ function buildMapGeoJSON() {{
 function updateMapColors() {{
   if (!isCarteActive || !mapReady) return;
   const gj = buildMapGeoJSON();
-  if (!gj) return;
-  mapInstance.getSource('iris').setData(gj);
-  domMaps.forEach((m, i) => {{ if (domMapsReady[i]) m.getSource('iris').setData(gj); }});
-}}
-
-function _addIrisLayer(map, sourceId, layerId, clickCb) {{
-  map.addSource(sourceId, {{ type: 'geojson', data: {{ type: 'FeatureCollection', features: [] }} }});
-  map.addLayer({{
-    id: layerId, type: 'circle', source: sourceId,
-    paint: {{
-      'circle-color': ['get', 'color'],
-      'circle-radius': ['interpolate', ['linear'], ['zoom'],
-        5, ['*', ['get', 'size'], 0.35],
-        10, ['*', ['get', 'size'], 1.3],
-        14, ['*', ['get', 'size'], 2.5]
-      ],
-      'circle-opacity': 0.85,
-      'circle-stroke-width': 0.5,
-      'circle-stroke-color': 'rgba(255,255,255,0.4)',
-    }}
-  }});
-  if (clickCb) {{
-    map.on('click', layerId, e => clickCb(e.features[0].properties.idx));
-    map.on('mouseenter', layerId, () => map.getCanvas().style.cursor = 'pointer');
-    map.on('mouseleave', layerId, () => map.getCanvas().style.cursor = '');
-  }}
+  if (gj) mapInstance.getSource('iris').setData(gj);
 }}
 
 function initMap() {{
@@ -2769,57 +2770,62 @@ function initMap() {{
     container: 'mapDiv',
     style: 'https://tiles.openfreemap.org/styles/bright',
     bounds: [[-5.2, 41.3], [9.6, 51.2]],
-    fitBoundsOptions: {{ padding: 20 }},
+    fitBoundsOptions: {{ padding: 10 }},
     minZoom: 4,
     maxZoom: 16,
+    maxBounds: [[-7.0, 39.5], [11.5, 52.5]],
+    dragRotate: false,
   }});
+  mapInstance.touchZoomRotate.disableRotation();
   mapInstance.on('load', () => {{
     mapReady = true;
+    // Overlay blanc semi-transparent pour atténuer le fond de carte
     const overlay = document.createElement('div');
     overlay.style.cssText = 'position:absolute;inset:0;background:rgba(255,255,255,0.22);pointer-events:none;z-index:2';
     document.getElementById('mapDiv').appendChild(overlay);
-    _addIrisLayer(mapInstance, 'iris', 'iris-circles', idx => {{
+    mapInstance.addSource('iris', {{
+      type: 'geojson',
+      data: {{ type: 'FeatureCollection', features: [] }}
+    }});
+    mapInstance.addLayer({{
+      id: 'iris-circles',
+      type: 'circle',
+      source: 'iris',
+      paint: {{
+        'circle-color': ['get', 'color'],
+        'circle-radius': ['interpolate', ['linear'], ['zoom'],
+          5, ['*', ['get', 'size'], 0.35],
+          10, ['*', ['get', 'size'], 1.3],
+          14, ['*', ['get', 'size'], 2.5]
+        ],
+        'circle-opacity': 0.85,
+        'circle-stroke-width': 0.5,
+        'circle-stroke-color': 'rgba(255,255,255,0.4)',
+      }}
+    }});
+    mapInstance.on('click', 'iris-circles', e => {{
+      const idx = e.features[0].properties.idx;
       currentClickedGlobalIdx = idx;
-      showDesktopCardElec(idx);
+      showCard(idx);
+    }});
+    mapInstance.on('mouseenter', 'iris-circles', () => {{
+      mapInstance.getCanvas().style.cursor = 'pointer';
+    }});
+    mapInstance.on('mouseleave', 'iris-circles', () => {{
+      mapInstance.getCanvas().style.cursor = '';
     }});
     updateMapColors();
-  }});
-
-  // Mini-maps DOM-TOM
-  document.getElementById('domMapsRow').style.display = 'flex';
-  DOM_TOM_CONFIGS.forEach((cfg, i) => {{
-    const m = new maplibregl.Map({{
-      container: cfg.id,
-      style: 'https://tiles.openfreemap.org/styles/bright',
-      bounds: cfg.bounds,
-      fitBoundsOptions: {{ padding: 5 }},
-      minZoom: 4, maxZoom: 16,
-      attributionControl: false,
-      navigationControl: false,
-    }});
-    m.addControl(new maplibregl.AttributionControl({{ compact: true }}));
-    domMaps.push(m);
-    domMapsReady.push(false);
-    m.on('load', () => {{
-      domMapsReady[i] = true;
-      const ov = document.createElement('div');
-      ov.style.cssText = 'position:absolute;inset:0;background:rgba(255,255,255,0.22);pointer-events:none;z-index:2';
-      document.getElementById(cfg.id).appendChild(ov);
-      _addIrisLayer(m, 'iris', 'iris-circles', idx => {{
-        currentClickedGlobalIdx = idx;
-        showDesktopCardElec(idx);
-      }});
-      const gj = buildMapGeoJSON();
-      if (gj) m.getSource('iris').setData(gj);
-    }});
   }});
 }}
 
 async function showCarte() {{
   isCarteActive = true;
-  document.getElementById('chartDiv').style.display = 'none';
+  document.getElementById('chart').style.display = 'none';
   document.querySelectorAll('.corner-label').forEach(el => el.style.display = 'none');
-  document.getElementById('axisDesc').style.display = 'none';
+  const resetBtn = document.getElementById('resetBtn');
+  if (resetBtn) resetBtn.style.display = 'none';
+  document.querySelector('.footer') && (document.querySelector('.footer').style.display = 'none');
+  document.getElementById('axisDesc') && (document.getElementById('axisDesc').style.display = 'none');
   document.getElementById('mapDiv').style.display = 'block';
   if (!IRIS_LAT) {{
     document.getElementById('carteLoadingMsg').style.display = 'block';
@@ -2829,9 +2835,8 @@ async function showCarte() {{
     document.getElementById('carteLoadingMsg').style.display = 'none';
   }}
   if (!mapInitialized) {{
-    initMap();  // initialise aussi domMapsRow
+    initMap();
   }} else {{
-    document.getElementById('domMapsRow').style.display = 'flex';
     updateMapColors();
   }}
 }}
@@ -2840,53 +2845,25 @@ function hideCarte() {{
   if (!isCarteActive) return;
   isCarteActive = false;
   document.getElementById('mapDiv').style.display = 'none';
-  document.getElementById('domMapsRow').style.display = 'none';
-  document.getElementById('chartDiv').style.display = 'block';
+  document.getElementById('chart').style.display = 'block';
   document.querySelectorAll('.corner-label').forEach(el => el.style.display = '');
-  document.getElementById('axisDesc').style.display = '';
-}}
-
-// ── Helpers overlay de chargement ─────────────────────────────────────────
-function setLoadingProgress(pct, msg, detail) {{
-  const bar = document.getElementById('loadingBar');
-  const msgEl = document.getElementById('loadingMsg');
-  const detailEl = document.getElementById('loadingDetail');
-  if (bar) bar.style.width = pct + '%';
-  if (msg && msgEl) msgEl.textContent = msg;
-  if (detailEl) detailEl.textContent = detail || '';
-}}
-function hideLoadingOverlay() {{
-  const ov = document.getElementById('loadingOverlay');
-  if (ov) {{ ov.style.opacity = '0'; ov.style.transition = 'opacity 0.4s'; setTimeout(() => ov.remove(), 400); }}
+  const resetBtn = document.getElementById('resetBtn');
+  if (resetBtn) resetBtn.style.display = '';
+  document.querySelector('.footer') && (document.querySelector('.footer').style.display = '');
+  document.getElementById('axisDesc') && (document.getElementById('axisDesc').style.display = '');
 }}
 
 // ── Initialisation async ──────────────────────────────────────────────────
-initUI();
-
 (async function init() {{
-  try {{
-  // Phase 1 : Plotly newPlot (figData inline, 8 KB)
   setLoadingProgress(5, 'Initialisation du graphique…');
   await Plotly.newPlot(chartDiv, figData.data, figData.layout, {{
-    responsive: true, displayModeBar: true, scrollZoom: true,
-    modeBarButtonsToRemove: ['select2d','lasso2d','autoScale2d'],
-    doubleClick: 'reset',
+    responsive: true, displayModeBar: false, scrollZoom: false,
+    doubleClick: false, staticPlot: false,
   }});
-
-  // Enregistrer le click handler
-  chartDiv.on('plotly_click', function(eventData) {{
-    if (!eventData || !eventData.points || eventData.points.length === 0) return;
-    const pt = eventData.points[0];
-    if (pt.curveNumber !== 1) return;
-    const globalIdx = pt.customdata;
-    if (globalIdx !== undefined && globalIdx !== null) {{
-      showDesktopCardElec(globalIdx);
-    }}
-  }});
+  chartDiv.on('plotly_relayout', checkZoomed);
 
   setLoadingProgress(10, 'Chargement des données…', 'static.json + élection par défaut');
 
-  // Phase 2a : static.json + élection par défaut en parallèle
   const [staticData, defaultElecData] = await Promise.all([
     fetch('data/static.json').then(r => r.json()),
     fetch('data/elec_' + DEFAULT_ELECTION_ID + '.json').then(r => r.json()),
@@ -2899,23 +2876,21 @@ initUI();
   elecCache[DEFAULT_ELECTION_ID] = defaultElecData;
   currentGroupIndices = Object.assign({{}}, GROUP_INDICES);
 
-  setLoadingProgress(40, 'Données électorales chargées — chargement des axes…', 'iris_x_desktop.json + iris_y_desktop.json');
+  setLoadingProgress(40, 'Données électorales chargées — chargement des axes…', 'iris_x_mobile.json + iris_y_mobile.json');
 
-  // Appliquer l'élection par défaut (barycentres + carte IRIS cliquables)
   await applyElection(DEFAULT_ELECTION_ID);
   setCorners(PRESETS[0].corners);
   updateDesc(PRESETS[0], PRESETS[0].xVar, PRESETS[0].yVar);
 
-  // Phase 2b : IRIS_X et IRIS_Y en parallèle (les plus gros fichiers)
   const [xData, yData] = await Promise.all([
-    fetch('data/iris_x_desktop.json').then(r => r.json()),
-    fetch('data/iris_y_desktop.json').then(r => r.json()),
+    fetch('data/iris_x_mobile.json').then(r => r.json()),
+    fetch('data/iris_y_mobile.json').then(r => r.json()),
   ]);
 
   IRIS_X = xData;
   IRIS_Y = yData;
 
-  // Construire les selects maintenant que IRIS_X est disponible
+  buildPresetButtons();
   buildSelect('xSelect', PRESETS[0].xVar);
   buildSelect('ySelect', PRESETS[0].yVar);
   buildColorVarSelect();
@@ -2924,14 +2899,6 @@ initUI();
   document.getElementById('ySelect').disabled = false;
   document.getElementById('xInvertChk').checked = PRESETS[0].xInvert || false;
 
-  // Masquer les presets tsne/umap si données absentes
-  document.querySelectorAll('.preset-btn').forEach(btn => {{
-    const pid = btn.dataset.id;
-    if ((pid === 'tsne' && !IRIS_X['tsne_x']) || (pid === 'umap' && !IRIS_X['umap_x'])) {{
-      btn.style.display = 'none';
-    }}
-  }});
-
   setLoadingProgress(90, 'Finalisation…');
   applyAxes(PRESETS[0].xVar, PRESETS[0].xInvert, PRESETS[0].yVar, PRESETS[0]);
 
@@ -2939,19 +2906,12 @@ initUI();
   hideLoadingOverlay();
 
   // Ouvrir la carte par défaut
-  currentPresetId = 'carte';
-  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
-  const carteBtnEl = document.querySelector('.preset-btn[data-id="carte"]');
-  if (carteBtnEl) carteBtnEl.classList.add('active');
   await showCarte();
-  }} catch(e) {{
-    const msgEl = document.getElementById('loadingMsg');
-    const detailEl = document.getElementById('loadingDetail');
-    if (msgEl) msgEl.textContent = 'Erreur : ' + e.message;
-    if (detailEl) detailEl.textContent = e.stack || '';
-    console.error('Init error:', e);
-  }}
-}})();
+}})().catch(function(err) {{
+  document.getElementById('loadingMsg').textContent = 'Erreur : ' + err.message;
+  document.getElementById('loadingDetail').textContent = err.stack || '';
+  console.error('init error', err);
+}});
 
 </script>
 </body>
@@ -2959,7 +2919,7 @@ initUI();
     return html
 
 
-desktop_html = build_desktop_html()
-with open("saint_graphique_iris.html", "w", encoding="utf-8") as f:
-    f.write(desktop_html)
-print(f"Desktop → saint_graphique_iris.html ({len(desktop_html)//1024} KB)")
+mobile_html = build_mobile_html()
+with open("saint_graphique_iris_mobile.html", "w", encoding="utf-8") as f:
+    f.write(mobile_html)
+print(f"Mobile  → saint_graphique_iris_mobile.html ({len(mobile_html)//1024} KB)")

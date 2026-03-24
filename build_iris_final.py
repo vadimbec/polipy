@@ -1,6 +1,6 @@
 """
 build_iris_final.py
-Script autonome qui recrée iris/iris_final_socio_politique_bis.csv
+Script autonome qui recrée iris/iris_final_socio_politique.csv
 depuis les fichiers sources bruts INSEE.
 
 Usage : conda run -n vadim_env python build_iris_final.py [--with-embeddings]
@@ -699,14 +699,14 @@ def build_final(ml_path, with_embeddings=False):
     df_final.drop(columns=['_COM5', 'COM_cog'], errors='ignore', inplace=True)
 
     # Sauvegarde
-    output_path = os.path.join(PATH_IRIS, "iris_final_socio_politique_bis.csv")
+    output_path = os.path.join(PATH_IRIS, "iris_final_socio_politique.csv")
     df_final.to_csv(output_path, index=False)
     print(f"  Résultat : {len(df_final)} IRIS x {len(df_final.columns)} colonnes")
     print(f"  Sauvegardé : {output_path}")
 
     # Vérifications
     print("\n  === VÉRIFICATIONS ===")
-    print(f"  IRIS total : {len(df_final)} (ancien jolivet : 45 650 — gain : +{len(df_final)-45650})")
+    print(f"  IRIS total : {len(df_final)} IRIS")
 
     cols_verif = [
         'pop_totale', 'age_moyen', 'pct_0_19', 'pct_20_64', 'pct_65_plus',

@@ -66,6 +66,25 @@ La trace index 0 contient les barycentres partis + abstention. Mise à jour via 
 - Les `scores` dans `IRIS_ELECTION_DATA` sont en **% des exprimés** — pour calculer des voix absolues, multiplier par `exprimes`, pas par `inscrits`.
 - Elections disponibles : `ELECTIONS_AVAILABLE` dict Python, exporté en JS `ELECTIONS_META`.
 
+## Fichiers locaux non trackés par git (NE PAS SUPPRIMER)
+
+Les dossiers suivants sont dans `.gitignore` et n'existent que localement. Ne jamais les supprimer, déplacer ou écraser :
+
+- `communes/` — données INSEE Filosofi commune (sources pour `build_iris_final.py`) :
+  - `communes/FILO2021_DISP_COM.csv`
+  - `communes/FILO2021_DISP_PAUVRES_COM.csv`
+- `iris/` — fichiers sources INSEE IRIS lourds (base-ic-*.CSV, contours, etc.)
+- `data/` — JSON générés par les scripts rebuild (ne pas supprimer manuellement)
+
+Ces fichiers ne sont pas récupérables via git. Si supprimés par erreur, les fichiers `communes/` viennent de **INSEE Filosofi 2021** (téléchargement manuel depuis insee.fr).
+
+## deploy.sh — règles de sécurité
+
+Le script `deploy.sh` utilise `git worktree` pour déployer sur `gh-pages` sans quitter `main`. Il ne doit jamais :
+- Faire de `git checkout`, `git reset`, ou `git clean` sur la branche `main`
+- Toucher aux fichiers sources (uniquement copier les fichiers générés vers le worktree)
+- Être modifié pour inclure des globes (`**`) ou des `rm -rf` sur des dossiers sources
+
 ## Mises à jour du journal de bord
 
 Après chaque modification, mettre à jour `TASKS.md` :

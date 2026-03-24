@@ -450,31 +450,44 @@ VARS_BY_CAT = {
         'score_pca_pc7_logement_csp', 'score_pca_pc8_equipements_logement',
         'score_peripherie_metropole',
     ],
-    'Réductions dimensionnelles': [
+    'Reductions dimensionnelles': [
         'tsne_x', 'tsne_y', 'umap_x', 'umap_y',
     ],
     'Démographie': [
-        'pct_0_19', 'pct_20_64', 'pct_65_plus',
-        'pct_etrangers', 'pct_immigres', 'age_moyen', ''
+        'pct_etrangers', 'age_moyen',
+        'pct_femmes', 'taille_menage_moy', 'pct_hors_menage', 'ecart_csp_plus_hf',
+        'pct_0_19', 'pct_20_64', 'pct_65_plus', 'pct_immigres',
     ],
     'Revenus et inégalités': [
-        'DISP_MED21', 'DISP_TP6021', 'DISP_GI21', 'DISP_S80S2021', 'DISP_RD21',
-        'DISP_PPAT21', 'DISP_PPSOC21', 'DISP_PPMINI21', 'DISP_PACT21',
-        'DISP_PPEN21', 'DISP_PBEN21', 'DISP_PPFAM21', 'DISP_PPLOGT21',
-        'DISP_PCHO21', 'DISP_PTSA21',
-        'DISP_D121', 'DISP_D221', 'DISP_D321', 'DISP_D421',
-        'DISP_D621', 'DISP_D721', 'DISP_D821', 'DISP_D921',
-        'DISP_Q121', 'DISP_Q321', 'DISP_PIMPOT21',
+        'DISP_MED21', 'DISP_TP6021',
+        'DISP_PPAT21', 'DISP_PPSOC21', 'DISP_PACT21',
+        'DISP_PPEN21','DISP_PCHO21', 'DISP_PIMPOT21',
     ],
     'Diplômes et emploi': [
-        'pct_sup5', 'pct_bac_plus', 'pct_sans_diplome', 'pct_capbep',
-        'pct_chomage', 'pct_cdi', 'pct_cdd', 'pct_interim', 'pct_temps_partiel',
-        'pct_inactif', 'pct_csp_agriculteur', 'pct_csp_independant', 'pct_csp_plus',
-        'pct_csp_intermediaire', 'pct_csp_employe', 'pct_csp_ouvrier',
-        'pct_csp_retraite', 'pct_csp_sans_emploi', 'pct_etudiants',
+        'pct_sup5', 'pct_sans_diplome', 'pct_capbep',
+        'pct_chomage', 'pct_cdi', 'pct_interim',
+        'pct_inactif', 'pct_csp_retraite', 'pct_csp_sans_emploi', 'pct_etudiants',
     ],
-    'Mobilité': [
-      'pct_actifs_voiture', 'pct_actifs_transports', 'pct_actifs_velo', 'pct_actifs_2roues',
+    'Logement': [
+        'pct_proprietaires', 'pct_locataires', 'pct_hlm',
+        'pct_logvac', 'pct_maison', 'pct_appart',
+        'pct_petits_logements', 'pct_grands_logements',
+        'pct_logements_anciens', 'pct_logements_recents',
+        'pct_voiture_0', 'pct_voiture_2plus',
+        'surface_moyenne', 'pct_suroccupation',
+        'pct_chauffage_elec', 'pct_chauffage_fioul',
+        'pct_chauffage_gaz_ville', 'pct_chauffage_gaz_bouteille',
+        'pct_chauffage_autre',
+        'pct_garage', 'nb_pieces_moyen', 'pct_studios', 'pct_logements_5p_plus',
+    ],
+    'Équipements (BPE)': [
+        'bpe_total_pour1000',
+        'bpe_A_services_pour1000', 'bpe_B_commerces_pour1000',
+        'bpe_C_enseignement_pour1000', 'bpe_D_sante_pour1000',
+        'bpe_E_transports_pour1000', 'bpe_F_sports_culture_pour1000',
+        'bpe_G_tourisme_pour1000',
+        'bpe_educ_prioritaire_pour1000', 'bpe_ecole_privee_pour1000',
+        'bpe_sport_indoor_pour1000', 'pct_sport_accessible',
     ],
 }
 
@@ -671,8 +684,8 @@ for cat_vars in VARS_BY_CAT.values():
 
 # ── 1. CHARGEMENT DES DONNÉES ─────────────────────────────────────────────────
 # Source unique : iris_final_socio_politique.csv contient toutes les colonnes nécessaires
-# df_socio = pd.read_csv("iris/iris_final_socio_politique.csv", low_memory=False)
-df_socio = pd.read_csv("iris/iris_final_socio_politique_bis.csv", low_memory=False)
+# df_socio = pd.read_csv("iris/iris_final_socio_politique_bis.csv", low_memory=False)
+df_socio = pd.read_csv("iris/iris_final_socio_politique.csv", low_memory=False)
 
 # On garde aussi les coordonnées pour AXE_X / AXE_Y (optionnel)
 # mais toutes les variables clés sont dans df_socio
@@ -950,9 +963,7 @@ pop = df['_pop'].copy()
 q5  = pop.quantile(0.05)
 q95 = pop.quantile(0.95)
 pop_clipped = pop.clip(q5, q95)
-lower_size = 1.2
-upper_size = 2.5
-marker_size = lower_size + (pop_clipped - q5) / (q95 - q5) * (upper_size - lower_size)  # 2.5–4px
+marker_size = 2.5 + (pop_clipped - q5) / (q95 - q5) * (4 - 2.5)  # 2.5–4px
 
 # ── 6. JITTER ET DONNÉES PAR VARIABLE ─────────────────────────────────────────
 np.random.seed(42)
@@ -1419,14 +1430,23 @@ def build_mobile_html():
     # ── Écriture des fichiers JSON dans data/ ──────────────────────────────
     def _build_geo_centroids(df_arg):
         import geopandas as gpd
-        print("  Calcul des centroïdes IRIS depuis iris-stats.geojson...")
-        gdf = gpd.read_file('iris-stats.geojson')
-        gdf = gdf.set_crs('EPSG:2154', allow_override=True)
-        gdf_wgs = gdf.to_crs('EPSG:4326')
-        gdf_wgs = gdf_wgs.copy()
-        gdf_wgs['lat'] = gdf_wgs.geometry.centroid.y
-        gdf_wgs['lon'] = gdf_wgs.geometry.centroid.x
-        lookup = dict(zip(gdf_wgs['index'].astype(str), zip(gdf_wgs['lat'], gdf_wgs['lon'])))
+        # Source principale : contours_iris_2025.gpkg (EPSG:4326, contient DROM)
+        print("  Calcul des centroïdes IRIS depuis contours_iris_2025.gpkg...")
+        gdf = gpd.read_file('iris/contours_iris_2025.gpkg')
+        centroids = gdf.to_crs('EPSG:2154').geometry.centroid.to_crs('EPSG:4326')
+        gdf['lat'] = centroids.y
+        gdf['lon'] = centroids.x
+        lookup = dict(zip(gdf['CODE_IRIS'].astype(str), zip(gdf['lat'], gdf['lon'])))
+        # Fallback : iris-stats.geojson pour les IRIS manquants
+        missing = [str(c) for c in df_arg['IRIS'] if str(c) not in lookup]
+        if missing:
+            gdf2 = gpd.read_file('iris-stats.geojson')
+            gdf2 = gdf2.set_crs('EPSG:2154', allow_override=True)
+            centroids2 = gdf2.geometry.centroid.to_crs('EPSG:4326')
+            gdf2['lat'] = centroids2.y
+            gdf2['lon'] = centroids2.x
+            for _, row in gdf2[gdf2['index'].astype(str).isin(set(missing))].iterrows():
+                lookup[str(row['index'])] = (row['lat'], row['lon'])
         lats, lons = [], []
         for iris_code in df_arg['IRIS']:
             coords = lookup.get(str(iris_code))
@@ -1571,6 +1591,13 @@ html, body {{ background: #FAF9F7; font-family: 'Helvetica Neue', system-ui, san
 
 #chartWrap {{ position: relative; width: 100%; }}
 #chart {{ width: 100%; aspect-ratio: 9 / 11; touch-action: none; }}
+#domMapsRow {{ display: none; gap: 4px; padding: 4px 4px 0; flex-wrap: wrap; touch-action: pan-y; }}
+.dom-map-wrap {{ flex: 1; min-width: 120px; position: relative; padding: 10px 0; touch-action: pan-y; }}
+.dom-map-label {{ position: absolute; top: 3px; left: 5px; z-index: 10; font-size: 9px;
+                  font-weight: 800; color: #333; background: rgba(255,255,255,0.82);
+                  padding: 1px 5px; border-radius: 6px; pointer-events: none; }}
+.dom-map-canvas {{ width: 100%; height: 150px; border-radius: 6px; overflow: hidden;
+                   border: 1px solid #E8E8E8; }}
 .corner-label {{ position: absolute; font-size: 8px; font-weight: 800; line-height: 1.2;
                  pointer-events: none; opacity: 0.65; }}
 .corner-tl {{ top: 8px; left: 56px; text-align: left; }}
@@ -1698,9 +1725,15 @@ html, body {{ background: #FAF9F7; font-family: 'Helvetica Neue', system-ui, san
 
 <div id="chartWrap">
   <div id="chart"></div>
-  <div id="mapDiv" style="width:100%;height:calc(100vh - 160px);min-height:300px;display:none;position:relative;">
+  <div id="mapDiv" style="width:100%;height:calc(100vh - 180px);min-height:300px;display:none;position:relative;">
     <div id="carteLoadingMsg" style="display:none;position:absolute;top:8px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,0.92);padding:6px 16px;border-radius:20px;font-size:12px;color:#555;z-index:10;box-shadow:0 1px 4px rgba(0,0,0,0.1)">Chargement des coordonnées géographiques…</div>
     <button id="mapResetBtn" onclick="mapInstance && mapInstance.fitBounds([[-5.2,41.3],[9.6,51.2]],{{padding:10}})" style="position:absolute;bottom:16px;right:8px;z-index:20;background:rgba(255,255,255,0.95);border:1px solid #ccc;border-radius:6px;padding:6px 10px;font-size:13px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.15)">↺ Recentrer</button>
+  </div>
+  <div id="domMapsRow">
+    <div class="dom-map-wrap"><div class="dom-map-label">Guadeloupe</div><div class="dom-map-canvas" id="domMap0"></div></div>
+    <div class="dom-map-wrap"><div class="dom-map-label">Martinique</div><div class="dom-map-canvas" id="domMap1"></div></div>
+    <div class="dom-map-wrap"><div class="dom-map-label">Guyane</div><div class="dom-map-canvas" id="domMap2"></div></div>
+    <div class="dom-map-wrap"><div class="dom-map-label">La Réunion</div><div class="dom-map-canvas" id="domMap3"></div></div>
   </div>
   <div class="corner-label corner-tl" id="cornerTL" style="color:{sg['corners'][0]['color']}"></div>
   <div class="corner-label corner-tr" id="cornerTR" style="color:{sg['corners'][1]['color']}"></div>
@@ -1773,6 +1806,14 @@ let mapInitialized = false;
 let isCarteActive = false;
 let IRIS_INFO = null, IRIS_POPS = null, MARKER_SIZES = null, GROUP_INDICES = null;
 const elecCache = {{}};  // cache élections déjà fetché
+const domMaps = [];
+const domMapsReady = [];
+const DOM_TOM_CONFIGS = [
+  {{ id: 'domMap0', center: [-61.55, 16.25], zoom: 8.5, bounds: [[-62.0,15.83],[-61.0,16.56]] }},
+  {{ id: 'domMap1', center: [-61.0,  14.65], zoom: 9.0, bounds: [[-61.3,14.37],[-60.75,14.90]] }},
+  {{ id: 'domMap2', center: [-53.1,   4.0],  zoom: 5.5, bounds: [[-54.6,2.1],[-51.5,5.8]] }},
+  {{ id: 'domMap3', center: [55.55, -21.1],  zoom: 8.5, bounds: [[55.21,-21.4],[55.84,-20.87]] }},
+];
 
 let currentXVar = 'score_exploitation';
 let currentYVar = 'score_domination';
@@ -2747,7 +2788,32 @@ function buildMapGeoJSON() {{
 function updateMapColors() {{
   if (!isCarteActive || !mapReady) return;
   const gj = buildMapGeoJSON();
-  if (gj) mapInstance.getSource('iris').setData(gj);
+  if (!gj) return;
+  mapInstance.getSource('iris').setData(gj);
+  domMaps.forEach((m, i) => {{ if (domMapsReady[i]) m.getSource('iris').setData(gj); }});
+}}
+
+function _addIrisLayer(map, sourceId, layerId, clickCb) {{
+  map.addSource(sourceId, {{ type: 'geojson', data: {{ type: 'FeatureCollection', features: [] }} }});
+  map.addLayer({{
+    id: layerId, type: 'circle', source: sourceId,
+    paint: {{
+      'circle-color': ['get', 'color'],
+      'circle-radius': ['interpolate', ['linear'], ['zoom'],
+        5, ['*', ['get', 'size'], 0.35],
+        10, ['*', ['get', 'size'], 1.3],
+        14, ['*', ['get', 'size'], 2.5]
+      ],
+      'circle-opacity': 0.85,
+      'circle-stroke-width': 0.5,
+      'circle-stroke-color': 'rgba(255,255,255,0.4)',
+    }}
+  }});
+  if (clickCb) {{
+    map.on('click', layerId, e => clickCb(e.features[0].properties.idx));
+    map.on('mouseenter', layerId, () => map.getCanvas().style.cursor = 'pointer');
+    map.on('mouseleave', layerId, () => map.getCanvas().style.cursor = '');
+  }}
 }}
 
 function initMap() {{
@@ -2760,48 +2826,50 @@ function initMap() {{
     fitBoundsOptions: {{ padding: 10 }},
     minZoom: 4,
     maxZoom: 16,
-    maxBounds: [[-7.0, 39.5], [11.5, 52.5]],
     dragRotate: false,
   }});
   mapInstance.touchZoomRotate.disableRotation();
   mapInstance.on('load', () => {{
     mapReady = true;
-    // Overlay blanc semi-transparent pour atténuer le fond de carte
     const overlay = document.createElement('div');
     overlay.style.cssText = 'position:absolute;inset:0;background:rgba(255,255,255,0.22);pointer-events:none;z-index:2';
     document.getElementById('mapDiv').appendChild(overlay);
-    mapInstance.addSource('iris', {{
-      type: 'geojson',
-      data: {{ type: 'FeatureCollection', features: [] }}
-    }});
-    mapInstance.addLayer({{
-      id: 'iris-circles',
-      type: 'circle',
-      source: 'iris',
-      paint: {{
-        'circle-color': ['get', 'color'],
-        'circle-radius': ['interpolate', ['linear'], ['zoom'],
-          5, ['*', ['get', 'size'], 0.35],
-          10, ['*', ['get', 'size'], 1.3],
-          14, ['*', ['get', 'size'], 2.5]
-        ],
-        'circle-opacity': 0.85,
-        'circle-stroke-width': 0.5,
-        'circle-stroke-color': 'rgba(255,255,255,0.4)',
-      }}
-    }});
-    mapInstance.on('click', 'iris-circles', e => {{
-      const idx = e.features[0].properties.idx;
+    _addIrisLayer(mapInstance, 'iris', 'iris-circles', idx => {{
       currentClickedGlobalIdx = idx;
       showCard(idx);
     }});
-    mapInstance.on('mouseenter', 'iris-circles', () => {{
-      mapInstance.getCanvas().style.cursor = 'pointer';
-    }});
-    mapInstance.on('mouseleave', 'iris-circles', () => {{
-      mapInstance.getCanvas().style.cursor = '';
-    }});
     updateMapColors();
+  }});
+
+  // Mini-maps DOM-TOM
+  document.getElementById('domMapsRow').style.display = 'flex';
+  DOM_TOM_CONFIGS.forEach((cfg, i) => {{
+    const m = new maplibregl.Map({{
+      container: cfg.id,
+      style: 'https://tiles.openfreemap.org/styles/bright',
+      bounds: cfg.bounds,
+      fitBoundsOptions: {{ padding: 5 }},
+      minZoom: 4, maxZoom: 16,
+      attributionControl: false,
+      navigationControl: false,
+      dragRotate: false,
+    }});
+    m.touchZoomRotate.disableRotation();
+    m.addControl(new maplibregl.AttributionControl({{ compact: true }}));
+    domMaps.push(m);
+    domMapsReady.push(false);
+    m.on('load', () => {{
+      domMapsReady[i] = true;
+      const ov = document.createElement('div');
+      ov.style.cssText = 'position:absolute;inset:0;background:rgba(255,255,255,0.22);pointer-events:none;z-index:2';
+      document.getElementById(cfg.id).appendChild(ov);
+      _addIrisLayer(m, 'iris', 'iris-circles', idx => {{
+        currentClickedGlobalIdx = idx;
+        showCard(idx);
+      }});
+      const gj = buildMapGeoJSON();
+      if (gj) m.getSource('iris').setData(gj);
+    }});
   }});
 }}
 
@@ -2822,8 +2890,9 @@ async function showCarte() {{
     document.getElementById('carteLoadingMsg').style.display = 'none';
   }}
   if (!mapInitialized) {{
-    initMap();
+    initMap();  // initialise aussi domMapsRow
   }} else {{
+    document.getElementById('domMapsRow').style.display = 'flex';
     updateMapColors();
   }}
 }}
@@ -2832,6 +2901,7 @@ function hideCarte() {{
   if (!isCarteActive) return;
   isCarteActive = false;
   document.getElementById('mapDiv').style.display = 'none';
+  document.getElementById('domMapsRow').style.display = 'none';
   document.getElementById('chart').style.display = 'block';
   document.querySelectorAll('.corner-label').forEach(el => el.style.display = '');
   const resetBtn = document.getElementById('resetBtn');

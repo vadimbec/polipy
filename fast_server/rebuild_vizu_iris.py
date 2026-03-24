@@ -889,7 +889,8 @@ for cat_vars in VARS_BY_CAT.values():
 
 # ── 1. CHARGEMENT DES DONNÉES ─────────────────────────────────────────────────
 # Source unique : iris_final_socio_politique.csv contient toutes les colonnes nécessaires
-df_socio = pd.read_csv("iris/iris_final_socio_politique_bis.csv", low_memory=False)
+df_socio = pd.read_csv("iris/iris_final_socio_politique.csv", low_memory=False)
+# df_socio = pd.read_csv("iris/iris_final_socio_politique_bis.csv", low_memory=False)
 # On garde aussi les coordonnées pour AXE_X / AXE_Y (optionnel)
 # mais toutes les variables clés sont dans df_socio
 df = df_socio.copy()
@@ -1163,10 +1164,6 @@ q5  = pop.quantile(0.05)
 q95 = pop.quantile(0.95)
 pop_clipped = pop.clip(q5, q95)
 marker_size = 2.5 + (pop_clipped - q5) / (q95 - q5) * (6 - 2.5)  # 2.5–6px
-
-
-### test
-
 
 # ── 6. JITTER ET DONNÉES PAR VARIABLE ─────────────────────────────────────────
 np.random.seed(42)
@@ -1633,14 +1630,23 @@ def build_desktop_html():
     # ── Écriture des fichiers JSON dans data/ ──────────────────────────────
     def _build_geo_centroids(df_arg):
         import geopandas as gpd
-        print("  Calcul des centroïdes IRIS depuis iris-stats.geojson...")
-        gdf = gpd.read_file('iris-stats.geojson')
-        gdf = gdf.set_crs('EPSG:2154', allow_override=True)
-        gdf_wgs = gdf.to_crs('EPSG:4326')
-        gdf_wgs = gdf_wgs.copy()
-        gdf_wgs['lat'] = gdf_wgs.geometry.centroid.y
-        gdf_wgs['lon'] = gdf_wgs.geometry.centroid.x
-        lookup = dict(zip(gdf_wgs['index'].astype(str), zip(gdf_wgs['lat'], gdf_wgs['lon'])))
+        # Source principale : contours_iris_2025.gpkg (EPSG:4326, contient DROM)
+        print("  Calcul des centroïdes IRIS depuis contours_iris_2025.gpkg...")
+        gdf = gpd.read_file('iris/contours_iris_2025.gpkg')
+        centroids = gdf.to_crs('EPSG:2154').geometry.centroid.to_crs('EPSG:4326')
+        gdf['lat'] = centroids.y
+        gdf['lon'] = centroids.x
+        lookup = dict(zip(gdf['CODE_IRIS'].astype(str), zip(gdf['lat'], gdf['lon'])))
+        # Fallback : iris-stats.geojson pour les IRIS manquants
+        missing = [str(c) for c in df_arg['IRIS'] if str(c) not in lookup]
+        if missing:
+            gdf2 = gpd.read_file('iris-stats.geojson')
+            gdf2 = gdf2.set_crs('EPSG:2154', allow_override=True)
+            centroids2 = gdf2.geometry.centroid.to_crs('EPSG:4326')
+            gdf2['lat'] = centroids2.y
+            gdf2['lon'] = centroids2.x
+            for _, row in gdf2[gdf2['index'].astype(str).isin(set(missing))].iterrows():
+                lookup[str(row['index'])] = (row['lat'], row['lon'])
         lats, lons = [], []
         for iris_code in df_arg['IRIS']:
             coords = lookup.get(str(iris_code))
@@ -1762,6 +1768,13 @@ html, body {{ background: #FAF9F7; font-family: 'Helvetica Neue', system-ui, san
 
 .chart-wrapper {{ position: relative; }}
 #chartDiv {{ width: 100%; height: 640px; }}
+#domMapsRow {{ display: none; gap: 6px; padding: 6px 0 0; flex-wrap: wrap; }}
+.dom-map-wrap {{ flex: 1; min-width: 140px; max-width: 200px; position: relative; }}
+.dom-map-label {{ position: absolute; top: 4px; left: 6px; z-index: 10; font-size: 10px;
+                  font-weight: 800; color: #333; background: rgba(255,255,255,0.82);
+                  padding: 1px 6px; border-radius: 8px; pointer-events: none; }}
+.dom-map-canvas {{ width: 100%; height: 185px; border-radius: 8px; overflow: hidden;
+                   border: 1px solid #E8E8E8; }}
 .corner-label {{ position: absolute; font-size: 10px; font-weight: 800; line-height: 1.2;
                  pointer-events: none; opacity: 0.65; }}
 .corner-tl {{ top: 12px; left: 80px; text-align: left; }}
@@ -1884,6 +1897,12 @@ html, body {{ background: #FAF9F7; font-family: 'Helvetica Neue', system-ui, san
         <div id="carteLoadingMsg" style="display:none;position:absolute;top:8px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,0.92);padding:6px 16px;border-radius:20px;font-size:12px;color:#555;z-index:10;box-shadow:0 1px 4px rgba(0,0,0,0.1)">Chargement des coordonnées géographiques…</div>
         <button id="mapResetBtn" onclick="mapInstance && mapInstance.fitBounds([[-5.2,41.3],[9.6,51.2]],{{padding:20}})" style="position:absolute;bottom:16px;right:8px;z-index:20;background:rgba(255,255,255,0.95);border:1px solid #ccc;border-radius:6px;padding:6px 10px;font-size:13px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,0.15)">↺ Recentrer</button>
       </div>
+      <div id="domMapsRow">
+        <div class="dom-map-wrap"><div class="dom-map-label">Guadeloupe</div><div class="dom-map-canvas" id="domMap0"></div></div>
+        <div class="dom-map-wrap"><div class="dom-map-label">Martinique</div><div class="dom-map-canvas" id="domMap1"></div></div>
+        <div class="dom-map-wrap"><div class="dom-map-label">Guyane</div><div class="dom-map-canvas" id="domMap2"></div></div>
+        <div class="dom-map-wrap"><div class="dom-map-label">La Réunion</div><div class="dom-map-canvas" id="domMap3"></div></div>
+      </div>
       <div class="corner-label corner-tl" id="cornerTL" style="color:{sg['corners'][0]['color']}"></div>
       <div class="corner-label corner-tr" id="cornerTR" style="color:{sg['corners'][1]['color']}"></div>
       <div class="corner-label corner-bl" id="cornerBL" style="color:{sg['corners'][2]['color']}"></div>
@@ -1935,6 +1954,14 @@ let mapInstance = null;
 let mapReady = false;
 let mapInitialized = false;
 let isCarteActive = false;
+const domMaps = [];       // instances MapLibre des mini-maps DOM-TOM
+const domMapsReady = [];  // bool par mini-map
+const DOM_TOM_CONFIGS = [
+  {{ id: 'domMap0', center: [-61.55, 16.25], zoom: 8.5, bounds: [[-62.0,15.83],[-61.0,16.56]] }},
+  {{ id: 'domMap1', center: [-61.0,  14.65], zoom: 9.0, bounds: [[-61.3,14.37],[-60.75,14.90]] }},
+  {{ id: 'domMap2', center: [-53.1,   4.0],  zoom: 5.5, bounds: [[-54.6,2.1],[-51.5,5.8]] }},
+  {{ id: 'domMap3', center: [55.55, -21.1],  zoom: 8.5, bounds: [[55.21,-21.4],[55.84,-20.87]] }},
+];
 let IRIS_INFO = null, IRIS_POPS = null, MARKER_SIZES = null, GROUP_INDICES = null;
 const elecCache = {{}};  // cache élections déjà fetché
 
@@ -2732,7 +2759,32 @@ function buildMapGeoJSON() {{
 function updateMapColors() {{
   if (!isCarteActive || !mapReady) return;
   const gj = buildMapGeoJSON();
-  if (gj) mapInstance.getSource('iris').setData(gj);
+  if (!gj) return;
+  mapInstance.getSource('iris').setData(gj);
+  domMaps.forEach((m, i) => {{ if (domMapsReady[i]) m.getSource('iris').setData(gj); }});
+}}
+
+function _addIrisLayer(map, sourceId, layerId, clickCb) {{
+  map.addSource(sourceId, {{ type: 'geojson', data: {{ type: 'FeatureCollection', features: [] }} }});
+  map.addLayer({{
+    id: layerId, type: 'circle', source: sourceId,
+    paint: {{
+      'circle-color': ['get', 'color'],
+      'circle-radius': ['interpolate', ['linear'], ['zoom'],
+        5, ['*', ['get', 'size'], 0.35],
+        10, ['*', ['get', 'size'], 1.3],
+        14, ['*', ['get', 'size'], 2.5]
+      ],
+      'circle-opacity': 0.85,
+      'circle-stroke-width': 0.5,
+      'circle-stroke-color': 'rgba(255,255,255,0.4)',
+    }}
+  }});
+  if (clickCb) {{
+    map.on('click', layerId, e => clickCb(e.features[0].properties.idx));
+    map.on('mouseenter', layerId, () => map.getCanvas().style.cursor = 'pointer');
+    map.on('mouseleave', layerId, () => map.getCanvas().style.cursor = '');
+  }}
 }}
 
 function initMap() {{
@@ -2745,46 +2797,46 @@ function initMap() {{
     fitBoundsOptions: {{ padding: 20 }},
     minZoom: 4,
     maxZoom: 16,
-    maxBounds: [[-7.0, 39.5], [11.5, 52.5]],
   }});
   mapInstance.on('load', () => {{
     mapReady = true;
-    // Overlay blanc semi-transparent pour atténuer le fond de carte
     const overlay = document.createElement('div');
     overlay.style.cssText = 'position:absolute;inset:0;background:rgba(255,255,255,0.22);pointer-events:none;z-index:2';
     document.getElementById('mapDiv').appendChild(overlay);
-    mapInstance.addSource('iris', {{
-      type: 'geojson',
-      data: {{ type: 'FeatureCollection', features: [] }}
-    }});
-    mapInstance.addLayer({{
-      id: 'iris-circles',
-      type: 'circle',
-      source: 'iris',
-      paint: {{
-        'circle-color': ['get', 'color'],
-        'circle-radius': ['interpolate', ['linear'], ['zoom'],
-          5, ['*', ['get', 'size'], 0.35],
-          10, ['*', ['get', 'size'], 1.3],
-          14, ['*', ['get', 'size'], 2.5]
-        ],
-        'circle-opacity': 0.85,
-        'circle-stroke-width': 0.5,
-        'circle-stroke-color': 'rgba(255,255,255,0.4)',
-      }}
-    }});
-    mapInstance.on('click', 'iris-circles', e => {{
-      const idx = e.features[0].properties.idx;
+    _addIrisLayer(mapInstance, 'iris', 'iris-circles', idx => {{
       currentClickedGlobalIdx = idx;
       showDesktopCardElec(idx);
     }});
-    mapInstance.on('mouseenter', 'iris-circles', () => {{
-      mapInstance.getCanvas().style.cursor = 'pointer';
-    }});
-    mapInstance.on('mouseleave', 'iris-circles', () => {{
-      mapInstance.getCanvas().style.cursor = '';
-    }});
     updateMapColors();
+  }});
+
+  // Mini-maps DOM-TOM
+  document.getElementById('domMapsRow').style.display = 'flex';
+  DOM_TOM_CONFIGS.forEach((cfg, i) => {{
+    const m = new maplibregl.Map({{
+      container: cfg.id,
+      style: 'https://tiles.openfreemap.org/styles/bright',
+      bounds: cfg.bounds,
+      fitBoundsOptions: {{ padding: 5 }},
+      minZoom: 4, maxZoom: 16,
+      attributionControl: false,
+      navigationControl: false,
+    }});
+    m.addControl(new maplibregl.AttributionControl({{ compact: true }}));
+    domMaps.push(m);
+    domMapsReady.push(false);
+    m.on('load', () => {{
+      domMapsReady[i] = true;
+      const ov = document.createElement('div');
+      ov.style.cssText = 'position:absolute;inset:0;background:rgba(255,255,255,0.22);pointer-events:none;z-index:2';
+      document.getElementById(cfg.id).appendChild(ov);
+      _addIrisLayer(m, 'iris', 'iris-circles', idx => {{
+        currentClickedGlobalIdx = idx;
+        showDesktopCardElec(idx);
+      }});
+      const gj = buildMapGeoJSON();
+      if (gj) m.getSource('iris').setData(gj);
+    }});
   }});
 }}
 
@@ -2802,8 +2854,9 @@ async function showCarte() {{
     document.getElementById('carteLoadingMsg').style.display = 'none';
   }}
   if (!mapInitialized) {{
-    initMap();
+    initMap();  // initialise aussi domMapsRow
   }} else {{
+    document.getElementById('domMapsRow').style.display = 'flex';
     updateMapColors();
   }}
 }}
@@ -2812,6 +2865,7 @@ function hideCarte() {{
   if (!isCarteActive) return;
   isCarteActive = false;
   document.getElementById('mapDiv').style.display = 'none';
+  document.getElementById('domMapsRow').style.display = 'none';
   document.getElementById('chartDiv').style.display = 'block';
   document.querySelectorAll('.corner-label').forEach(el => el.style.display = '');
   document.getElementById('axisDesc').style.display = '';
