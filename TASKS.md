@@ -53,7 +53,20 @@
 
 ---
 
+## UPDATE 6 — ✅ Terminée
+
+| # | Tâche | Statut |
+|---|-------|--------|
+| T15 | Fallback T1 pour IRIS sans données T2 (élus au 1er tour) | ✅ Fait |
+| T16 | Afficher le code IRIS dans la fiche info à côté du nom commune | ✅ Fait |
+
+---
+
 ## Historique
+
+### 2026-03-24 — T15/T16 : Fallback T1 + code IRIS dans fiche
+- **T15** : Quand un IRIS n'a pas de données T2 (élu·e au 1er tour avec +50%), les fonctions `applyElection`, `restyleIRIS`, `buildMapGeoJSON` et les fiches info utilisent désormais les données T1 comme fallback. Les IRIS concernés apparaissent avec leur couleur T1 mais délavée (mélange 45% couleur + 55% blanc) pour signaler visuellement qu'il s'agit de données T1. La fiche info affiche les scores T1 avec la mention *"Élu·e au T1 — résultats du T1 affichés"*. Les données T1 sont chargées en parallèle avec les données T2 dans `applyElection` (`Promise.all`). Appliqué dans les deux versions desktop et mobile.
+- **T16** : La fiche info affiche désormais le code IRIS (`cd[0]`, ex. `420011101`) en gris clair après le nom de commune. Évite la confusion avec les stats de la commune entière.
 
 ### 2026-03-19 — T12/T13/T14 : Remplacement jolivet + audit + nouvelles variables
 - **T12** : Cellule finale `eda_iris.ipynb` (id `54ad0c7f`) réécrite. Suppression de la dépendance à `iris-stats.geojson` (jolivet). Les variables démographiques (`pop_totale`, `pct_0_19/20_64/65_plus`, `pct_etrangers`, `pct_immigres`, `age_moyen`, `pct_csp_*`) sont maintenant calculées directement depuis `iris/base-ic-evol-struct-pop-2020.CSV` avec les mêmes formules que `template_merge_iris_bv/utils.py`. La fusion est une LEFT join au lieu d'une INNER join → passage de 45 650 à ~49 280 IRIS conservés (+3 630). `nom_commune` récupéré via `cog_ensemble_2026_csv/v_commune_2026.csv`. Correction du bug `utils.py` : `pct_0_19/20_64/65_plus` utilisaient `P20_F*` (femmes seulement) au lieu de `P20_POP*` — valeurs ~2× plus correctes. Toutes les colonnes brutes `P20_*/C20_*` incluses dans `iris_final_socio_politique.csv`.

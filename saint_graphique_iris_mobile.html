@@ -432,12 +432,17 @@ function showCard(irisGlobalIdx) {
   const xDisp = xRaw !== undefined ? (currentXInvert ? -xRaw : xRaw) : undefined;
 
   const elecData = elecCache[currentElectionId];
-  const elecScores = elecData ? elecData.scores[irisGlobalIdx] : null;
-  const currentMeta = ELECTIONS_META[currentElectionId];
-  const currentColor = elecData?.colors[irisGlobalIdx] || '#9CA3AF';
-  const currentParti = elecData?.partis[irisGlobalIdx] || '—';
+  const t1Fb = getT1FallbackData(currentElectionId);
+  const hasT2 = elecData && elecData.partis[irisGlobalIdx] !== null;
+  const activeData = hasT2 ? elecData : (t1Fb || elecData);
+  const isT1Fallback = !hasT2 && !!t1Fb;
 
-  const abstElec = elecData ? elecData.abst[irisGlobalIdx] : null;
+  const elecScores = activeData ? activeData.scores[irisGlobalIdx] : null;
+  const currentMeta = ELECTIONS_META[currentElectionId];
+  const currentColor = activeData?.colors[irisGlobalIdx] || '#9CA3AF';
+  const currentParti = activeData?.partis[irisGlobalIdx] || '—';
+
+  const abstElec = activeData ? activeData.abst[irisGlobalIdx] : null;
 
   let voteGridHtml = '';
   if (elecScores && Object.keys(elecScores).length > 0) {
@@ -452,9 +457,12 @@ function showCard(irisGlobalIdx) {
         `<span class="vote-score">${score.toFixed(1)}%</span>` +
         `</div>`;
     }).join('');
+    if (isT1Fallback) voteGridHtml = `<div style="color:#AAA;font-size:9px;margin-bottom:4px;font-style:italic">(remporté au T1)</div>` + voteGridHtml;
   }
 
-  document.getElementById('cardName').textContent = cd[1] || cd[0] || 'IRIS inconnu';
+  const irisCode = cd[0] || '';
+  const communeName = cd[1] || cd[0] || 'IRIS inconnu';
+  document.getElementById('cardName').innerHTML = communeName + (irisCode ? ` <span style="color:#AAA;font-weight:400;font-size:10px">${irisCode}</span>` : '');
   const partyEl = document.getElementById('cardParty');
   partyEl.textContent = cd[19] || '';
   partyEl.style.color = '#666';
@@ -509,11 +517,19 @@ function computeButtonPcts(electionId) {
   btns.forEach(b => { b.pct = data.buttonPcts[b.key] || 0; });
 }
 
+// ── T1 fallback helper ────────────────────────────────────────────────────
+function getT1FallbackData(electionId) {
+  if (!electionId.endsWith('_t2')) return null;
+  const t1Id = electionId.replace(/_t2$/, '_t1');
+  return elecCache[t1Id] || null;
+}
+
 // ── Restyle all IRIS (trace 1) ────────────────────────────────────────────
 function restyleIRIS() {
   if (!IRIS_X || !IRIS_Y) return;
   const data = elecCache[currentElectionId];
   if (!data) return;
+  const t1Data = getT1FallbackData(currentElectionId);
   const xArr = IRIS_X[currentXVar] || [];
   const yArr = IRIS_Y[currentYVar] || [];
   const colorArr = currentColorVar ? (IRIS_X[currentColorVar] || IRIS_Y[currentColorVar] || null) : null;
@@ -521,7 +537,12 @@ function restyleIRIS() {
   const knownKeys = new Set(btns.map(b => b.key));
   const fx = [], fy = [], fc = [], fs = [], fcd = [];
   for (let i = 0; i < n; i++) {
-    const parti = data.partis[i];
+    let parti = data.partis[i];
+    let isFallback = false;
+    if ((parti === null || parti === undefined) && t1Data) {
+      parti = t1Data.partis[i];
+      isFallback = true;
+    }
     if (parti === null || parti === undefined) continue;
     const effectiveKey = knownKeys.has(parti) ? parti : 'AUTRE';
     if (!activeGroups.has(effectiveKey)) continue;
@@ -532,7 +553,8 @@ function restyleIRIS() {
     if (colorArr && colorArr[i] !== null && colorArr[i] !== undefined) {
       fc.push(varToHex(colorArr[i], colorVarMin, colorVarMax));
     } else {
-      fc.push(colorArr ? '#CCCCCC' : (data.colors[i] || '#9CA3AF'));
+      const baseColor = isFallback ? (t1Data.colors[i] || '#9CA3AF') : (data.colors[i] || '#9CA3AF');
+      fc.push(colorArr ? '#CCCCCC' : baseColor);
     }
     fs.push(MARKER_SIZES[i] || 3);
     fcd.push(i);
@@ -702,12 +724,17 @@ function rebuildFilterButtons() {
 }
 
 async function applyElection(electionId) {
-  if (!elecCache[electionId]) {
+  const t1IdNeeded = electionId.endsWith('_t2') ? electionId.replace(/_t2$/, '_t1') : null;
+  const fetches = [];
+  if (!elecCache[electionId]) fetches.push(electionId);
+  if (t1IdNeeded && !elecCache[t1IdNeeded]) fetches.push(t1IdNeeded);
+  if (fetches.length > 0) {
     const spinner = document.getElementById('elecSpinner');
     if (spinner) spinner.style.display = 'inline';
     try {
-      const r = await fetch('data/elec_' + electionId + '.json');
-      elecCache[electionId] = await r.json();
+      await Promise.all(fetches.map(id =>
+        fetch('data/elec_' + id + '.json').then(r => r.json()).then(d => { elecCache[id] = d; })
+      ));
     } finally {
       if (spinner) spinner.style.display = 'none';
     }
@@ -761,7 +788,10 @@ async function applyElection(electionId) {
 
   if (currentClickedGlobalIdx !== null) {
     const partisData = elecCache[currentElectionId];
-    if (partisData && partisData.partis[currentClickedGlobalIdx] !== null) {
+    const hasT2Data = partisData && partisData.partis[currentClickedGlobalIdx] !== null;
+    const t1Fb = getT1FallbackData(currentElectionId);
+    const hasT1Fallback = !hasT2Data && t1Fb && t1Fb.partis[currentClickedGlobalIdx] !== null;
+    if (hasT2Data || hasT1Fallback) {
       showCard(currentClickedGlobalIdx);
     } else {
       document.getElementById('infoCard').classList.remove('show');
@@ -1212,20 +1242,27 @@ resetBtn.addEventListener('click', () => {
 function buildMapGeoJSON() {
   const elecData = elecCache[currentElectionId];
   if (!elecData || !IRIS_LAT || !IRIS_LON) return null;
+  const t1Data = getT1FallbackData(currentElectionId);
   const enabledKeys = new Set(btns.filter(b => activeGroups.has(b.key)).map(b => b.key));
   const knownPartiKeys = new Set(btns.map(b => b.key));
   const colorArr = currentColorVar ? (IRIS_X && (IRIS_X[currentColorVar] || null)) || (IRIS_Y && (IRIS_Y[currentColorVar] || null)) : null;
   const features = [];
   for (let i = 0; i < IRIS_LAT.length; i++) {
     if (IRIS_LAT[i] === null) continue;
-    const parti = elecData.partis[i];
+    let parti = elecData.partis[i];
+    let isFallback = false;
+    if ((parti === null || parti === undefined) && t1Data) {
+      parti = t1Data.partis[i];
+      isFallback = true;
+    }
     const effectiveKey = knownPartiKeys.has(parti) ? parti : 'AUTRE';
     if (!enabledKeys.has(effectiveKey)) continue;
     let color;
     if (colorArr && colorArr[i] !== null && colorArr[i] !== undefined) {
       color = varToHex(colorArr[i], colorVarMin, colorVarMax);
     } else {
-      color = colorArr ? '#CCCCCC' : (elecData.colors[i] || '#9CA3AF');
+      const baseColor = isFallback ? (t1Data.colors[i] || '#9CA3AF') : (elecData.colors[i] || '#9CA3AF');
+      color = colorArr ? '#CCCCCC' : baseColor;
     }
     features.push({
       type: 'Feature',
