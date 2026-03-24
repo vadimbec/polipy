@@ -698,6 +698,18 @@ def build_final(ml_path, with_embeddings=False):
     df_final = pd.merge(df_final, df_cog, left_on='_COM5', right_on='COM', how='left', suffixes=('', '_cog'))
     df_final.drop(columns=['_COM5', 'COM_cog'], errors='ignore', inplace=True)
 
+    # Enrichissement religion/associations (si disponible)
+    religion_path = os.path.join(PATH_IRIS, "iris_religion_assoc.csv")
+    if os.path.exists(religion_path):
+        df_rel = pd.read_csv(religion_path, dtype={'IRIS': str}, low_memory=False)
+        df_rel['IRIS'] = df_rel['IRIS'].astype(str).str.zfill(9)
+        new_cols = [c for c in df_rel.columns if c != 'IRIS' and c not in df_final.columns]
+        if new_cols:
+            df_final = pd.merge(df_final, df_rel[['IRIS'] + new_cols], on='IRIS', how='left')
+            raw_relig = [c for c in new_cols if not c.endswith('_pour1000')]
+            df_final[raw_relig] = df_final[raw_relig].fillna(0)
+            print(f"  Religion/assoc : {len(new_cols)} variables ajoutées depuis {religion_path}")
+
     # Sauvegarde
     output_path = os.path.join(PATH_IRIS, "iris_final_socio_politique.csv")
     df_final.to_csv(output_path, index=False)
