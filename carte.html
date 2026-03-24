@@ -390,11 +390,19 @@ function updateDesc(preset, xVar, yVar) {
   }
 }
 
+// ── T1 fallback helper : renvoie le cache T1 si l'élection courante est un T2 ─
+function getT1FallbackData(electionId) {
+  if (!electionId.endsWith('_t2')) return null;
+  const t1Id = electionId.replace(/_t2$/, '_t1');
+  return elecCache[t1Id] || null;
+}
+
 // ── Restyle all IRIS points (single trace 1) ─────────────────────────────
 function restyleIRIS() {
   if (!IRIS_X || !IRIS_Y) return;  // axes pas encore chargés
   const data = elecCache[currentElectionId];
   if (!data) return;
+  const t1Data = getT1FallbackData(currentElectionId);
   const xArr = IRIS_X[currentXVar] || [];
   const yArr = IRIS_Y[currentYVar] || [];
   const colorArr = currentColorVar ? (IRIS_X[currentColorVar] || IRIS_Y[currentColorVar] || null) : null;
@@ -402,7 +410,12 @@ function restyleIRIS() {
   const knownKeys = new Set(btns.map(b => b.key));
   const fx = [], fy = [], fc = [], fs = [], fcd = [];
   for (let i = 0; i < n; i++) {
-    const parti = data.partis[i];
+    let parti = data.partis[i];
+    let isFallback = false;
+    if ((parti === null || parti === undefined) && t1Data) {
+      parti = t1Data.partis[i];
+      isFallback = true;
+    }
     if (parti === null || parti === undefined) continue;
     const effectiveKey = knownKeys.has(parti) ? parti : 'AUTRE';
     if (!activeGroups.has(effectiveKey)) continue;
@@ -413,7 +426,8 @@ function restyleIRIS() {
     if (colorArr && colorArr[i] !== null && colorArr[i] !== undefined) {
       fc.push(varToHex(colorArr[i], colorVarMin, colorVarMax));
     } else {
-      fc.push(colorArr ? '#CCCCCC' : (data.colors[i] || '#9CA3AF'));
+      const baseColor = isFallback ? (t1Data.colors[i] || '#9CA3AF') : (data.colors[i] || '#9CA3AF');
+      fc.push(colorArr ? '#CCCCCC' : baseColor);
     }
     fs.push(MARKER_SIZES[i] || 3);
     fcd.push(i);
@@ -648,12 +662,17 @@ function computeAbstBary(electionId) {
 }
 
 async function applyElection(electionId) {
-  if (!elecCache[electionId]) {
+  const t1IdNeeded = electionId.endsWith('_t2') ? electionId.replace(/_t2$/, '_t1') : null;
+  const fetches = [];
+  if (!elecCache[electionId]) fetches.push(electionId);
+  if (t1IdNeeded && !elecCache[t1IdNeeded]) fetches.push(t1IdNeeded);
+  if (fetches.length > 0) {
     const spinner = document.getElementById('elecSpinner');
     if (spinner) spinner.style.display = 'inline';
     try {
-      const r = await fetch('data/elec_' + electionId + '.json');
-      elecCache[electionId] = await r.json();
+      await Promise.all(fetches.map(id =>
+        fetch('data/elec_' + id + '.json').then(r => r.json()).then(d => { elecCache[id] = d; })
+      ));
     } finally {
       if (spinner) spinner.style.display = 'none';
     }
@@ -711,7 +730,10 @@ async function applyElection(electionId) {
 
   if (currentClickedGlobalIdx !== null) {
     const partisData = elecCache[currentElectionId];
-    if (partisData && partisData.partis[currentClickedGlobalIdx] !== null) {
+    const hasT2Data = partisData && partisData.partis[currentClickedGlobalIdx] !== null;
+    const t1Fb = getT1FallbackData(currentElectionId);
+    const hasT1Fallback = !hasT2Data && t1Fb && t1Fb.partis[currentClickedGlobalIdx] !== null;
+    if (hasT2Data || hasT1Fallback) {
       showDesktopCardElec(currentClickedGlobalIdx);
     } else {
       const card = document.getElementById('infoCard');
@@ -953,12 +975,17 @@ function showDesktopCardElec(irisGlobalIdx) {
   const xDisp = xRaw !== undefined ? (currentXInvert ? -xRaw : xRaw) : undefined;
 
   const elecData = elecCache[currentElectionId];
+  const t1Fb = getT1FallbackData(currentElectionId);
+  const hasT2 = elecData && elecData.partis[irisGlobalIdx] !== null;
+  const activeData = hasT2 ? elecData : (t1Fb || elecData);
+  const isT1Fallback = !hasT2 && !!t1Fb;
+
   const sticky = document.getElementById('sidebarSticky');
-  if (sticky) { sticky.style.display = 'block'; sticky.style.color = elecData?.colors[irisGlobalIdx] || '#9CA3AF'; sticky.textContent = cd[1] || cd[0] || ''; }
-  const elecScores = elecData ? elecData.scores[irisGlobalIdx] : null;
+  if (sticky) { sticky.style.display = 'block'; sticky.style.color = activeData?.colors[irisGlobalIdx] || '#9CA3AF'; sticky.textContent = cd[1] || cd[0] || ''; }
+  const elecScores = activeData ? activeData.scores[irisGlobalIdx] : null;
   const currentMeta = ELECTIONS_META[currentElectionId];
-  const currentColor = elecData?.colors[irisGlobalIdx] || '#9CA3AF';
-  const currentParti = elecData?.partis[irisGlobalIdx] || '—';
+  const currentColor = activeData?.colors[irisGlobalIdx] || '#9CA3AF';
+  const currentParti = activeData?.partis[irisGlobalIdx] || '—';
 
   let voteBarsHtml = '';
   if (elecScores && Object.keys(elecScores).length > 0) {
@@ -974,10 +1001,11 @@ function showDesktopCardElec(irisGlobalIdx) {
         <div class="vote-bar-pct" style="${isTop ? 'font-weight:700;color:#1a1a1a' : ''}">${pct}</div>
       </div>`;
     }).join('');
+    if (isT1Fallback) voteBarsHtml = `<div style="color:#AAA;font-size:10px;margin-bottom:5px;font-style:italic">(remporté au T1)</div>` + voteBarsHtml;
   }
 
   card.innerHTML = `
-    <div class="name">${cd[1] || cd[0] || 'IRIS inconnu'}</div>
+    <div class="name">${cd[1] || cd[0] || 'IRIS inconnu'} <span style="color:#AAA;font-weight:400;font-size:11px">${cd[0] || ''}</span></div>
     <div class="party" style="color:#666;font-size:12px">${cd[19] || ''}</div>
     <div class="row"><span class="lbl">Population :</span> <b>${fmtNum(cd[2], ' hab.')}</b> &nbsp;·&nbsp; <span class="lbl">Âge moyen :</span> <b>${cd[18] !== '' ? Number(cd[18]).toFixed(1) + ' ans' : '—'}</b></div>
     <div class="row"><span class="lbl">Revenu médian :</span> <b>${fmtNum(cd[3], ' €/UC')}</b></div>
@@ -994,9 +1022,9 @@ function showDesktopCardElec(irisGlobalIdx) {
     <div class="stat-bar-row"><div class="stat-bar-label">HLM</div><div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${Math.min(100,cd[14]||0)}%;background:#E8975A"></div></div><div class="stat-bar-pct">${fmtPct(cd[14])}</div></div>
     <div class="section-title">${currentMeta ? currentMeta.label : currentElectionId}</div>
     ${(function() {
-      const abstVal = elecData ? elecData.abst[irisGlobalIdx] : null;
-      const blancVal = elecData ? elecData.blancs[irisGlobalIdx] : null;
-      const inscrVal = elecData ? elecData.inscrits[irisGlobalIdx] : null;
+      const abstVal = activeData ? activeData.abst[irisGlobalIdx] : null;
+      const blancVal = activeData ? activeData.blancs[irisGlobalIdx] : null;
+      const inscrVal = activeData ? activeData.inscrits[irisGlobalIdx] : null;
       const blancPct = (blancVal != null && inscrVal != null && inscrVal > 0) ? blancVal / inscrVal * 100 : null;
       let row = '';
       if (abstVal != null) row += `<span class="lbl">Abstention :</span> <b>${fmtPct(abstVal)}</b>`;
@@ -1013,20 +1041,27 @@ function showDesktopCardElec(irisGlobalIdx) {
 function buildMapGeoJSON() {
   const elecData = elecCache[currentElectionId];
   if (!elecData || !IRIS_LAT || !IRIS_LON) return null;
+  const t1Data = getT1FallbackData(currentElectionId);
   const enabledKeys = new Set(btns.filter(b => activeGroups.has(b.key)).map(b => b.key));
   const knownPartiKeys = new Set(btns.map(b => b.key));
   const colorArr = currentColorVar ? (IRIS_X && (IRIS_X[currentColorVar] || null)) || (IRIS_Y && (IRIS_Y[currentColorVar] || null)) : null;
   const features = [];
   for (let i = 0; i < IRIS_LAT.length; i++) {
     if (IRIS_LAT[i] === null) continue;
-    const parti = elecData.partis[i];
+    let parti = elecData.partis[i];
+    let isFallback = false;
+    if ((parti === null || parti === undefined) && t1Data) {
+      parti = t1Data.partis[i];
+      isFallback = true;
+    }
     const effectiveKey = knownPartiKeys.has(parti) ? parti : 'AUTRE';
     if (!enabledKeys.has(effectiveKey)) continue;
     let color;
     if (colorArr && colorArr[i] !== null && colorArr[i] !== undefined) {
       color = varToHex(colorArr[i], colorVarMin, colorVarMax);
     } else {
-      color = colorArr ? '#CCCCCC' : (elecData.colors[i] || '#9CA3AF');
+      const baseColor = isFallback ? (t1Data.colors[i] || '#9CA3AF') : (elecData.colors[i] || '#9CA3AF');
+      color = colorArr ? '#CCCCCC' : baseColor;
     }
     features.push({
       type: 'Feature',
