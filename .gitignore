@@ -42,6 +42,7 @@ data/
 contours/
 communes/
 resultats_elections/
+rna_waldec/
 
 # Large iris files
 iris/*base-ic*.csv

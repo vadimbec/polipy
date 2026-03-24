@@ -54,6 +54,11 @@ LABELS = {
     "JADOT":         "Yannick Jadot",
     "ROUSSEL":       "Fabien Roussel",
     "HIDALGO":       "Anne Hidalgo",
+    # Présidentielles 2012
+    "HOLLANDE":      "François Hollande",
+    "SARKOZY":       "Nicolas Sarkozy",
+    "BAYROU":        "François Bayrou",
+    "JOLY":          "Éva Joly",
 }
 SHORT = {
     "RN":            "RN",
@@ -91,6 +96,11 @@ SHORT = {
     "JADOT":         "Jadot",
     "ROUSSEL":       "Roussel",
     "HIDALGO":       "Hidalgo",
+    # Présidentielles 2012
+    "HOLLANDE":      "Hollande",
+    "SARKOZY":       "Sarkozy",
+    "BAYROU":        "Bayrou",
+    "JOLY":          "Joly",
 }
 # RN/REC/ZEMMOUR/LE_PEN rendered semi-transparent
 OPACITY = {
@@ -100,10 +110,10 @@ OPACITY = {
 ORDER = ["LFI","PCF","EELV","PS","ENS","LR","RN","REC","AUTRE"]
 # ALL_ORDER : tous les partis/candidats possibles (pour créer une trace Plotly par parti)
 ALL_ORDER = [
-    "LFI","MELENCHON","PCF","ROUSSEL","EXG","EELV","JADOT","PS","DVG","HAMON",
+    "LFI","MELENCHON","PCF","ROUSSEL","EXG","EELV","JADOT","JOLY","PS","DVG","HAMON","HOLLANDE",
     "NFP","NUPES","PS_PP","UG",
     "ENS","MODEM","HOR","UDI","MACRON",
-    "LR","DVD","DVC","FILLON","PECRESSE","UXD",
+    "LR","DVD","DVC","FILLON","PECRESSE","SARKOZY","BAYROU","UXD",
     "RN","LE_PEN","REC","EXD","DLF","ZEMMOUR","DUPONT_AIGNAN",
     "REG",
     "HIDALGO",
@@ -823,6 +833,11 @@ ALL_PARTIES_COLORS = {
     'FILLON':       '#1D4ED8',
     'HAMON':        '#EC4899',
     'DUPONT_AIGNAN':'#6B7280',
+    # Présidentielles 2012
+    'HOLLANDE':     '#EC4899',
+    'SARKOZY':      '#1D4ED8',
+    'BAYROU':       '#FB923C',
+    'JOLY':         '#16A34A',
     # Présidentielles 2022
     'ZEMMOUR':      '#0F172A',
     'PECRESSE':     '#3B82F6',

@@ -54,6 +54,11 @@ LABELS = {
     "JADOT":         "Yannick Jadot",
     "ROUSSEL":       "Fabien Roussel",
     "HIDALGO":       "Anne Hidalgo",
+    # Présidentielles 2012
+    "HOLLANDE":      "François Hollande",
+    "SARKOZY":       "Nicolas Sarkozy",
+    "BAYROU":        "François Bayrou",
+    "JOLY":          "Éva Joly",
 }
 SHORT = {
     "RN":            "RN",
@@ -91,6 +96,11 @@ SHORT = {
     "JADOT":         "Jadot",
     "ROUSSEL":       "Roussel",
     "HIDALGO":       "Hidalgo",
+    # Présidentielles 2012
+    "HOLLANDE":      "Hollande",
+    "SARKOZY":       "Sarkozy",
+    "BAYROU":        "Bayrou",
+    "JOLY":          "Joly",
 }
 # RN/REC/ZEMMOUR/LE_PEN rendered semi-transparent
 OPACITY = {
@@ -100,10 +110,10 @@ OPACITY = {
 ORDER = ["LFI","PCF","EELV","PS","ENS","LR","RN","REC","AUTRE"]
 # ALL_ORDER : tous les partis/candidats possibles (pour créer une trace Plotly par parti)
 ALL_ORDER = [
-    "LFI","MELENCHON","PCF","ROUSSEL","EXG","EELV","JADOT","PS","DVG","HAMON",
+    "LFI","MELENCHON","PCF","ROUSSEL","EXG","EELV","JADOT","JOLY","PS","DVG","HAMON","HOLLANDE",
     "NFP","NUPES","PS_PP","UG",
     "ENS","MODEM","HOR","UDI","MACRON",
-    "LR","DVD","DVC","FILLON","PECRESSE","UXD",
+    "LR","DVD","DVC","FILLON","PECRESSE","SARKOZY","BAYROU","UXD",
     "RN","LE_PEN","REC","EXD","DLF","ZEMMOUR","DUPONT_AIGNAN",
     "REG",
     "HIDALGO",
@@ -1036,6 +1046,11 @@ ALL_PARTIES_COLORS = {
     'FILLON':       '#1D4ED8',
     'HAMON':        '#EC4899',
     'DUPONT_AIGNAN':'#6B7280',
+    # Présidentielles 2012
+    'HOLLANDE':     '#EC4899',
+    'SARKOZY':      '#1D4ED8',
+    'BAYROU':       '#FB923C',
+    'JOLY':         '#16A34A',
     # Présidentielles 2022
     'ZEMMOUR':      '#0F172A',
     'PECRESSE':     '#3B82F6',
@@ -1053,14 +1068,23 @@ ELECTIONS_AVAILABLE = {
     '2024_legi_t2': {'type': 'legi', 'year': 2024, 'tour': 2, 'label': 'Législatives 2024 — 2e tour'},
     '2017_legi_t1': {'type': 'legi', 'year': 2017, 'tour': 1, 'label': 'Législatives 2017 — 1er tour'},
     '2017_legi_t2': {'type': 'legi', 'year': 2017, 'tour': 2, 'label': 'Législatives 2017 — 2e tour'},
+    '2012_legi_t1': {'type': 'legi', 'year': 2012, 'tour': 1, 'label': 'Législatives 2012 — 1er tour'},
+    '2012_legi_t2': {'type': 'legi', 'year': 2012, 'tour': 2, 'label': 'Législatives 2012 — 2e tour'},
     '2024_euro_t1': {'type': 'euro', 'year': 2024, 'tour': 1, 'label': 'Européennes 2024'},
+    '2019_euro_t1': {'type': 'euro', 'year': 2019, 'tour': 1, 'label': 'Européennes 2019'},
+    '2014_euro_t1': {'type': 'euro', 'year': 2014, 'tour': 1, 'label': 'Européennes 2014'},
     '2022_pres_t1': {'type': 'pres', 'year': 2022, 'tour': 1, 'label': 'Présidentielles 2022 — 1er tour'},
     '2022_pres_t2': {'type': 'pres', 'year': 2022, 'tour': 2, 'label': 'Présidentielles 2022 — 2e tour'},
     '2017_pres_t1': {'type': 'pres', 'year': 2017, 'tour': 1, 'label': 'Présidentielles 2017 — 1er tour'},
     '2017_pres_t2': {'type': 'pres', 'year': 2017, 'tour': 2, 'label': 'Présidentielles 2017 — 2e tour'},
+    '2012_pres_t1': {'type': 'pres', 'year': 2012, 'tour': 1, 'label': 'Présidentielles 2012 — 1er tour'},
+    '2012_pres_t2': {'type': 'pres', 'year': 2012, 'tour': 2, 'label': 'Présidentielles 2012 — 2e tour'},
+    '2014_muni_t1': {'type': 'muni', 'year': 2014, 'tour': 1, 'label': 'Municipales 2014 — 1er tour'},
+    '2014_muni_t2': {'type': 'muni', 'year': 2014, 'tour': 2, 'label': 'Municipales 2014 — 2e tour'},
     '2020_muni_t1': {'type': 'muni', 'year': 2020, 'tour': 1, 'label': 'Municipales 2020 — 1er tour'},
     '2020_muni_t2': {'type': 'muni', 'year': 2020, 'tour': 2, 'label': 'Municipales 2020 — 2e tour'},
     '2026_muni_t1': {'type': 'muni', 'year': 2026, 'tour': 1, 'label': 'Municipales 2026 — 1er tour'},
+    '2026_muni_t2': {'type': 'muni', 'year': 2026, 'tour': 2, 'label': 'Municipales 2026 — 2e tour'},
 }
 DEFAULT_ELECTION = '2022_legi_t1'
 

@@ -30,25 +30,29 @@ if hasattr(sys.stdout, 'reconfigure'):
 # DEFAULT_CAND   = "resultats_elections/candidats_results.parquet"
 # DEFAULT_GEN    = "resultats_elections/general_results.parquet"
 
-DEFAULT_CAND   = "resultats_elections/candidats_results_2026.parquet"
-DEFAULT_GEN    = "resultats_elections/general_results_2026.parquet"
+DEFAULT_CAND   = "resultats_elections/candidats_results.parquet"
+DEFAULT_GEN    = "resultats_elections/general_results.parquet"
 DEFAULT_TABLE  = "table_passage_BV_IRIS.csv"
 DEFAULT_OUTDIR = "iris/elections"
 
 # Élections traitées par défaut (2019_euro_t1 skippée : voix=0 dans le parquet)
 DEFAULT_ELECTIONS = [
     # Législatives
+    "2012_legi_t1", "2012_legi_t2",
     "2017_legi_t1", "2017_legi_t2",
     "2022_legi_t1", "2022_legi_t2",
     "2024_legi_t1", "2024_legi_t2",
     # Européennes
-    "2024_euro_t1",
+    "2014_euro_t1", "2019_euro_t1", 
+    "2024_euro_t1", 
     # Présidentielles
+    "2012_pres_t1", "2012_pres_t2",
     "2017_pres_t1", "2017_pres_t2",
     "2022_pres_t1", "2022_pres_t2",
     # Municipales
+    "2014_muni_t1", "2014_muni_t2",
     "2020_muni_t1", "2020_muni_t2",
-    "2026_muni_t1",
+    "2026_muni_t1", "2026_muni_t2"
 ]
 
 # ── MAPPING NUANCES → PARTIS ───────────────────────────────────────────────────
@@ -57,7 +61,7 @@ DEFAULT_ELECTIONS = [
 
 NUANCE_TO_PARTI_BASE = {
     # ── RN ───────────────────────────────────────────────────────────────────
-    'RN':   'RN',  'FN':   'RN',  'LRN':  'RN',
+    'RN':   'RN',  'FN':   'RN',  'LRN':  'RN',  'LFN':  'RN',
     # ── UXD : Ciotti / alliance LR-RN 2024 ──────────────────────────────────
     'UXD':  'UXD', 'LUXD': 'UXD',
     # ── Reconquête ────────────────────────────────────────────────────────────
@@ -66,12 +70,19 @@ NUANCE_TO_PARTI_BASE = {
     'EXD':  'EXD', 'LEXD': 'EXD',
     # ── DLF (Debout la France / Dupont-Aignan) ──────────────────────────────
     'DLF':  'DLF', 'LDLF': 'DLF',
-    # ── LR / Droite classique ────────────────────────────────────────────────
+    # ── LR / Droite classique (UMP = ancienne appellation LR avant 2015) ────
     'LR':   'LR',  'LLR':  'LR',
+    'UMP':  'LR',  'LUMP': 'LR',
     'DVD':  'DVD', 'LDVD': 'DVD', 'LUDR': 'DVD', 'LDSV': 'DVD',
+    # ── PRV (Parti Radical Valoisien, apparenté UMP) ─────────────────────────
+    'PRV':  'DVD',
+    # ── ALLI (alliances locales droite/centre-droite, type Nouveau Centre-UMP) ─
+    'ALLI': 'DVD',
 
     # ── DVC (divers centre) ──────────────────────────────────────────────────
     'DVC':  'DVC', 'LDVC': 'DVC',
+    # ── CEN / NCE (Nouveau Centre / centre UDI-iste 2012) ────────────────────
+    'CEN':  'DVC', 'NCE':  'DVC',
     # ── Ensemble / Renaissance ───────────────────────────────────────────────
     'ENS':  'ENS', 'REM':  'ENS', 'LREM': 'ENS', 'LENS': 'ENS', 'LREN': 'ENS',
     # ── Horizons ─────────────────────────────────────────────────────────────
@@ -85,7 +96,7 @@ NUANCE_TO_PARTI_BASE = {
     # ── LFI ──────────────────────────────────────────────────────────────────
     'FI':   'LFI', 'LFI':  'LFI',
     # ── Extrême gauche (LO, NPA, etc.) ───────────────────────────────────────
-    'EXG':  'EXG', 'LEXG': 'EXG',
+    'EXG':  'EXG', 'LEXG': 'EXG', 'LO':   'EXG', 'LLO':  'EXG', 'NPA':  'EXG', 'LNPA': 'EXG',
     # ── PS / Socialistes ─────────────────────────────────────────────────────
     'SOC':  'PS',  'LSOC': 'PS',
     # ── DVG (divers gauche) ──────────────────────────────────────────────────
@@ -94,8 +105,10 @@ NUANCE_TO_PARTI_BASE = {
     'RDG':  'DVG', 'LRDG': 'DVG',
     # ── EELV / Écologistes ───────────────────────────────────────────────────
     'VEC':  'EELV', 'ECO':  'EELV', 'LVEC': 'EELV', 'LECO': 'EELV',
-    # ── PCF ──────────────────────────────────────────────────────────────────
+    # ── PCF / Front de Gauche ────────────────────────────────────────────────
     'COM':  'PCF', 'LCOM': 'PCF', 'FG':   'PCF', 'LFG':  'PCF',
+    # ── LPG (Parti de Gauche, Mélenchon, fusionné dans FI) ───────────────────
+    'LPG':  'PCF',
     # ── Régionalistes ────────────────────────────────────────────────────────
     'REG':  'REG', 'LREG': 'REG',
     # ── Union Divers Droite (maires sortants centre-droit, listes d'union locale) ─
@@ -107,6 +120,8 @@ NUANCE_TO_PARTI_BASE = {
     'DXD':  'AUTRE', 'DXG':  'AUTRE',
     'LNC':  'AUTRE', 'LGJ':  'AUTRE',
     'NC':   'AUTRE',
+    # ── AUT (divers ancienne codification) ───────────────────────────────────
+    'AUT':  'AUTRE',
 }
 
 # Surcharges par élection : {id_election: {nuance: parti}}
@@ -120,6 +135,49 @@ ELECTION_OVERRIDES = {
     '2024_legi_t1': {'UG': 'NFP'},
     '2024_legi_t2': {'UG': 'NFP'},
 }
+
+# Mapping libellé de liste → parti pour les élections sans nuance codifiée
+# Clé : libelle_abrege_liste (majuscules, strip)
+LIBELLE_TO_PARTI = {
+    # 2019 européennes
+    'PRENEZ LE POUVOIR':        'RN',          # liste RN (Jordan Bardella)
+    'RENAISSANCE':              'ENS',          # liste LREM (Nathalie Loiseau)
+    "ENVIE D'EUROPE":           'PS_PP',        # liste PS-Place Publique (Glucksmann)
+    'EUROPE ÉCOLOGIE':          'EELV',         # liste EELV (Yannick Jadot)
+    'LA FRANCE INSOUMISE':      'LFI',          # liste LFI (Manon Aubry)
+    'UNION DROITE-CENTRE':      'LR',           # liste LR (François-Xavier Bellamy)
+    'DEBOUT LA FRANCE':         'DLF',          # liste DLF (Nicolas Dupont-Aignan)
+    "POUR L'EUROPE DES GENS":   'PCF',          # liste PCF-PG (Ian Brossat)
+    'LUTTE OUVRIÈRE':           'EXG',          # liste LO (Nathalie Arthaud)
+    'ENSEMBLE POUR LE FREXIT':  'EXD',          # liste souverainiste droite
+    'ENSEMBLE PATRIOTES':       'EXD',          # liste Philippot
+    'LISTE DE LA RECONQUÊTE':   'EXD',          # liste Dupont-Moretti (pas Reconquête parti)
+    'LISTE CITOYENNE':          'DVG',          # mouvement gilets jaunes / citoyens
+    'ALLIANCE JAUNE':           'DVG',          # gilets jaunes
+    'LES EUROPÉENS':            'DVC',          # liste pro-européen centre
+    'URGENCE ÉCOLOGIE':         'EELV',         # liste écologiste dissidente
+    'PARTI ANIMALISTE':         'AUTRE',
+    'PARTI PIRATE':             'AUTRE',
+    'UNE FRANCE ROYALE':        'AUTRE',
+    'LA LIGNE CLAIRE':          'AUTRE',
+    'DÉMOCRATIE REPRÉSENTATIVE':'AUTRE',
+    'PACE':                     'AUTRE',
+    "LES OUBLIES DE L'EUROPE":  'AUTRE',
+    'PARTI FED. EUROPÉEN':      'AUTRE',
+    'INITIATIVE CITOYENNE':     'AUTRE',
+    'ALLONS ENFANTS':           'AUTRE',
+    'DÉCROISSANCE 2019':        'AUTRE',
+    'À VOIX ÉGALES':            'AUTRE',
+    'NEUTRE ET ACTIF':          'AUTRE',
+    'RÉVOLUTIONNAIRE':          'AUTRE',
+    'ESPERANTO':                'AUTRE',
+    'ÉVOLUTION CITOYENNE':      'AUTRE',
+    'UDLEF':                    'AUTRE',
+    'EUROPE AU SERVICE PEUPLES':'AUTRE',
+}
+
+# Élections utilisant libelle_abrege_liste plutôt que la colonne nuance
+LIBELLE_ELECTIONS = {'2019_euro_t1'}
 
 # Ordre canonique des partis pour le tri des colonnes de sortie
 PARTIS_ORDER = [
@@ -137,19 +195,24 @@ PARTIS_ORDER = [
 # Chaque candidat devient une "colonne parti" dans le CSV de sortie.
 
 PRES_NOM_TO_PARTI = {
-    # 2017
-    'MACRON':         'MACRON',
-    'LE PEN':         'LE_PEN',
-    'FILLON':         'FILLON',
+    # 2012
+    'HOLLANDE':       'HOLLANDE',
+    'SARKOZY':        'SARKOZY',
+    'BAYROU':         'BAYROU',
+    'JOLY':           'JOLY',
     'MÉLENCHON':      'MELENCHON',
     'MELENCHON':      'MELENCHON',
-    'HAMON':          'HAMON',
+    'LE PEN':         'LE_PEN',
     'DUPONT-AIGNAN':  'DUPONT_AIGNAN',
-    'LASSALLE':       'AUTRE',
     'POUTOU':         'AUTRE',
-    'ASSELINEAU':     'AUTRE',
     'ARTHAUD':        'AUTRE',
     'CHEMINADE':      'AUTRE',
+    # 2017
+    'MACRON':         'MACRON',
+    'FILLON':         'FILLON',
+    'HAMON':          'HAMON',
+    'LASSALLE':       'AUTRE',
+    'ASSELINEAU':     'AUTRE',
     # 2022
     'ZEMMOUR':        'ZEMMOUR',
     'PÉCRESSE':       'PECRESSE',
@@ -165,7 +228,8 @@ PRES_NOM_TO_PARTI = {
 def load_data(cand_path: str, gen_path: str, table_path: str):
     print(f"Chargement candidats : {cand_path}")
     cand = pd.read_parquet(cand_path, columns=[
-        'id_election', 'id_brut_miom', 'voix', 'nuance', 'nom', 'prenom'
+        'id_election', 'id_brut_miom', 'voix', 'nuance', 'nom', 'prenom',
+        'libelle_abrege_liste'
     ])
     print(f"  {len(cand):,} lignes")
 
@@ -194,6 +258,14 @@ def _assign_parti(cand: pd.DataFrame, id_election: str) -> pd.DataFrame:
         unmapped = nom_upper[~nom_upper.isin(PRES_NOM_TO_PARTI)].dropna().unique()
         if len(unmapped) > 0:
             print(f"  ⚠️  Noms candidats non mappés → AUTRE : {sorted(unmapped.tolist())}")
+    elif id_election in LIBELLE_ELECTIONS:
+        # Élections sans nuance codifiée : mapper par libelle_abrege_liste
+        libelle_upper = cand['libelle_abrege_liste'].str.upper().str.strip()
+        cand = cand.copy()
+        cand['parti'] = libelle_upper.map(LIBELLE_TO_PARTI).fillna('AUTRE')
+        unmapped = libelle_upper[~libelle_upper.isin(LIBELLE_TO_PARTI)].dropna().unique()
+        if len(unmapped) > 0:
+            print(f"  ⚠️  Libellés non mappés → AUTRE : {sorted(unmapped.tolist())}")
     else:
         mapping = {**NUANCE_TO_PARTI_BASE, **ELECTION_OVERRIDES.get(id_election, {})}
         cand = cand.copy()
@@ -222,10 +294,10 @@ def process_election(
         print(f"  ⚠️  Aucune donnée candidats pour {id_election}")
         return None
 
-    gen_voix = gen['voix'].sum() if 'voix' in gen.columns else None
     if 'exprimes' in gen.columns and gen['exprimes'].sum() == 0:
-        print(f"  ⚠️  exprimes = 0 pour {id_election}, élection skippée")
-        return None
+        if cand['voix'].sum() == 0:
+            print(f"  ⚠️  exprimes = 0 et voix = 0 pour {id_election}, élection skippée")
+            return None
 
     # ── 2. Mapper nuances/noms → partis ────────────────────────────────────
     cand = _assign_parti(cand, id_election)
