@@ -52,5 +52,5 @@ echo "=== Nettoyage du worktree ==="
 cd "$REPO_ROOT"
 git worktree remove --force "$WORKTREE_DIR"
 
-echo "Done — on est resté sur main tout le temps."
+echo "Done — stayed on main."
 echo "https://vadimbec.github.io/polipy/"
