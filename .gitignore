@@ -56,6 +56,7 @@ iris/iris_database_machine_learning.csv
 iris/iris_coordonnees_classes.csv
 iris/iris_database_complete.csv
 iris/iris_database_hybride_parfaite.csv
+iris/iris_religion_assoc.csv
 iris/resultats_elections_par_iris.csv
 
 # Other large CSVs at root
