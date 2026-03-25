@@ -106,4 +106,4 @@ iris/contours_tmp/
 #Anything with LISEZMOI in the name
 *LISEZ MOI*
 
-old/*.txt
+*old.py
