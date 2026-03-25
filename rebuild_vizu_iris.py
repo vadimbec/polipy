@@ -1458,7 +1458,7 @@ pop = df['_pop'].copy()
 q5  = pop.quantile(0.05)
 q95 = pop.quantile(0.95)
 pop_clipped = pop.clip(q5, q95)
-marker_size = 2.0 + (pop_clipped - q5) / (q95 - q5) * (5 - 2.0)  # 2–5px
+marker_size = 2.5 + (pop_clipped - q5) / (q95 - q5) * (6.5 - 2.5)  # 2.5–6.5px
 
 # ── 6. JITTER ET DONNÉES PAR VARIABLE ─────────────────────────────────────────
 np.random.seed(42)
@@ -1554,7 +1554,7 @@ for eid, data in iris_election_data.items():
     if vals_list:
         min_v, max_v = min(vals_list), max(vals_list)
         for g, v in totals.items():
-            bary_sizes_elec[g] = round(7 + (((v - min_v) / (max_v - min_v)) ** 0.5) * 31, 1) if max_v > min_v else 18
+            bary_sizes_elec[g] = round(8 + (((v - min_v) / (max_v - min_v)) ** 0.5) * 34, 1) if max_v > min_v else 20
 
     # --- abstBary: pondéré par pop × abst (vectorisé) ---
     abst_weights = np.where(abst_valid, pops * abst_arr / 100, 0.0)  # (n,)

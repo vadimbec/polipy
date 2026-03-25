@@ -3,6 +3,21 @@
 
 ## Historique
 
+### 2026-03-26 — OSM lieux de culte : exploration + notebook corrélations politique
+
+- **`export.geojson`** (Overpass, 170 MB) : 60 993 lieux de culte France entière avec `religion` + `denomination`. Bien plus riche que RNA/BPE.
+- **`osm_cultes/`** : nouveau dossier contenant 5 scripts d'analyse :
+  - `01_osm_explore.py` — extraction centroïdes + stats tags → `osm_lieux_culte_centroides.csv`
+  - `02_osm_join_iris.py` — jointure spatiale (geopandas) → `osm_iris_counts.csv` (catégories : catholic, islam_total, jewish, evangelical, protestant, buddhist, etc.)
+  - `03_osm_normalise.py` — normalisation pour 1000 hab → `osm_iris_pour1000.csv`
+  - `04_osm_vs_rna_compare.py` — comparaison OSM vs RNA : corrélations faibles/négatives → OSM et RNA mesurent des choses différentes (bâtiments vs associations)
+  - `05_osm_eda.py` — distributions + top IRIS
+- **`eda_osm_cultes_politique.ipynb`** : nouveau notebook focalisé corrélations partielles OSM × vote :
+  - §1 : heatmaps par culte (10 nuances × 13 élections), une figure par culte
+  - §2 : synthèse T1 seulement (tous cultes × toutes nuances, 10 subplots)
+  - §3 : évolution temporelle par culte (courbes ρ par nuance)
+  - §4 : table des effets les plus forts (|ρ| décroissant)
+
 ### 2026-03-25 — Variables électorales comme axes + réduction tailles points
 - **Nouvelles variables dans les sélecteurs d'axes** : ajout d'une catégorie `Élections` (~85 variables) dans `VARS_BY_CAT` des deux scripts (desktop + mobile). Inclut : `pop_iris`, `pop_commune` (dans `Démographie`), `pct_abst_*` pour 12 élections (legi/pres/euro 2017–2024), et `pct_PARTI_*` pour tous les partis/candidats disponibles par élection (RN, LFI, NUPES, NFP, ENS, LR, PS, PS_PP, EELV, PCF, EXD, UXD, REC, LE_PEN, MACRON, MÉLENCHON, FILLON, PÉCRESSE, HAMON, ZEMMOUR, JADOT, ROUSSEL, HIDALGO). Legi 2017 T2 : tous les partis sauf AUTRE. Legi 2024 T2 : RN, NFP, UXD, LR, ENS.
 - **Fonction `_build_electoral_axis_vars(df)`** : ajoutée dans les deux scripts après la section 3b. Charge les CSV électoraux depuis `iris/elections/`, merge sur CODE_IRIS, et assigne les colonnes au dataframe principal. Cache les CSV par ID d'élection pour éviter les relectures.
