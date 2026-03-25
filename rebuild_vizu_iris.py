@@ -536,6 +536,7 @@ VARS_BY_CAT = {
         'tsne_x', 'tsne_y', 'umap_x', 'umap_y',
     ],
     'Démographie': [
+        'pop_iris', 'pop_commune',
         'pct_etrangers', 'age_moyen',
         'pct_femmes', 'taille_menage_moy', 'pct_hors_menage', 'ecart_csp_plus_hf',
         'pct_0_19', 'pct_20_64', 'pct_65_plus', 'pct_immigres',
@@ -570,6 +571,73 @@ VARS_BY_CAT = {
         'bpe_G_tourisme_pour1000',
         'bpe_educ_prioritaire_pour1000', 'bpe_ecole_privee_pour1000',
         'bpe_sport_indoor_pour1000', 'pct_sport_accessible',
+    ],
+    'Élections': [
+        # Abstentions (chronologique)
+        'pct_abst_legi17t1', 'pct_abst_legi17t2',
+        'pct_abst_legi22t1', 'pct_abst_legi22t2',
+        'pct_abst_legi24t1', 'pct_abst_legi24t2',
+        'pct_abst_pres17t1', 'pct_abst_pres17t2',
+        'pct_abst_pres22t1', 'pct_abst_pres22t2',
+        'pct_abst_euro19t1', 'pct_abst_euro24t1',
+        # RN
+        'pct_RN_legi17t1', 'pct_RN_legi17t2',
+        'pct_RN_legi22t1', 'pct_RN_legi22t2',
+        'pct_RN_legi24t1', 'pct_RN_legi24t2',
+        'pct_RN_euro19t1', 'pct_RN_euro24t1',
+        # Gauche radicale (LFI / NUPES / NFP)
+        'pct_LFI_legi17t1', 'pct_LFI_legi17t2',
+        'pct_NUPES_legi22t1', 'pct_NUPES_legi22t2',
+        'pct_NFP_legi24t1', 'pct_NFP_legi24t2',
+        'pct_LFI_legi24t1',
+        'pct_LFI_euro19t1', 'pct_LFI_euro24t1',
+        # ENS / Macron
+        'pct_ENS_legi17t1', 'pct_ENS_legi17t2',
+        'pct_ENS_legi22t1',
+        'pct_ENS_legi24t1', 'pct_ENS_legi24t2',
+        'pct_ENS_euro19t1', 'pct_ENS_euro24t1',
+        # LR
+        'pct_LR_legi17t1', 'pct_LR_legi17t2',
+        'pct_LR_legi22t1', 'pct_LR_legi22t2',
+        'pct_LR_legi24t1', 'pct_LR_legi24t2',
+        'pct_LR_euro19t1', 'pct_LR_euro24t1',
+        # PS / Socialistes
+        'pct_PS_legi17t1', 'pct_PS_legi17t2',
+        'pct_PS_legi24t1',
+        'pct_PS_PP_euro19t1', 'pct_PS_PP_euro24t1',
+        # EELV
+        'pct_EELV_legi17t1', 'pct_EELV_legi17t2',
+        'pct_EELV_legi22t1',
+        'pct_EELV_legi24t1',
+        'pct_EELV_euro19t1', 'pct_EELV_euro24t1',
+        # PCF
+        'pct_PCF_legi17t1', 'pct_PCF_legi17t2',
+        'pct_PCF_legi24t1',
+        'pct_PCF_euro24t1',
+        # Extrême-droite hors RN
+        'pct_EXD_legi17t1', 'pct_EXD_legi17t2',
+        'pct_EXD_legi24t1',
+        'pct_UXD_legi24t1', 'pct_UXD_legi24t2',
+        'pct_REC_legi22t1',
+        'pct_REC_legi24t1',
+        'pct_REC_euro24t1',
+        # Présidentielles — Le Pen
+        'pct_LE_PEN_pres17t1', 'pct_LE_PEN_pres17t2',
+        'pct_LE_PEN_pres22t1', 'pct_LE_PEN_pres22t2',
+        # Présidentielles — Macron
+        'pct_MACRON_pres17t1', 'pct_MACRON_pres17t2',
+        'pct_MACRON_pres22t1', 'pct_MACRON_pres22t2',
+        # Présidentielles — Mélenchon
+        'pct_MELENCHON_pres17t1', 'pct_MELENCHON_pres22t1',
+        # Présidentielles — Fillon / Pécresse (droite)
+        'pct_FILLON_pres17t1',
+        'pct_PECRESSE_pres22t1',
+        # Présidentielles — autres
+        'pct_HAMON_pres17t1',
+        'pct_ZEMMOUR_pres22t1',
+        'pct_JADOT_pres22t1',
+        'pct_ROUSSEL_pres22t1',
+        'pct_HIDALGO_pres22t1',
     ],
 }
 
@@ -758,6 +826,8 @@ VAR_LABELS = {
     'P21_ACT_SUP5':             'Actifs 15-64 ans titulaires BAC+5 ou plus',
     # ── Structure démographique 2020 (base-ic-evol-struct-pop-2020) ────────────
     'pop_totale':               'Population totale (2021)',
+    'pop_iris':                 'Population totale de l\'IRIS (2021)',
+    'pop_commune':              'Population totale de la commune (2021, somme des IRIS)',
     'age_moyen':                'Âge moyen de la population (2021)',
     'pct_0_19':                 '% population 0-19 ans (2021)',
     'pct_20_64':                '% population 20-64 ans (2021)',
@@ -879,6 +949,104 @@ VAR_LABELS = {
     'bpe_ecole_privee_pour1000':    'Écoles privées pour 1000 hab. (BPE 2024)',
     'bpe_sport_indoor_pour1000':    'Équipements sportifs couverts pour 1000 hab. (BPE 2024)',
     'pct_sport_accessible':         '% équipements sportifs accessibles PMR (BPE 2024)',
+    # ── Abstentions ────────────────────────────────────────────────────────────
+    'pct_abst_legi17t1':  '% abstention — Législatives 2017 T1',
+    'pct_abst_legi17t2':  '% abstention — Législatives 2017 T2',
+    'pct_abst_legi22t1':  '% abstention — Législatives 2022 T1',
+    'pct_abst_legi22t2':  '% abstention — Législatives 2022 T2',
+    'pct_abst_legi24t1':  '% abstention — Législatives 2024 T1',
+    'pct_abst_legi24t2':  '% abstention — Législatives 2024 T2',
+    'pct_abst_pres17t1':  '% abstention — Présidentielles 2017 T1',
+    'pct_abst_pres17t2':  '% abstention — Présidentielles 2017 T2',
+    'pct_abst_pres22t1':  '% abstention — Présidentielles 2022 T1',
+    'pct_abst_pres22t2':  '% abstention — Présidentielles 2022 T2',
+    'pct_abst_euro19t1':  '% abstention — Européennes 2019',
+    'pct_abst_euro24t1':  '% abstention — Européennes 2024',
+    # ── RN ─────────────────────────────────────────────────────────────────────
+    'pct_RN_legi17t1':    '% RN — Législatives 2017 T1 (% des exprimés)',
+    'pct_RN_legi17t2':    '% RN — Législatives 2017 T2 (% des exprimés)',
+    'pct_RN_legi22t1':    '% RN — Législatives 2022 T1 (% des exprimés)',
+    'pct_RN_legi22t2':    '% RN — Législatives 2022 T2 (% des exprimés)',
+    'pct_RN_legi24t1':    '% RN — Législatives 2024 T1 (% des exprimés)',
+    'pct_RN_legi24t2':    '% RN — Législatives 2024 T2 (% des exprimés)',
+    'pct_RN_euro19t1':    '% RN — Européennes 2019 (% des exprimés)',
+    'pct_RN_euro24t1':    '% RN — Européennes 2024 (% des exprimés)',
+    # ── LFI / NUPES / NFP ──────────────────────────────────────────────────────
+    'pct_LFI_legi17t1':   '% LFI — Législatives 2017 T1 (% des exprimés)',
+    'pct_LFI_legi17t2':   '% LFI — Législatives 2017 T2 (% des exprimés)',
+    'pct_NUPES_legi22t1': '% NUPES — Législatives 2022 T1 (% des exprimés)',
+    'pct_NUPES_legi22t2': '% NUPES — Législatives 2022 T2 (% des exprimés)',
+    'pct_NFP_legi24t1':   '% NFP — Législatives 2024 T1 (% des exprimés)',
+    'pct_NFP_legi24t2':   '% NFP — Législatives 2024 T2 (% des exprimés)',
+    'pct_LFI_legi24t1':   '% LFI — Législatives 2024 T1 (% des exprimés)',
+    'pct_LFI_euro19t1':   '% LFI — Européennes 2019 (% des exprimés)',
+    'pct_LFI_euro24t1':   '% LFI — Européennes 2024 (% des exprimés)',
+    # ── ENS / Macron ───────────────────────────────────────────────────────────
+    'pct_ENS_legi17t1':   '% ENS/LREM — Législatives 2017 T1 (% des exprimés)',
+    'pct_ENS_legi17t2':   '% ENS/LREM — Législatives 2017 T2 (% des exprimés)',
+    'pct_ENS_legi22t1':   '% Ensemble — Législatives 2022 T1 (% des exprimés)',
+    'pct_ENS_legi24t1':   '% Ensemble — Législatives 2024 T1 (% des exprimés)',
+    'pct_ENS_legi24t2':   '% Ensemble — Législatives 2024 T2 (% des exprimés)',
+    'pct_ENS_euro19t1':   '% Renaissance — Européennes 2019 (% des exprimés)',
+    'pct_ENS_euro24t1':   '% Renaissance — Européennes 2024 (% des exprimés)',
+    # ── LR ─────────────────────────────────────────────────────────────────────
+    'pct_LR_legi17t1':    '% LR — Législatives 2017 T1 (% des exprimés)',
+    'pct_LR_legi17t2':    '% LR — Législatives 2017 T2 (% des exprimés)',
+    'pct_LR_legi22t1':    '% LR — Législatives 2022 T1 (% des exprimés)',
+    'pct_LR_legi22t2':    '% LR — Législatives 2022 T2 (% des exprimés)',
+    'pct_LR_legi24t1':    '% LR — Législatives 2024 T1 (% des exprimés)',
+    'pct_LR_legi24t2':    '% LR — Législatives 2024 T2 (% des exprimés)',
+    'pct_LR_euro19t1':    '% LR — Européennes 2019 (% des exprimés)',
+    'pct_LR_euro24t1':    '% LR — Européennes 2024 (% des exprimés)',
+    # ── PS / Socialistes ───────────────────────────────────────────────────────
+    'pct_PS_legi17t1':    '% PS — Législatives 2017 T1 (% des exprimés)',
+    'pct_PS_legi17t2':    '% PS — Législatives 2017 T2 (% des exprimés)',
+    'pct_PS_legi24t1':    '% PS — Législatives 2024 T1 (% des exprimés)',
+    'pct_PS_PP_euro19t1': '% PS/Place Publique — Européennes 2019 (% des exprimés)',
+    'pct_PS_PP_euro24t1': '% PS/Place Publique — Européennes 2024 (% des exprimés)',
+    # ── EELV ───────────────────────────────────────────────────────────────────
+    'pct_EELV_legi17t1':  '% EELV — Législatives 2017 T1 (% des exprimés)',
+    'pct_EELV_legi17t2':  '% EELV — Législatives 2017 T2 (% des exprimés)',
+    'pct_EELV_legi22t1':  '% EELV — Législatives 2022 T1 (% des exprimés)',
+    'pct_EELV_legi24t1':  '% EELV — Législatives 2024 T1 (% des exprimés)',
+    'pct_EELV_euro19t1':  '% EELV — Européennes 2019 (% des exprimés)',
+    'pct_EELV_euro24t1':  '% EELV — Européennes 2024 (% des exprimés)',
+    # ── PCF ────────────────────────────────────────────────────────────────────
+    'pct_PCF_legi17t1':   '% PCF — Législatives 2017 T1 (% des exprimés)',
+    'pct_PCF_legi17t2':   '% PCF — Législatives 2017 T2 (% des exprimés)',
+    'pct_PCF_legi24t1':   '% PCF — Législatives 2024 T1 (% des exprimés)',
+    'pct_PCF_euro24t1':   '% PCF — Européennes 2024 (% des exprimés)',
+    # ── Extrême-droite hors RN ─────────────────────────────────────────────────
+    'pct_EXD_legi17t1':   '% Extrême-droite — Législatives 2017 T1 (% des exprimés)',
+    'pct_EXD_legi17t2':   '% Extrême-droite — Législatives 2017 T2 (% des exprimés)',
+    'pct_EXD_legi24t1':   '% Extrême-droite — Législatives 2024 T1 (% des exprimés)',
+    'pct_UXD_legi24t1':   '% Union Extrême-droite (Ciotti) — Législatives 2024 T1 (% des exprimés)',
+    'pct_UXD_legi24t2':   '% Union Extrême-droite (Ciotti) — Législatives 2024 T2 (% des exprimés)',
+    'pct_REC_legi22t1':   '% Reconquête — Législatives 2022 T1 (% des exprimés)',
+    'pct_REC_legi24t1':   '% Reconquête — Législatives 2024 T1 (% des exprimés)',
+    'pct_REC_euro24t1':   '% Reconquête — Européennes 2024 (% des exprimés)',
+    # ── Présidentielles — Le Pen ───────────────────────────────────────────────
+    'pct_LE_PEN_pres17t1':    '% Le Pen — Présidentielles 2017 T1 (% des exprimés)',
+    'pct_LE_PEN_pres17t2':    '% Le Pen — Présidentielles 2017 T2 (% des exprimés)',
+    'pct_LE_PEN_pres22t1':    '% Le Pen — Présidentielles 2022 T1 (% des exprimés)',
+    'pct_LE_PEN_pres22t2':    '% Le Pen — Présidentielles 2022 T2 (% des exprimés)',
+    # ── Présidentielles — Macron ───────────────────────────────────────────────
+    'pct_MACRON_pres17t1':    '% Macron — Présidentielles 2017 T1 (% des exprimés)',
+    'pct_MACRON_pres17t2':    '% Macron — Présidentielles 2017 T2 (% des exprimés)',
+    'pct_MACRON_pres22t1':    '% Macron — Présidentielles 2022 T1 (% des exprimés)',
+    'pct_MACRON_pres22t2':    '% Macron — Présidentielles 2022 T2 (% des exprimés)',
+    # ── Présidentielles — Mélenchon ────────────────────────────────────────────
+    'pct_MELENCHON_pres17t1': '% Mélenchon — Présidentielles 2017 T1 (% des exprimés)',
+    'pct_MELENCHON_pres22t1': '% Mélenchon — Présidentielles 2022 T1 (% des exprimés)',
+    # ── Présidentielles — Droite classique ────────────────────────────────────
+    'pct_FILLON_pres17t1':    '% Fillon — Présidentielles 2017 T1 (% des exprimés)',
+    'pct_PECRESSE_pres22t1':  '% Pécresse — Présidentielles 2022 T1 (% des exprimés)',
+    # ── Présidentielles — autres ───────────────────────────────────────────────
+    'pct_HAMON_pres17t1':     '% Hamon — Présidentielles 2017 T1 (% des exprimés)',
+    'pct_ZEMMOUR_pres22t1':   '% Zemmour — Présidentielles 2022 T1 (% des exprimés)',
+    'pct_JADOT_pres22t1':     '% Jadot — Présidentielles 2022 T1 (% des exprimés)',
+    'pct_ROUSSEL_pres22t1':   '% Roussel — Présidentielles 2022 T1 (% des exprimés)',
+    'pct_HIDALGO_pres22t1':   '% Hidalgo — Présidentielles 2022 T1 (% des exprimés)',
 }
 
 ALL_VARS = []
@@ -990,6 +1158,133 @@ print("Calcul des scores composites IRIS...")
 for score_name, cfg in SCORES_CONFIG.items():
     df[score_name] = make_score(cfg['pos_vars'], cfg['neg_vars'])
     print(f"  {score_name}: min={df[score_name].min():.2f} max={df[score_name].max():.2f} mean={df[score_name].mean():.2f}")
+
+# ── 3c. VARIABLES ÉLECTORALES POUR AXES ──────────────────────────────────────
+def _build_electoral_axis_vars(df_iris):
+    """Charge les CSV électoraux et retourne un dict col_name → array pour df.assign()."""
+    import os as _os
+    new_cols = {}
+    if 'COM' in df_iris.columns and 'pop_totale' in df_iris.columns:
+        new_cols['pop_iris'] = df_iris['pop_totale'].fillna(0)
+        new_cols['pop_commune'] = df_iris.groupby('COM')['pop_totale'].transform('sum').fillna(0)
+    elif 'pop_totale' in df_iris.columns:
+        new_cols['pop_iris'] = df_iris['pop_totale'].fillna(0)
+
+    ELECTORAL_VARS = [
+        # Legi 2017 T1
+        ('2017_legi_t1', 'pct_abstention',  'pct_abst_legi17t1'),
+        ('2017_legi_t1', 'score_RN',        'pct_RN_legi17t1'),
+        ('2017_legi_t1', 'score_LFI',       'pct_LFI_legi17t1'),
+        ('2017_legi_t1', 'score_PS',        'pct_PS_legi17t1'),
+        ('2017_legi_t1', 'score_ENS',       'pct_ENS_legi17t1'),
+        ('2017_legi_t1', 'score_LR',        'pct_LR_legi17t1'),
+        ('2017_legi_t1', 'score_EELV',      'pct_EELV_legi17t1'),
+        ('2017_legi_t1', 'score_PCF',       'pct_PCF_legi17t1'),
+        ('2017_legi_t1', 'score_EXD',       'pct_EXD_legi17t1'),
+        # Legi 2017 T2 (tous partis sauf AUTRE)
+        ('2017_legi_t2', 'pct_abstention',  'pct_abst_legi17t2'),
+        ('2017_legi_t2', 'score_RN',        'pct_RN_legi17t2'),
+        ('2017_legi_t2', 'score_LFI',       'pct_LFI_legi17t2'),
+        ('2017_legi_t2', 'score_PS',        'pct_PS_legi17t2'),
+        ('2017_legi_t2', 'score_ENS',       'pct_ENS_legi17t2'),
+        ('2017_legi_t2', 'score_LR',        'pct_LR_legi17t2'),
+        ('2017_legi_t2', 'score_EELV',      'pct_EELV_legi17t2'),
+        ('2017_legi_t2', 'score_PCF',       'pct_PCF_legi17t2'),
+        ('2017_legi_t2', 'score_EXD',       'pct_EXD_legi17t2'),
+        # Legi 2022 T1
+        ('2022_legi_t1', 'pct_abstention',  'pct_abst_legi22t1'),
+        ('2022_legi_t1', 'score_RN',        'pct_RN_legi22t1'),
+        ('2022_legi_t1', 'score_NUPES',     'pct_NUPES_legi22t1'),
+        ('2022_legi_t1', 'score_ENS',       'pct_ENS_legi22t1'),
+        ('2022_legi_t1', 'score_LR',        'pct_LR_legi22t1'),
+        ('2022_legi_t1', 'score_REC',       'pct_REC_legi22t1'),
+        ('2022_legi_t1', 'score_EELV',      'pct_EELV_legi22t1'),
+        # Legi 2022 T2
+        ('2022_legi_t2', 'pct_abstention',  'pct_abst_legi22t2'),
+        ('2022_legi_t2', 'score_RN',        'pct_RN_legi22t2'),
+        ('2022_legi_t2', 'score_NUPES',     'pct_NUPES_legi22t2'),
+        ('2022_legi_t2', 'score_LR',        'pct_LR_legi22t2'),
+        # Legi 2024 T1
+        ('2024_legi_t1', 'pct_abstention',  'pct_abst_legi24t1'),
+        ('2024_legi_t1', 'score_RN',        'pct_RN_legi24t1'),
+        ('2024_legi_t1', 'score_NFP',       'pct_NFP_legi24t1'),
+        ('2024_legi_t1', 'score_ENS',       'pct_ENS_legi24t1'),
+        ('2024_legi_t1', 'score_LR',        'pct_LR_legi24t1'),
+        ('2024_legi_t1', 'score_UXD',       'pct_UXD_legi24t1'),
+        ('2024_legi_t1', 'score_REC',       'pct_REC_legi24t1'),
+        ('2024_legi_t1', 'score_EXD',       'pct_EXD_legi24t1'),
+        ('2024_legi_t1', 'score_LFI',       'pct_LFI_legi24t1'),
+        ('2024_legi_t1', 'score_PS',        'pct_PS_legi24t1'),
+        ('2024_legi_t1', 'score_EELV',      'pct_EELV_legi24t1'),
+        ('2024_legi_t1', 'score_PCF',       'pct_PCF_legi24t1'),
+        # Legi 2024 T2 (RN, NFP, UXD, LR, ENS)
+        ('2024_legi_t2', 'pct_abstention',  'pct_abst_legi24t2'),
+        ('2024_legi_t2', 'score_RN',        'pct_RN_legi24t2'),
+        ('2024_legi_t2', 'score_NFP',       'pct_NFP_legi24t2'),
+        ('2024_legi_t2', 'score_UXD',       'pct_UXD_legi24t2'),
+        ('2024_legi_t2', 'score_LR',        'pct_LR_legi24t2'),
+        ('2024_legi_t2', 'score_ENS',       'pct_ENS_legi24t2'),
+        # Pres 2017 T1
+        ('2017_pres_t1', 'pct_abstention',  'pct_abst_pres17t1'),
+        ('2017_pres_t1', 'score_LE_PEN',    'pct_LE_PEN_pres17t1'),
+        ('2017_pres_t1', 'score_MELENCHON', 'pct_MELENCHON_pres17t1'),
+        ('2017_pres_t1', 'score_MACRON',    'pct_MACRON_pres17t1'),
+        ('2017_pres_t1', 'score_FILLON',    'pct_FILLON_pres17t1'),
+        ('2017_pres_t1', 'score_HAMON',     'pct_HAMON_pres17t1'),
+        # Pres 2017 T2
+        ('2017_pres_t2', 'pct_abstention',  'pct_abst_pres17t2'),
+        ('2017_pres_t2', 'score_LE_PEN',    'pct_LE_PEN_pres17t2'),
+        ('2017_pres_t2', 'score_MACRON',    'pct_MACRON_pres17t2'),
+        # Pres 2022 T1
+        ('2022_pres_t1', 'pct_abstention',  'pct_abst_pres22t1'),
+        ('2022_pres_t1', 'score_LE_PEN',    'pct_LE_PEN_pres22t1'),
+        ('2022_pres_t1', 'score_MELENCHON', 'pct_MELENCHON_pres22t1'),
+        ('2022_pres_t1', 'score_MACRON',    'pct_MACRON_pres22t1'),
+        ('2022_pres_t1', 'score_PECRESSE',  'pct_PECRESSE_pres22t1'),
+        ('2022_pres_t1', 'score_ZEMMOUR',   'pct_ZEMMOUR_pres22t1'),
+        ('2022_pres_t1', 'score_JADOT',     'pct_JADOT_pres22t1'),
+        ('2022_pres_t1', 'score_ROUSSEL',   'pct_ROUSSEL_pres22t1'),
+        ('2022_pres_t1', 'score_HIDALGO',   'pct_HIDALGO_pres22t1'),
+        # Pres 2022 T2
+        ('2022_pres_t2', 'pct_abstention',  'pct_abst_pres22t2'),
+        ('2022_pres_t2', 'score_LE_PEN',    'pct_LE_PEN_pres22t2'),
+        ('2022_pres_t2', 'score_MACRON',    'pct_MACRON_pres22t2'),
+        # Euro 2019
+        ('2019_euro_t1', 'pct_abstention',  'pct_abst_euro19t1'),
+        ('2019_euro_t1', 'score_RN',        'pct_RN_euro19t1'),
+        ('2019_euro_t1', 'score_ENS',       'pct_ENS_euro19t1'),
+        ('2019_euro_t1', 'score_LFI',       'pct_LFI_euro19t1'),
+        ('2019_euro_t1', 'score_EELV',      'pct_EELV_euro19t1'),
+        ('2019_euro_t1', 'score_LR',        'pct_LR_euro19t1'),
+        ('2019_euro_t1', 'score_PS_PP',     'pct_PS_PP_euro19t1'),
+        # Euro 2024
+        ('2024_euro_t1', 'pct_abstention',  'pct_abst_euro24t1'),
+        ('2024_euro_t1', 'score_RN',        'pct_RN_euro24t1'),
+        ('2024_euro_t1', 'score_ENS',       'pct_ENS_euro24t1'),
+        ('2024_euro_t1', 'score_LFI',       'pct_LFI_euro24t1'),
+        ('2024_euro_t1', 'score_EELV',      'pct_EELV_euro24t1'),
+        ('2024_euro_t1', 'score_LR',        'pct_LR_euro24t1'),
+        ('2024_euro_t1', 'score_PS_PP',     'pct_PS_PP_euro24t1'),
+        ('2024_euro_t1', 'score_REC',       'pct_REC_euro24t1'),
+        ('2024_euro_t1', 'score_PCF',       'pct_PCF_euro24t1'),
+    ]
+
+    loaded = {}
+    for (csv_id, src_col, tgt_col) in ELECTORAL_VARS:
+        if csv_id not in loaded:
+            path = f"iris/elections/{csv_id}.csv"
+            loaded[csv_id] = pd.read_csv(path, index_col='CODE_IRIS', dtype={'CODE_IRIS': str}) if _os.path.exists(path) else None
+        elec = loaded[csv_id]
+        if elec is None or src_col not in elec.columns:
+            new_cols[tgt_col] = pd.Series(0.0, index=df_iris.index)
+            continue
+        merged = df_iris[['IRIS']].merge(elec[[src_col]], left_on='IRIS', right_index=True, how='left')
+        new_cols[tgt_col] = merged[src_col].fillna(0).to_numpy()
+    return new_cols
+
+print("Construction des variables électorales pour axes...")
+df = df.assign(**_build_electoral_axis_vars(df))
+print("  Variables électorales/demo ajoutées au dataframe.")
 
 # ── 4. PARTI DOMINANT PAR IRIS ────────────────────────────────────────────────
 score_party_cols = [c for c in df.columns if c.startswith('score_') and c[6:] in ALL_ORDER]
@@ -1163,7 +1458,7 @@ pop = df['_pop'].copy()
 q5  = pop.quantile(0.05)
 q95 = pop.quantile(0.95)
 pop_clipped = pop.clip(q5, q95)
-marker_size = 2.5 + (pop_clipped - q5) / (q95 - q5) * (6 - 2.5)  # 2.5–6px
+marker_size = 2.0 + (pop_clipped - q5) / (q95 - q5) * (5 - 2.0)  # 2–5px
 
 # ── 6. JITTER ET DONNÉES PAR VARIABLE ─────────────────────────────────────────
 np.random.seed(42)
@@ -1259,7 +1554,7 @@ for eid, data in iris_election_data.items():
     if vals_list:
         min_v, max_v = min(vals_list), max(vals_list)
         for g, v in totals.items():
-            bary_sizes_elec[g] = round(8 + (((v - min_v) / (max_v - min_v)) ** 0.5) * 37, 1) if max_v > min_v else 22
+            bary_sizes_elec[g] = round(7 + (((v - min_v) / (max_v - min_v)) ** 0.5) * 31, 1) if max_v > min_v else 18
 
     # --- abstBary: pondéré par pop × abst (vectorisé) ---
     abst_weights = np.where(abst_valid, pops * abst_arr / 100, 0.0)  # (n,)

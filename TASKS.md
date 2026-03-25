@@ -1,68 +1,14 @@
 # Polipy — Journal de bord des tâches
 
-## Statut des mises à jour
-
----
-
-## UPDATE 1 — ✅ Terminée
-
-| # | Tâche | Statut |
-|---|-------|--------|
-| T1 | Barycentres pondérés par score × population (pas seulement IRIS dominants) | ✅ Fait |
-| T2 | Barycentres absents au premier chargement de la page | ✅ Fait |
-| T9 | Supprimer les partis à cocher en bas (doublon des boutons du haut) | ✅ Fait |
-
----
-
-## UPDATE 2 — ✅ Terminée (desktop uniquement)
-
-| # | Tâche | Statut |
-|---|-------|--------|
-| T8 | Ajuster taille barycentres en fonction du nb de votants totaux | ✅ Fait |
-| T6 | Vérifier affiliations partis (EXD parfois devrait être RN, etc.) | ⏸ Reporté |
-| T5 | Afficher nom des candidats dans chaque IRIS sur la carte info | ⏸ Reporté (données parquet non intégrées) |
-
----
-
-## UPDATE 3 — Réflexion nécessaire (desktop uniquement)
-
-| # | Tâche | Statut |
-|---|-------|--------|
-| T11 | Afficher stats abstention + top 7 partis sous le graphique (% relatif et absolu, mis à jour par élection) | ✅ Fait |
-| T7 | Vérifier calcul barycentre abstention, ajouter distribution abstention (density map?) | ✅ Fait |
-| T10 | Pimp barycentres : distributions, moments, écarts-types, density map → supprimé (ellipses/densités illisibles, barycentres seuls suffisent) | ✅ Fait |
-| T3 | Accélérer / alléger taille fichier / lazy-load des données | 🔧 Phase A terminée, Phase B à faire |
-
----
-
-## UPDATE 4 — Version mobile
-
-| # | Tâche | Statut |
-|---|-------|--------|
-| T4 | Portage de toutes les fonctionnalités desktop vers la version mobile | ✅ Fait |
-
----
-
-## UPDATE 5 — ✅ Terminée
-
-| # | Tâche | Statut |
-|---|-------|--------|
-| T12 | Remplacer jolivet (iris-stats.geojson) par base-ic-evol-struct-pop-2020.CSV dans le pipeline | ✅ Fait |
-| T13 | Audit fallback commune FILOSOFI (nouvelle cellule notebook) | ✅ Fait |
-| T14 | Ajouter variables démographiques et genre dans VAR_LABELS + VARS_BY_CAT | ✅ Fait |
-
----
-
-## UPDATE 6 — ✅ Terminée
-
-| # | Tâche | Statut |
-|---|-------|--------|
-| T15 | Fallback T1 pour IRIS sans données T2 (élus au 1er tour) | ✅ Fait |
-| T16 | Afficher le code IRIS dans la fiche info à côté du nom commune | ✅ Fait |
-
----
 
 ## Historique
+
+### 2026-03-25 — Variables électorales comme axes + réduction tailles points
+- **Nouvelles variables dans les sélecteurs d'axes** : ajout d'une catégorie `Élections` (~85 variables) dans `VARS_BY_CAT` des deux scripts (desktop + mobile). Inclut : `pop_iris`, `pop_commune` (dans `Démographie`), `pct_abst_*` pour 12 élections (legi/pres/euro 2017–2024), et `pct_PARTI_*` pour tous les partis/candidats disponibles par élection (RN, LFI, NUPES, NFP, ENS, LR, PS, PS_PP, EELV, PCF, EXD, UXD, REC, LE_PEN, MACRON, MÉLENCHON, FILLON, PÉCRESSE, HAMON, ZEMMOUR, JADOT, ROUSSEL, HIDALGO). Legi 2017 T2 : tous les partis sauf AUTRE. Legi 2024 T2 : RN, NFP, UXD, LR, ENS.
+- **Fonction `_build_electoral_axis_vars(df)`** : ajoutée dans les deux scripts après la section 3b. Charge les CSV électoraux depuis `iris/elections/`, merge sur CODE_IRIS, et assigne les colonnes au dataframe principal. Cache les CSV par ID d'élection pour éviter les relectures.
+- **Tailles de points desktop** : barycentres réduits de 8–45 px → 7–38 px (fallback 22→18) ; petits points IRIS 2.5–6 px → 2–5 px.
+- **Tailles de points mobile** : barycentres réduits de 8–45 px → 6–32 px (fallback 22→15) ; petits points IRIS 2.5–4 px → 1.5–3 px.
+- `data/iris_x_desktop.json` et `iris_y_desktop.json` passent à ~47 MB (doublement, attendu : ~85 nouvelles variables × N_IRIS).
 
 ### 2026-03-24 — T15/T16 : Fallback T1 + code IRIS dans fiche
 - **T15** : Quand un IRIS n'a pas de données T2 (élu·e au 1er tour avec +50%), les fonctions `applyElection`, `restyleIRIS`, `buildMapGeoJSON` et les fiches info utilisent désormais les données T1 comme fallback. Les IRIS concernés apparaissent avec leur couleur T1 mais délavée (mélange 45% couleur + 55% blanc) pour signaler visuellement qu'il s'agit de données T1. La fiche info affiche les scores T1 avec la mention *"Élu·e au T1 — résultats du T1 affichés"*. Les données T1 sont chargées en parallèle avec les données T2 dans `applyElection` (`Promise.all`). Appliqué dans les deux versions desktop et mobile.
