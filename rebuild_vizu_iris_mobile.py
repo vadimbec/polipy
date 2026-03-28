@@ -1076,7 +1076,7 @@ def _build_electoral_axis_vars(df_iris):
     return new_cols
 
 print("Construction des variables électorales pour axes...")
-df = df.assign(**_build_electoral_axis_vars(df))
+df = df.assign(**_build_electoral_axis_vars(df)).copy()
 print("  Variables électorales/demo ajoutées au dataframe.")
 
 # ── 4. PARTI DOMINANT PAR IRIS ────────────────────────────────────────────────
