@@ -9,7 +9,7 @@ import os
 import geopandas as gpd
 import pandas as pd
 
-F_BUREAUX = "iris/bureau-de-vote-insee-reu-openstreetmap.gpkg"
+F_BUREAUX = "iris/bureau-de-vote-insee-reu-openstreetmap.gpkg"          # https://www.data.gouv.fr/datasets/reconstruction-automatique-de-la-geometrie-des-bureaux-de-vote-depuis-insee-reu-et-openstreetmap
 F_IRIS    = "iris/contours_iris_2025.gpkg"
 OUT_FILE  = "table_passage_BV_IRIS.csv"
 

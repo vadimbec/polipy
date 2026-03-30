@@ -211,16 +211,359 @@ SCORES_CONFIG = {
     },
 }
 
+# ── Nouveaux scores v2 (débiaisés par clustering de corrélation) ──────────────
+SCORES_CONFIG_V2 = {
+    'score_composition_capital': {
+        'pos_vars': ['DISP_PPAT21', 'DISP_PBEN21', 'P21_NSAL15P_EMPLOY', 'pct_proprietaires', 'pct_logements_anciens'],
+        'neg_vars': ['DISP_PTSA21', 'pct_csp_ouvrier', 'pct_csp_employe', 'pct_cdi'],
+    },
+    'score_domination_v2': {
+        'pos_vars': ['DISP_MED21', 'DISP_PPAT21', 'pct_proprietaires', 'pct_sup5', 'pct_bac_plus', 'pct_csp_plus', 'pct_csp_intermediaire', 'pct_cdi'],
+        'neg_vars': ['DISP_TP6021', 'pct_sans_diplome', 'pct_capbep', 'pct_csp_ouvrier', 'pct_csp_sans_emploi', 'pct_chomage', 'DISP_PPMINI21'],
+    },
+    'score_cap_eco_v2': {
+        'pos_vars': ['DISP_MED21', 'DISP_PPAT21', 'pct_proprietaires', 'surface_moyenne', 'pct_grands_logements'],
+        'neg_vars': ['DISP_TP6021', 'DISP_PPMINI21', 'pct_hlm', 'pct_suroccupation'],
+    },
+    'score_cap_cult_v2': {
+        'pos_vars': ['pct_sup5', 'pct_bac_plus', 'pct_csp_intermediaire', 'pct_actifs_velo', 'bpe_ecole_privee_pour1000', 'bpe_sport_indoor_pour1000'],
+        'neg_vars': ['pct_sans_diplome', 'pct_capbep', 'pct_csp_independant', 'pct_csp_agriculteur', 'pct_actifs_voiture'],
+    },
+    'score_rentier_v2': {
+        'pos_vars': ['DISP_PPAT21', 'DISP_PBEN21', 'pct_proprietaires'],
+        'neg_vars': ['DISP_PTSA21', 'pct_cdd', 'pct_interim'],
+    },
+    'score_ruralite_v2': {
+        'pos_vars': ['pct_csp_agriculteur', 'pct_sans_diplome', 'pct_actifs_voiture', 'P21_ACTOCC15P_ILT3'],
+        'neg_vars': ['pct_actifs_velo', 'pct_actifs_transports', 'pct_actifs_marche', 'pct_etudiants', 'P21_ACTOCC15P_ILT1', 'bpe_total_pour1000'],
+    },
+    'score_periurbain': {
+        'pos_vars': ['pct_maison', 'pct_actifs_voiture', 'pct_voiture_2plus', 'P21_ACTOCC15P_ILT3', 'pct_chauffage_fioul', 'pct_hlm'],
+        'neg_vars': ['bpe_E_transports_pour1000', 'pct_actifs_transports', 'pct_appart', 'bpe_total_pour1000'],
+    },
+    'score_france_pavillonnaire': {
+        'pos_vars': ['pct_capbep', 'pct_actifs_voiture', 'pct_maison', 'pct_voiture_2plus', 'nb_pieces_moyen', 'pct_chauffage_fioul'],
+        'neg_vars': ['pct_bac_plus', 'pct_sup5', 'pct_csp_plus', 'DISP_GI21', 'DISP_PACT21', 'DISP_RD21', 'pct_actifs_velo', 'DISP_PTSA21', 'pct_studios', 'pct_petits_logements'],
+    },
+}
+
+# ── Scores grouped (nouvelle architecture : zscore→agrégation→rang centile) ───
+SCORES_CONFIG_GROUPED = {
+    'score_domination': [
+        {
+            'poids': 1.0,
+            'vars': {
+                'pct_csp_plus':          +1.0,
+                'pct_csp_intermediaire': +0.8,
+                'pct_csp_independant':   +0.6,
+                'pct_employeurs':        +0.7,
+                'pct_cdi':               +0.3,
+                'pct_csp_ouvrier':       -0.8,
+                'pct_csp_employe':       -0.5,
+                'pct_csp_sans_emploi':   -1.0,
+                'pct_chomage':           -0.8,
+                'pct_interim':           -0.5,
+                'pct_cdd':               -0.4,
+                'pct_temps_partiel':     -0.5,
+            }
+        }
+    ],
+    'score_composition_capital': [
+        {
+            'poids': 0.75,
+            'vars': {
+                'DISP_PPAT21':  +1.5,
+                'DISP_PBEN21':  +1.0,
+                'DISP_PTSA21':  -1.0,
+                'DISP_PCHO21':  -0.5,
+            }
+        },
+        {
+            'poids': 0.25,
+            'vars': {
+                'pct_proprietaires':  +1.5,
+                'pct_employeurs':     +0.8,
+                'pct_csp_ouvrier':    -0.8,
+                'pct_csp_employe':    -0.5,
+                'pct_cdi':            -0.5,
+                'pct_cdd':            -0.6,
+                'pct_interim':        -0.7,
+                'pct_temps_partiel':  -0.7,
+            }
+        }
+    ],
+    'score_cap_eco': [
+        {
+            'poids': 0.7,
+            'vars': {
+                'DISP_MED21':    +1.0,
+                'DISP_PPAT21':   +0.8,
+                'DISP_PBEN21':   +0.5,
+                'DISP_TP6021':   -1.0,
+                'DISP_PPMINI21': -1.0,
+                'DISP_PPLOGT21': -0.6,
+            }
+        },
+        {
+            'poids': 0.3,
+            'vars': {
+                'pct_proprietaires':  +0.8,
+                'pct_hlm':            -0.8,
+                'pct_suroccupation':  -0.5,
+            }
+        }
+    ],
+    'score_cap_cult': [
+        {
+            'poids': 0.8,
+            'vars': {
+                'pct_sup5':              +1.0,
+                'pct_bac_plus':          +0.6,
+                'pct_csp_intermediaire': +0.5,
+                'pct_actifs_velo':       +0.3,
+                'pct_sans_diplome':      -1.0,
+                'pct_capbep':            -0.6,
+                'pct_csp_independant':   -0.3,
+                'pct_csp_agriculteur':   -0.3,
+            }
+        },
+        {
+            'poids': 0.2,
+            'vars': {
+                'bpe_ecole_privee_pour1000':  +0.8,
+                'bpe_sport_indoor_pour1000':  +0.4,
+            }
+        }
+    ],
+    'score_precarite': [
+        {
+            'poids': 0.6,
+            'vars': {
+                'DISP_TP6021':   +1.0,
+                'DISP_PPMINI21': +0.8,
+                'DISP_PPSOC21':  +0.5,
+                'DISP_PPLOGT21': +0.4,
+                'DISP_MED21':    -1.0,
+            }
+        },
+        {
+            'poids': 0.4,
+            'vars': {
+                'pct_csp_sans_emploi': +0.8,
+                'pct_chomage':         +0.7,
+                'pct_interim':         +0.5,
+                'pct_cdd':             +0.4,
+                'pct_temps_partiel':   +0.3,
+                'pct_hlm':             +0.4,
+                'pct_suroccupation':   +0.5,
+            }
+        }
+    ],
+    'score_rentier': [
+        {
+            'poids': 1.0,
+            'vars': {
+                'DISP_PPAT21':  +1.0,
+                'DISP_PBEN21':  +0.7,
+                'DISP_PPEN21':  +0.5,
+                'DISP_PTSA21':  -1.0,
+                'DISP_PACT21':  -0.6,
+            }
+        }
+    ],
+    # score_ruralite retiré de grouped (valeur v1 conservée) — absorbé par score_urbanite
+    'score_urbanite': [
+        {
+            'poids': 0.6,
+            'vars': {
+                'pct_appart':            +1.0,
+                'pct_voiture_0':         +0.9,
+                'pct_actifs_transports': +0.8,
+                'pct_locataires':        +0.7,
+                'pct_petits_logements':  +0.6,
+                'pct_actifs_velo':       +0.5,
+                'pct_actifs_marche':     +0.4,
+                'pct_maison':            -1.0,
+                'pct_voiture_2plus':     -0.9,
+                'pct_garage':            -0.7,
+                'surface_moyenne':       -0.6,
+                'pct_chauffage_fioul':   -0.4,
+                'pct_csp_agriculteur':   -0.7,
+                'P21_ACTOCC15P_ILT3':   -0.5,
+            }
+        },
+        {
+            'poids': 0.4,
+            'vars': {
+                'bpe_E_transports_pour1000': +0.9,
+                'bpe_total_pour1000':        +0.7,
+                'P21_ACTOCC15P_ILT1':        +0.5,
+                'bpe_B_commerces_pour1000':  +0.4,
+            }
+        }
+    ],
+    'score_confort_residentiel': [
+        {
+            'poids': 1.0,
+            'vars': {
+                'pct_proprietaires':     +0.7,
+                'pct_grands_logements':  +0.8,
+                'surface_moyenne':       +0.7,
+                'nb_pieces_moyen':       +0.6,
+                'pct_garage':            +0.5,
+                'pct_logements_5p_plus': +0.5,
+                'pct_suroccupation':     -1.0,
+                'pct_hlm':               -0.7,
+                'pct_petits_logements':  -0.6,
+                'pct_studios':           -0.5,
+                'pct_logvac':            -0.3,
+            }
+        }
+    ],
+    'score_equipement_public': [
+        {
+            'poids': 1.0,
+            'vars': {
+                'bpe_D_sante_pour1000':          +1.0,
+                'bpe_C_enseignement_pour1000':   +0.8,
+                'bpe_A_services_pour1000':        +0.7,
+                'bpe_E_transports_pour1000':      +0.7,
+                'bpe_F_sports_culture_pour1000':  +0.6,
+                'bpe_B_commerces_pour1000':       +0.5,
+                'bpe_educ_prioritaire_pour1000':  +0.4,
+            }
+        }
+    ],
+    'score_dependance_carbone': [
+        {
+            'poids': 0.55,
+            'vars': {
+                'pct_actifs_voiture':    +1.0,
+                'pct_voiture_2plus':     +0.8,
+                'pct_actifs_transports': -0.9,
+                'pct_actifs_velo':       -0.7,
+                'pct_actifs_marche':     -0.5,
+            }
+        },
+        {
+            'poids': 0.45,
+            'vars': {
+                'pct_chauffage_fioul':         +1.0,
+                'pct_chauffage_gaz_bouteille': +0.6,
+                'pct_logements_recents':       -0.6,
+                'pct_chauffage_elec':          -0.5,
+            }
+        }
+    ],
+}
+
+SCORES_CONFIG_GROUPED_PCA = {
+    'score_domination': [
+        {'poids': 1.0, 'vars': {
+            'pct_csp_plus': +1.0, 'pct_csp_intermediaire': +0.6,
+            'pct_csp_ouvrier': -0.8, 'pct_csp_employe': -0.6, 'pct_csp_sans_emploi': -1.0,
+
+            'pct_sup5': +0.7, 'pct_bac_plus': +0.4, 
+            'pct_sans_diplome': -0.8, 'pct_capbep': -0.5, 
+
+            'pct_cdi': +0.8, 
+            'pct_interim': -0.9, 'pct_cdd': -0.7, 'pct_temps_partiel': -0.5,
+        }}
+    ],
+    'score_exploitation': [
+        {'poids': 0.75, 'vars': {
+            'DISP_PPAT21': +1.5, 'DISP_PBEN21': +1.0, 'DISP_PCHO21': -0.5,
+        }},
+        {'poids': 0.25, 'vars': {
+            'pct_proprietaires': +1.5, 'pct_employeurs': +0.8,
+            'pct_csp_ouvrier': -0.8, 'pct_csp_employe': -0.5,
+        }}
+    ],
+    'score_cap_eco': [
+        {'poids': 0.7, 'vars': {
+            'DISP_MED21': +1.0, 'DISP_PPAT21': +0.8, 'DISP_PBEN21': +0.5,
+            'DISP_TP6021': -1.0, 'DISP_PPMINI21': -1.0, 'DISP_PPLOGT21': -0.6,
+        }},
+        {'poids': 0.3, 'vars': {
+            'pct_proprietaires': +0.8, 'pct_hlm': -0.8, 'pct_suroccupation': -0.5,
+        }}
+    ],
+        'score_cap_cult': [
+        {'poids': 1.0, 'vars': {
+            'pct_sup5': +1.0, 'pct_bac_plus': +0.6, 'pct_csp_intermediaire': +0.5,
+            'pct_actifs_velo': +0.3,
+            'pct_sans_diplome': -1.0, 'pct_capbep': -0.6,
+            'pct_csp_agriculteur': -0.3,
+        }},
+    ],
+    'score_precarite': [
+        {'poids': 0.6, 'vars': {
+            'DISP_TP6021': +1.0, 'DISP_PPMINI21': +0.8, 'DISP_PPSOC21': +0.5,
+            'DISP_PPLOGT21': +0.4, 'DISP_MED21': -1.0,
+        }},
+        {'poids': 0.4, 'vars': {
+            'pct_csp_sans_emploi': +0.8, 'pct_chomage': +0.7, 'pct_interim': +0.5,
+            'pct_cdd': +0.4, 'pct_temps_partiel': +0.3, 'pct_hlm': +0.4, 'pct_suroccupation': +0.5,
+        }}
+    ],
+    
+    'score_rentier': [
+        {'poids': 1.0, 'vars': {
+            'DISP_PPAT21': +1.0, 'DISP_PPEN21': +0.5,
+            'DISP_PTSA21': -1.0, 'DISP_PACT21': -0.6,
+        }}
+    ],
+    'score_urbanite': [
+        {'poids': 0.6, 'vars': {
+            'pct_appart': +1.0, 'pct_voiture_0': +0.9, 'pct_actifs_transports': +0.8,
+            'pct_locataires': +0.7, 'pct_petits_logements': +0.6,
+            'pct_actifs_velo': +0.5, 'pct_actifs_marche': +0.4,
+            'pct_maison': -1.0, 'pct_voiture_2plus': -0.9, 'pct_garage': -0.7,
+            'surface_moyenne': -0.6, 'pct_chauffage_fioul': -0.4,
+            'pct_csp_agriculteur': -0.7, 'P21_ACTOCC15P_ILT3': -0.5,
+        }},
+        {'poids': 0.4, 'vars': {
+            'bpe_total_pour1000': +0.7, 'bpe_B_commerces_pour1000': +0.4,
+        }}
+    ],
+    'score_confort_residentiel': [
+        {'poids': 1.0, 'vars': {
+            'pct_proprietaires': +0.7, 'pct_grands_logements': +0.8,
+            'surface_moyenne': +0.7, 'nb_pieces_moyen': +0.6, 'pct_garage': +0.5,
+            'pct_logements_5p_plus': +0.5,
+            'pct_suroccupation': -1.0, 'pct_hlm': -0.7, 'pct_petits_logements': -0.6,
+            'pct_studios': -0.5,
+        }}
+    ],
+    'score_equipement_public': [
+        {'poids': 1.0, 'vars': {
+            'bpe_D_sante_pour1000': +1.0, 'bpe_C_enseignement_pour1000': +0.8,
+            'bpe_A_services_pour1000': +0.7,
+            'bpe_F_sports_culture_pour1000': +0.6, 'bpe_B_commerces_pour1000': +0.5,
+        }}
+    ],
+    'score_dependance_carbone': [
+        {'poids': 0.55, 'vars': {
+            'pct_actifs_voiture': +1.0, 'pct_voiture_2plus': +0.8,
+            'pct_actifs_transports': -0.9, 'pct_actifs_velo': -0.7, 'pct_actifs_marche': -0.5,
+        }},
+        {'poids': 0.45, 'vars': {
+            'pct_chauffage_fioul': +1.0, 'pct_chauffage_gaz_bouteille': +0.6,
+            'pct_logements_recents': -0.6, 'pct_chauffage_elec': -0.5,
+        }}
+    ],
+}
+
 # ── PRESETS D'AXES ────────────────────────────────────────────────────────────
 AXIS_PRESETS = [
     {
         'id': 'saint_graphique',
-        'label': 'Saint-Graphique',
+        'label': 'Domination × Exploitation',
         'emoji': '⚒️',
         'xVar': 'score_exploitation', 'xInvert': False,
         'yVar': 'score_domination',
         'xTitle': '← Exploité (prolétaire) ─── Position dans le rapport capital/travail ─── Exploiteur (bourgeois) →',
-        'yTitle': '← Dominé ─── Domination sociale (Bourdieu) ─── Dominant →',
+        'yTitle': '← Dominé ─── Domination sociale ─── Dominant →',
         'xRange': [-50, 50], 'yRange': [-50, 50],
         'corners': [
             {'pos': 'tl', 'text': 'ASCENSION<br>SOCIALE', 'color': '#E87070'},
@@ -229,9 +572,9 @@ AXIS_PRESETS = [
             {'pos': 'br', 'text': 'PETITE<br>BOURGEOISIE', 'color': '#C49A30'},
         ],
         'desc': {
-            'title': 'Le Saint-Graphique — Marx × Bourdieu',
-            'x': "<b>Axe X — Position dans le rapport capital/travail (Marx)</b> : d'où vient le revenu de l'IRIS ? À droite : zones <em>exploiteuses</em> (bourgeoisie, rentiers). À gauche : zones <em>exploitées</em> (prolétariat). Variables : % ouvriers, % employés, taux pauvreté, % sans diplôme.",
-            'y': '<b>Axe Y — Domination sociale (Bourdieu)</b> : position dans la hiérarchie sociale totale (capital économique + culturel). En haut : dominants (riches, diplômés, cadres sup.). En bas : dominés.',
+            'title': 'Domination × Exploitation — Position de classe',
+            'x': "<b>Axe X — Position dans le rapport capital/travail</b> : d'où vient le revenu de l'IRIS ? À droite : zones <em>exploiteuses</em> — revenus patrimoniaux, bénéfices, employeurs, cadres supérieurs. À gauche : zones <em>exploitées</em> — salaires, ouvriers, employés, sans diplôme, pauvreté.",
+            'y': '<b>Axe Y — Domination sociale</b> : position dans la hiérarchie sociale totale combinant capital économique et culturel. En haut : dominants (revenus élevés, diplômés, cadres sup.). En bas : dominés (chômage, minimas sociaux, faibles revenus).',
             'quadrants': {
                 'tr': '<b>Reproduction du capital</b> — Zones exploiteuses ET dominantes : beaux quartiers, arrondissements bourgeois.',
                 'tl': "<b>Ascension sociale</b> — Zones exploitées mais dominantes : cadres salariés issus de milieux populaires.",
@@ -256,14 +599,14 @@ AXIS_PRESETS = [
             {'pos': 'br', 'text': 'RICHE<br>NON DIPLOME', 'color': '#C49A30'},
         ],
         'desc': {
-            'title': 'Espace bourdieusien — Capital culturel × Domination',
-            'x': '<b>Axe X — Capital culturel</b> : diplômes (BAC+5), % cadres sup. et professions intermédiaires. À droite : forte proportion de diplômés et cadres. À gauche : zones peu qualifiées.',
-            'y': '<b>Axe Y — Domination sociale</b> : hiérarchie totale combinant capital économique et culturel.',
+            'title': 'Espace bourdieusien — Capital économique × Capital culturel',
+            'x': "<b>Axe X — Capital économique</b> : revenu médian, patrimoine (DISP_PPAT21), bénéfices (DISP_PBEN21), pensions, propriétaires, taille des logements. À droite : zones aisées. À gauche : zones pauvres (taux de pauvreté, minimas sociaux, faibles revenus d'activité).",
+            'y': "<b>Axe Y — Capital culturel</b> : diplômes (BAC+5), % cadres supérieurs et professions intermédiaires, pratiques culturelles (vélo urbain). En haut : forte proportion de diplômés et cadres. En bas : zones peu qualifiées (sans diplôme, CAP-BEP, ouvriers).",
             'quadrants': {
-                'tl': '<b>Noblesse du capital</b> — Riches mais peu diplômés : héritiers, propriétaires fonciers.',
-                'tr': '<b>Élite intégrée</b> — Riches ET diplômés : grandes écoles, hauts fonctionnaires.',
-                'bl': '<b>Classe populaire</b> — Pauvres ET peu diplômés : prolétariat classique.',
-                'br': '<b>Intellectuels déclassés</b> — Diplômés mais peu riches : enseignants, chercheurs.',
+                'tl': '<b>Intellectuels déclassés</b> — Diplômés mais aux revenus modestes : enseignants, chercheurs, travailleurs du secteur public.',
+                'tr': '<b>Élite intégrée</b> — Riches ET diplômés : grandes écoles, professions libérales, hauts fonctionnaires.',
+                'bl': '<b>Classe populaire</b> — Faibles capitaux économique et culturel : zones ouvrières, quartiers populaires.',
+                'br': '<b>Bourgeoisie patrimoniale</b> — Aisés mais peu diplômés : artisans propriétaires, commerçants, rentiers.',
             }
         }
     },
@@ -285,7 +628,7 @@ AXIS_PRESETS = [
         'desc': {
             'title': 'Rente vs Travail × Domination sociale',
             'x': '<b>Axe X — Score rentier</b> : part du revenu tirée du capital (patrimoine, pensions, retraites) vs travail salarié. À droite : les rentiers. À gauche : les travailleurs.',
-            'y': '<b>Axe Y — Domination sociale</b> : même axe que le Saint-Graphique.',
+            'y': '<b>Axe Y — Domination sociale</b> : hiérarchie sociale totale combinant capital économique, culturel et position professionnelle. En haut : dominants (revenus élevés, diplômés, cadres sup.). En bas : dominés.',
             'quadrants': {
                 'tl': '<b>Intellectuels / Fonctionnaires</b> — Dominants mais non-rentiers : hauts fonctionnaires, médecins.',
                 'tr': '<b>Élite rentière</b> — Dominant ET rentier : vieille bourgeoisie, héritiers parisiens.',
@@ -323,85 +666,33 @@ AXIS_PRESETS = [
     },
     {
         'id': 'ruralite',
-        'label': 'Ruralité × Précarité',
+        'label': 'Territoire × Précarité',
         'emoji': '🌾',
-        'xVar': 'score_ruralite', 'xInvert': False,
+        'xVar': 'score_urbanite', 'xInvert': True,
         'yVar': 'score_precarite',
-        'xTitle': '← Urbain ─── Score ruralité ─── Rural →',
+        'xTitle': '← Urbain dense (transports, apparts) ─── Axe territorial ─── Rural / pavillonnaire (voiture, maison) →',
         'yTitle': '← Sécurisé ─── Score précarité ─── Précaire →',
         'xRange': [-55.0, 55.0], 'yRange': [-55.0, 55.0],
         'corners': [
             {'pos': 'bl', 'text': 'URBAIN<br>SÉCURISÉ', 'color': '#6B8FD4'},
-            {'pos': 'br', 'text': 'RURAL<br>SÉCURISÉ', 'color': '#059669'},
+            {'pos': 'br', 'text': 'RURAL/PAVILLONNAIRE<br>SÉCURISÉ', 'color': '#059669'},
             {'pos': 'tl', 'text': 'URBAIN<br>PRÉCAIRE', 'color': '#E87070'},
-            {'pos': 'tr', 'text': 'RURAL<br>PRÉCAIRE', 'color': '#C49A30'},
+            {'pos': 'tr', 'text': 'RURAL/PAVILLONNAIRE<br>PRÉCAIRE', 'color': '#C49A30'},
         ],
         'desc': {
-            'title': 'Ruralité × Précarité sociale',
-            'x': '<b>Axe X — Score ruralité</b> : profil agricole/retraité/voiture (droite = rural) vs tertiaire/diplômé/transports (gauche = urbain).',
+            'title': 'Territoire × Précarité sociale',
+            'x': '<b>Axe X — Score urbanité (inversé)</b> : fusion des anciens scores ruralité / urbanité / périphérie-métropole / France pavillonnaire. À droite : habitat pavillonnaire, voiture, maison, agriculteurs. À gauche : urbain dense, transports, appartements, services.',
             'y': '<b>Axe Y — Score précarité</b> : chômage, minimas sociaux, taux de pauvreté (haut = plus précaire).',
             'quadrants': {
-                'tl': '<b>Urbain sécurisé</b> — Quartiers denses avec emploi stable : centre-ville, cadres, fonctionnaires.',
-                'tr': '<b>Rural sécurisé</b> — Bourgs ruraux avec retraités et propriétaires fonciers aisés.',
-                'bl': '<b>Urbain précaire</b> — Banlieues populaires denses : chômage élevé, minimas sociaux.',
-                'br': '<b>Rural précaire</b> — Zones rurales défavorisées : désertification économique, faibles revenus.',
+                'tl': '<b>Urbain précaire</b> — Grands ensembles denses, chômage élevé, minimas sociaux.',
+                'tr': '<b>Rural/périurbain précaire</b> — Zones pavillonnaires ou rurales en difficulté économique.',
+                'bl': '<b>Urbain sécurisé</b> — Centre-ville dense, cadres, fonctionnaires, emploi stable.',
+                'br': '<b>Rural/périurbain sécurisé</b> — Pavillonnaire aisé, retraités propriétaires, bourgs ruraux stables.',
             }
         }
     },
-    {
-        'id': 'precarite_peripherie',
-        'label': 'Fractures territoriales',
-        'emoji': '🏘️',
-        'xVar': 'score_peripherie_metropole', 'xInvert': False,
-        'yVar': 'score_precarite',
-        'xTitle': '← Metropole (Macron/Jadot) ─── Peripherie-Metropole ─── Peripherie (Le Pen) →',
-        'yTitle': '← Aise ─── Precarite sociale ─── Precaire →',
-        'xRange': [-50, 50], 'yRange': [-50, 50],
-        'corners': [
-            {'pos': 'tl', 'text': 'BANLIEUE<br>POPULAIRE', 'color': '#DC2626'},
-            {'pos': 'tr', 'text': 'PERIPHERIE<br>PRECAIRE', 'color': '#374151'},
-            {'pos': 'bl', 'text': 'METROPOLE<br>AISEE', 'color': '#F59E0B'},
-            {'pos': 'br', 'text': 'PERIURBAIN<br>CONFORTABLE', 'color': '#3B82F6'},
-        ],
-        'desc': {
-            'title': 'Fractures territoriales — Precarite x Peripherie-Metropole',
-            'x': "<b>Axe X — Score peripherie-metropole</b> : construit a partir des variables qui separent le mieux les electorats Le Pen/Zemmour (peripherie) de ceux de Macron/Jadot (metropole). A droite : zones periurbaines (voiture, maison, CAP-BEP, fioul). A gauche : centres-villes connectes (BAC+5, cadres, velo, petits logements).",
-            'y': "<b>Axe Y — Score precarite</b> : composite chomage, minimas sociaux, taux de pauvrete vs revenu median et patrimoine. En haut : zones precaires. En bas : zones aisees.",
-            'quadrants': {
-                'tr': '<b>Peripherie precaire</b> — Zones rurales ou periurbaines en difficulte economique. Terre d\'election du RN.',
-                'tl': '<b>Banlieue populaire</b> — Grands ensembles et quartiers denses en difficulte. Fort vote LFI.',
-                'br': '<b>Periurbain confortable</b> — Lotissements pavillonnaires aises. Vote droite traditionnelle ou RN modere.',
-                'bl': '<b>Metropole aisee</b> — Centres-villes bourgeois et quartiers connectes. Vote Macron/EELV.',
-            }
-        }
-    },
-    {
-        'id': 'acp',
-        'label': 'ACP (PC1 x PC2)',
-        'emoji': '📊',
-        'xVar': 'score_pca_pc1_logement_confort', 'xInvert': False,
-        'yVar': 'score_pca_pc2_composition_diplomes',
-        'xTitle': '← Locatif dense ─── ACP PC1 : Logement & confort ─── Proprietaire pavillonnaire →',
-        'yTitle': '← Diplome aise ─── ACP PC2 : Composition sociale ─── Ouvrier precaire →',
-        'xRange': [-50, 50], 'yRange': [-50, 50],
-        'corners': [
-            {'pos': 'tl', 'text': 'HLM<br>PRECAIRE', 'color': '#DC2626'},
-            {'pos': 'tr', 'text': 'PAVILLONNAIRE<br>OUVRIER', 'color': '#374151'},
-            {'pos': 'bl', 'text': 'URBAIN<br>DIPLOME', 'color': '#F59E0B'},
-            {'pos': 'br', 'text': 'RESIDENTIEL<br>BOURGEOIS', 'color': '#3B82F6'},
-        ],
-        'desc': {
-            'title': 'Analyse en Composantes Principales — PC1 \u00d7 PC2',
-            'x': "<b>Axe X — ACP PC1 : Logement & confort</b> (1\u00e8re composante). L'ACP cherche les axes de plus grande variabilit\u00e9 sans utiliser l'information \u00e9lectorale. PC1 r\u00e9sume l'opposition entre habitat pavillonnaire et habitat collectif dense. <br><b>+</b> grands logements, garage, voiture, maison, propri\u00e9taires. <br><b>\u2212</b> appartements, locataires, immigr\u00e9s, transports, studios.",
-            'y': "<b>Axe Y — ACP PC2 : Composition sociale</b> (2\u00e8me composante, orthogonale \u00e0 PC1). S\u00e9pare zones ouvri\u00e8res pr\u00e9caires des zones de cadres dipl\u00f4m\u00e9s. <br><b>+</b> CAP-BEP, ch\u00f4mage, ouvriers, minimas sociaux, sans dipl\u00f4me. <br><b>\u2212</b> revenu m\u00e9dian, BAC+, cadres, BAC+5, revenus d'activit\u00e9.",
-            'quadrants': {
-                'tr': '<b>Pavillonnaire ouvrier</b> — Lotissements p\u00e9riurbains peu qualifi\u00e9s. Vote RN.',
-                'tl': '<b>HLM pr\u00e9caire</b> — Grands ensembles avec forte pr\u00e9carit\u00e9. Vote LFI.',
-                'br': '<b>R\u00e9sidentiel bourgeois</b> — Grandes propri\u00e9t\u00e9s, cadres sup\u00e9rieurs. Vote Macron.',
-                'bl': '<b>Urbain dipl\u00f4m\u00e9</b> — Centres-villes, jeunes actifs. \u00c9lectorat EELV/Macron.',
-            }
-        }
-    },
+    # precarite_peripherie supprimé — absorbé dans 'ruralite' (Territoire × Précarité)
+    # preset 'acp' supprimé — scores PCA approximatifs retirés
     {
         'id': 'tsne',
         'label': 't-SNE',
@@ -441,14 +732,11 @@ AXIS_PRESETS = [
 # Variables disponibles dans les dropdowns custom
 VARS_BY_CAT = {
     'Scores composites': [
+        # Scores principaux (make_score_grouped — valeurs canoniques)
         'score_exploitation', 'score_domination', 'score_cap_eco', 'score_cap_cult',
-        'score_precarite', 'score_rentier', 'score_ruralite',
+        'score_precarite', 'score_rentier', 'score_composition_capital',
         'score_urbanite', 'score_confort_residentiel', 'score_equipement_public',
-        'score_pca_pc1_logement_confort', 'score_pca_pc2_composition_diplomes',
-        'score_pca_pc3_equipements_demographie', 'score_pca_pc4_demographie_chauffage',
-        'score_pca_pc5_equipements_csp', 'score_pca_pc6_equipements_diplomes',
-        'score_pca_pc7_logement_csp', 'score_pca_pc8_equipements_logement',
-        'score_peripherie_metropole',
+        'score_dependance_carbone',
     ],
     'Reductions dimensionnelles': [
         'tsne_x', 'tsne_y', 'umap_x', 'umap_y',
@@ -924,6 +1212,83 @@ def make_score(pos_vars, neg_vars):
         return pd.Series(0.0, index=df.index)
     return pd.concat(parts, axis=1).mean(axis=1)
 
+def make_score_v2(pos_vars, neg_vars, corr_threshold=0.75, score_name=None):
+    """Score composite débiaisé par clustering de corrélation."""
+    pop = df['_pop']
+    all_vars  = [(v, +1) for v in pos_vars if v in df.columns]
+    all_vars += [(v, -1) for v in neg_vars if v in df.columns]
+    if not all_vars:
+        return pd.Series(0.0, index=df.index)
+    names = [v for v, _ in all_vars]
+    signs = [s for _, s in all_vars]
+    data = df[names].copy()
+    for col in names:
+        data[col] = data[col].fillna(data[col].median())
+    corr = data.corr().abs()
+    clusters = []
+    assigned = {}
+    for v in names:
+        placed = False
+        for c_idx, cluster in enumerate(clusters):
+            if all(corr.loc[v, u] >= corr_threshold for u in cluster):
+                cluster.append(v)
+                assigned[v] = c_idx
+                placed = True
+                break
+        if not placed:
+            clusters.append([v])
+            assigned[v] = len(clusters) - 1
+    cluster_sizes = {v: len(clusters[assigned[v]]) for v in names}
+    parts = []
+    for v, sign in zip(names, signs):
+        w = 1.0 / cluster_sizes[v]
+        parts.append(sign * w * _rang_pondere(df[v], pop))
+    total_weight = sum(1.0 / cluster_sizes[v] for v in names)
+    return pd.concat(parts, axis=1).sum(axis=1) / total_weight
+
+def _zscore_pondere(series, pop):
+    """Zscore pondéré par population (NaN remplacés par 0)."""
+    s = series.copy().astype(float)
+    p = pop.copy().astype(float)
+    valid = s.notna() & p.notna() & (p > 0)
+    if valid.sum() < 10:
+        return pd.Series(0.0, index=s.index)
+    s_v = s[valid]; p_v = p[valid]
+    w = p_v / p_v.sum()
+    w_mean = (s_v * w).sum()
+    w_std = np.sqrt(((s_v - w_mean) ** 2 * w).sum())
+    if w_std < 1e-10:
+        return pd.Series(0.0, index=s.index)
+    result = pd.Series(np.nan, index=s.index)
+    result[valid] = (s_v - w_mean) / w_std
+    return result.fillna(0.0)
+
+def make_score_grouped(groupes):
+    """Score grouped : zscore pondéré → agrégat groupe → rang centile (utilise df global)."""
+    pop = df['_pop']
+    rangs_groupes = []; poids_groupes = []
+    for groupe in groupes:
+        var_poids = groupe['vars']; poids_groupe = groupe['poids']
+        parts = []
+        total_poids = sum(abs(p) for p in var_poids.values())
+        if total_poids == 0:
+            continue
+        for var, poids in var_poids.items():
+            if var not in df.columns:
+                continue
+            z = _zscore_pondere(df[var], pop)
+            parts.append((poids / total_poids) * z)
+        if not parts:
+            continue
+        indice_groupe = pd.concat(parts, axis=1).sum(axis=1)
+        rangs_groupes.append(_rang_pondere(indice_groupe, pop))
+        poids_groupes.append(poids_groupe)
+    if not rangs_groupes:
+        return pd.Series(0.0, index=df.index)
+    total_poids_groupes = sum(poids_groupes)
+    score_final = sum(r * p for r, p in zip(rangs_groupes, poids_groupes))
+    return score_final / total_poids_groupes
+
 # ── 3b. VARIABLES DÉRIVÉES POUR LES NOUVEAUX AXES ────────────────────────────
 print("Calcul des variables dérivées...")
 _nscol = df['P21_NSCOL15P'].replace(0, np.nan)
@@ -947,9 +1312,26 @@ df['pct_actifs_velo']       = df['C21_ACTOCC15P_VELO'] / _actocc * 100
 df['pct_actifs_2roues']     = df['C21_ACTOCC15P_2ROUESMOT'] / _actocc * 100
 df['pct_actifs_marche']     = df['C21_ACTOCC15P_MAR'] / _actocc * 100
 
-print("Calcul des scores composites IRIS...")
+# Employeurs en proportion des actifs (utilisé par SCORES_CONFIG_GROUPED)
+_act1564 = df['P21_ACT1564'].replace(0, np.nan) if 'P21_ACT1564' in df.columns else None
+df['pct_employeurs'] = (
+    (df['P21_NSAL15P_EMPLOY'] / _act1564 * 100).clip(0, 100)
+    if _act1564 is not None else pd.Series(0.0, index=df.index)
+)
+
+print("Calcul des scores composites IRIS (v1)...")
 for score_name, cfg in SCORES_CONFIG.items():
     df[score_name] = make_score(cfg['pos_vars'], cfg['neg_vars'])
+    print(f"  {score_name}: min={df[score_name].min():.2f} max={df[score_name].max():.2f} mean={df[score_name].mean():.2f}")
+
+print("Calcul des scores v2 (débiaisés)...")
+for score_name, cfg in SCORES_CONFIG_V2.items():
+    df[score_name] = make_score_v2(cfg['pos_vars'], cfg['neg_vars'], score_name=score_name)
+    print(f"  {score_name}: min={df[score_name].min():.2f} max={df[score_name].max():.2f} mean={df[score_name].mean():.2f}")
+
+print("Calcul des scores grouped (zscore→rang centile)...")
+for score_name, groupes in SCORES_CONFIG_GROUPED.items():
+    df[score_name] = make_score_grouped(groupes)
     print(f"  {score_name}: min={df[score_name].min():.2f} max={df[score_name].max():.2f} mean={df[score_name].mean():.2f}")
 
 # ── 3c. VARIABLES ÉLECTORALES POUR AXES ──────────────────────────────────────

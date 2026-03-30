@@ -19,7 +19,26 @@
       "Bash(powershell -Command \"\\(Get-Item ''C:\\\\Users\\\\vadim\\\\Documents\\\\VSCodeProjects\\\\Polipy\\\\test\\\\analyse_scores.ipynb''\\).LastWriteTime\")",
       "Bash(powershell -Command \"\\(Get-Item ''C:\\\\Users\\\\vadim\\\\Documents\\\\VSCodeProjects\\\\Polipy\\\\test\\\\patch_notebook.py''\\).LastWriteTime; Get-Date\")",
       "Bash(powershell -Command \"& conda run -n vadim_env python test/patch_notebook.py\")",
-      "Bash(powershell -Command \"Remove-Item ''C:\\\\Users\\\\vadim\\\\Documents\\\\VSCodeProjects\\\\Polipy\\\\test\\\\patch_notebook.py''\")"
+      "Bash(powershell -Command \"Remove-Item ''C:\\\\Users\\\\vadim\\\\Documents\\\\VSCodeProjects\\\\Polipy\\\\test\\\\patch_notebook.py''\")",
+      "Bash(grep -A3 \"''id'': ''ruralite''\" rebuild_vizu_iris_mobile.py)",
+      "Bash(grep -A3 \"''id'': ''energie''\" rebuild_vizu_iris.py)",
+      "Bash(conda run:*)",
+      "Bash(/c/Users/vadim/miniconda3/Scripts/conda run:*)",
+      "Bash(where conda:*)",
+      "Read(//c/Users/vadim/**)",
+      "Bash(/c/Users/vadim/anaconda3/Scripts/conda run:*)",
+      "Bash(PYTHONIOENCODING=utf-8 /c/Users/vadim/anaconda3/Scripts/conda run -n vadim_env python rebuild_vizu_iris.py)",
+      "Bash(\"c:\\\\Users\\\\vadim\\\\Documents\\\\VSCodeProjects\\\\Polipy\\\\test\\\\pca_scores_diagnostics.ipynb\":*)",
+      "Bash(PYTHONIOENCODING=utf-8 /c/Users/vadim/anaconda3/Scripts/conda run -n vadim_env python _gen_notebook.py)",
+      "Bash(PYTHONIOENCODING=utf-8 /c/Users/vadim/anaconda3/Scripts/conda run -n vadim_env jupyter nbconvert --to notebook --execute --inplace pca_scores_diagnostics.ipynb)",
+      "Bash(PYTHONIOENCODING=utf-8 /c/Users/vadim/anaconda3/Scripts/conda run -n vadim_env jupyter kernelspec list)",
+      "Bash(PYTHONIOENCODING=utf-8 /c/Users/vadim/anaconda3/Scripts/conda run -n vadim_env jupyter nbconvert --to notebook --execute --inplace --ExecutePreprocessor.kernel_name=python3 pca_scores_diagnostics.ipynb)",
+      "Bash(PYTHONIOENCODING=utf-8 /c/Users/vadim/anaconda3/Scripts/conda run -n vadim_env jupyter nbconvert --to notebook --execute --inplace --ExecutePreprocessor.kernel_name=python3 --ExecutePreprocessor.timeout=300 pca_scores_diagnostics.ipynb)",
+      "Bash(ls -la \"c:\\\\Users\\\\vadim\\\\Documents\\\\VSCodeProjects\\\\Polipy\\\\test/\"pca_*)",
+      "Bash(ls -lh /c/Users/vadim/Documents/VSCodeProjects/Polipy/iris/*socio*)",
+      "Bash(grep -r score_domination /c/Users/vadim/Documents/VSCodeProjects/Polipy/test/ --include=*.py)",
+      "Bash(grep -n \"def.*csp\\\\|pct_csp_plus\\\\s*=\" /c/Users/vadim/Documents/VSCodeProjects/Polipy/*.py)",
+      "Bash(\"$USERPROFILE/miniconda3/Scripts/conda.exe\" run:*)"
     ]
   }
 }

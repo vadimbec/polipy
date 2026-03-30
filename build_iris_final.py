@@ -298,6 +298,134 @@ def make_score(df, pos_vars, neg_vars, pop_col='pop_totale'):
     return pd.concat(parts, axis=1).mean(axis=1)
 
 
+def make_score_v2(df, pos_vars, neg_vars, pop_col='pop_totale',
+                  corr_threshold=0.75, score_name=None, verbose=True):
+    """
+    Score composite par rang centile pondéré par population (version débiaisée).
+    Les variables fortement corrélées (> corr_threshold) sont regroupées
+    en clusters (liaison complète) ; chaque variable reçoit un poids
+    1/taille_cluster pour éviter de surpondérer les dimensions redondantes.
+    """
+    all_vars  = [(v, +1) for v in pos_vars if v in df.columns]
+    all_vars += [(v, -1) for v in neg_vars if v in df.columns]
+    if not all_vars:
+        return pd.Series(0.0, index=df.index)
+
+    names = [v for v, _ in all_vars]
+    signs = [s for _, s in all_vars]
+    pop   = df[pop_col]
+
+    # Matrice de corrélation (imputation médiane locale)
+    data = df[names].copy()
+    for col in names:
+        data[col] = data[col].fillna(data[col].median())
+    corr = data.corr().abs()
+
+    # Clustering greedy (liaison complète intra-cluster)
+    clusters: list = []
+    assigned: dict = {}
+    for v in names:
+        placed = False
+        for c_idx, cluster in enumerate(clusters):
+            if all(corr.loc[v, u] >= corr_threshold for u in cluster):
+                cluster.append(v)
+                assigned[v] = c_idx
+                placed = True
+                break
+        if not placed:
+            clusters.append([v])
+            assigned[v] = len(clusters) - 1
+
+    cluster_sizes = {v: len(clusters[assigned[v]]) for v in names}
+
+    if verbose and score_name:
+        cluster_members = {}
+        for v, c_idx in assigned.items():
+            cluster_members.setdefault(c_idx, []).append(v)
+        for c_idx, members in cluster_members.items():
+            if len(members) > 1:
+                print(f"  [{score_name}] cluster {c_idx}: {members} (poids 1/{len(members)} chacune)")
+
+    parts = []
+    for v, sign in zip(names, signs):
+        w = 1.0 / cluster_sizes[v]
+        parts.append(sign * w * _rang_pondere(df[v], pop))
+
+    total_weight = sum(1.0 / cluster_sizes[v] for v in names)
+    return pd.concat(parts, axis=1).sum(axis=1) / total_weight
+
+
+def _zscore_pondere(series, pop):
+    """
+    Zscore pondéré par population.
+    Chaque valeur est centrée/réduite par rapport à la moyenne et l'écart-type
+    pondérés par la population de chaque IRIS. NaN remplacés par 0.
+    """
+    s = series.copy().astype(float)
+    p = pop.copy().astype(float)
+    valid = s.notna() & p.notna() & (p > 0)
+    if valid.sum() < 10:
+        return pd.Series(0.0, index=s.index)
+    s_v = s[valid]
+    p_v = p[valid]
+    w = p_v / p_v.sum()
+    w_mean = (s_v * w).sum()
+    w_std = np.sqrt(((s_v - w_mean) ** 2 * w).sum())
+    if w_std < 1e-10:
+        return pd.Series(0.0, index=s.index)
+    result = pd.Series(np.nan, index=s.index)
+    result[valid] = (s_v - w_mean) / w_std
+    return result.fillna(0.0)
+
+
+def make_score_grouped(df, groupes, pop_col='pop_totale'):
+    """
+    Score composite en trois étapes :
+      1. Pour chaque groupe : zscore pondéré population de chaque variable,
+         puis somme pondérée par les poids théoriques → indice composite du groupe
+      2. Rang centile pondéré population de chaque indice composite de groupe
+      3. Moyenne pondérée des rangs centiles des groupes (poids entre groupes)
+
+    Paramètre `groupes` : liste de dicts, chacun avec :
+      - 'vars'   : dict {nom_variable: poids_signé}  (poids théoriques)
+      - 'poids'  : float  (poids de ce groupe dans le score final)
+
+    Range résultant : ~ [-50, +50], identique à l'ancienne implémentation.
+    """
+    pop = df[pop_col]
+    rangs_groupes = []
+    poids_groupes = []
+
+    for groupe in groupes:
+        var_poids = groupe['vars']
+        poids_groupe = groupe['poids']
+
+        parts = []
+        total_poids = sum(abs(p) for p in var_poids.values())
+        if total_poids == 0:
+            continue
+        for var, poids in var_poids.items():
+            if var not in df.columns:
+                continue
+            z = _zscore_pondere(df[var], pop)
+            parts.append((poids / total_poids) * z)
+
+        if not parts:
+            continue
+
+        indice_groupe = pd.concat(parts, axis=1).sum(axis=1)
+        rang_groupe = _rang_pondere(indice_groupe, pop)
+        rangs_groupes.append(rang_groupe)
+        poids_groupes.append(poids_groupe)
+
+    if not rangs_groupes:
+        return pd.Series(0.0, index=df.index)
+
+    total_poids_groupes = sum(poids_groupes)
+    score_final = sum(r * p for r, p in zip(rangs_groupes, poids_groupes))
+    return score_final / total_poids_groupes
+
+
 # Configuration de tous les scores composites
 SCORES_CONFIG = {
     # ── Scores sociologiques existants ──
@@ -381,6 +509,669 @@ SCORES_CONFIG = {
     },
 }
 
+# ── Nouveaux scores v2 (débiaisés par clustering de corrélation) ──────────────
+SCORES_CONFIG_V2 = {
+    # Axe X Saint-Graphique v2 : composition du revenu (capital vs travail)
+    'score_composition_capital': {
+        'pos_vars': ['DISP_PPAT21', 'DISP_PBEN21', 'P21_NSAL15P_EMPLOY', 'pct_proprietaires', 'pct_logements_anciens'],
+        'neg_vars': ['DISP_PTSA21', 'pct_csp_ouvrier', 'pct_csp_employe', 'pct_cdi'],
+    },
+    # Axe Y partagé Saint-Graphique v2 + Bourdieu v2 : position sociale totale
+    'score_domination_v2': {
+        'pos_vars': ['DISP_MED21', 'DISP_PPAT21', 'pct_proprietaires', 'pct_sup5', 'pct_bac_plus', 'pct_csp_plus', 'pct_csp_intermediaire', 'pct_cdi'],
+        'neg_vars': ['DISP_TP6021', 'pct_sans_diplome', 'pct_capbep', 'pct_csp_ouvrier', 'pct_csp_sans_emploi', 'pct_chomage', 'DISP_PPMINI21'],
+    },
+    # Axe X Bourdieu v2 : capital économique pur (sans diplôme/CSP)
+    'score_cap_eco_v2': {
+        'pos_vars': ['DISP_MED21', 'DISP_PPAT21', 'pct_proprietaires', 'surface_moyenne', 'pct_grands_logements'],
+        'neg_vars': ['DISP_TP6021', 'DISP_PPMINI21', 'pct_hlm', 'pct_suroccupation'],
+    },
+    # Axe Y Bourdieu v2 : capital culturel/scolaire (sans revenus)
+    'score_cap_cult_v2': {
+        'pos_vars': ['pct_sup5', 'pct_bac_plus', 'pct_csp_intermediaire', 'pct_actifs_velo', 'bpe_ecole_privee_pour1000', 'bpe_sport_indoor_pour1000'],
+        'neg_vars': ['pct_sans_diplome', 'pct_capbep', 'pct_csp_independant', 'pct_csp_agriculteur', 'pct_actifs_voiture'],
+    },
+    # Ratio capital/travail pur (v2)
+    'score_rentier_v2': {
+        'pos_vars': ['DISP_PPAT21', 'DISP_PBEN21', 'pct_proprietaires'],
+        'neg_vars': ['DISP_PTSA21', 'pct_cdd', 'pct_interim'],
+    },
+    # Ruralité v2 (sans pct_immigres)
+    'score_ruralite_v2': {
+        'pos_vars': ['pct_csp_agriculteur', 'pct_sans_diplome', 'pct_actifs_voiture', 'P21_ACTOCC15P_ILT3'],
+        'neg_vars': ['pct_actifs_velo', 'pct_actifs_transports', 'pct_actifs_marche', 'pct_etudiants', 'P21_ACTOCC15P_ILT1', 'bpe_total_pour1000'],
+    },
+    # Zone de tension péri-urbaine (nouveau)
+    'score_periurbain': {
+        'pos_vars': ['pct_maison', 'pct_actifs_voiture', 'pct_voiture_2plus', 'P21_ACTOCC15P_ILT3', 'pct_chauffage_fioul', 'pct_hlm'],
+        'neg_vars': ['bpe_E_transports_pour1000', 'pct_actifs_transports', 'pct_appart', 'bpe_total_pour1000'],
+    },
+    # France pavillonnaire — renommé depuis score_peripherie_metropole (nouveau nom, variables inchangées)
+    'score_france_pavillonnaire': {
+        'pos_vars': ['pct_capbep', 'pct_actifs_voiture', 'pct_maison', 'pct_voiture_2plus', 'nb_pieces_moyen', 'pct_chauffage_fioul'],
+        'neg_vars': ['pct_bac_plus', 'pct_sup5', 'pct_csp_plus', 'DISP_GI21', 'DISP_PACT21', 'DISP_RD21', 'pct_actifs_velo', 'DISP_PTSA21', 'pct_studios', 'pct_petits_logements'],
+    },
+}
+
+# ── Scores grouped (nouvelle architecture : zscore→agrégation→rang centile par groupe) ──
+# Format : liste de groupes {'vars': {var: poids_signé}, 'poids': float}
+# La boucle grouped tourne en dernier dans compute_scores(), donc ces valeurs
+# écrasent celles de SCORES_CONFIG et SCORES_CONFIG_V2 pour les noms communs.
+SCORES_CONFIG_GROUPED = {
+
+    # ── score_domination ─────────────────────────────────────────────────────────
+    'score_domination': [
+        {
+            'poids': 1.0,
+            'vars': {
+                'pct_csp_plus':          +1.0,
+                'pct_csp_intermediaire': +0.6,
+                'pct_csp_independant':   +0.4,
+                'pct_employeurs':        +0.5,
+                'pct_cdi':               +0.3,
+                'pct_csp_ouvrier':       -0.8,
+                'pct_csp_employe':       -0.5,
+                'pct_csp_sans_emploi':   -1.0,
+                'pct_chomage':           -0.5,
+                'pct_interim':           -0.4,
+                'pct_cdd':               -0.3,
+                'pct_temps_partiel':     -0.3,
+            }
+        }
+    ],
+
+    # ── score_composition_capital ─────────────────────────────────────────────────
+    'score_composition_capital': [
+        {
+            'poids': 0.65,
+            'vars': {
+                'DISP_PPAT21':  +1.0,
+                'DISP_PBEN21':  +0.8,
+                'DISP_PTSA21':  -1.0,
+                'DISP_PCHO21':  -0.3,
+            }
+        },
+        {
+            'poids': 0.35,
+            'vars': {
+                'pct_proprietaires':  +0.8,
+                'pct_employeurs':     +0.5,
+                'pct_csp_ouvrier':    -0.6,
+                'pct_csp_employe':    -0.4,
+                'pct_cdi':            -0.4,
+                'pct_cdd':            -0.3,
+                'pct_temps_partiel':  -0.2,
+            }
+        }
+    ],
+
+    # ── score_cap_eco ─────────────────────────────────────────────────────────────
+    'score_cap_eco': [
+        {
+            'poids': 0.7,
+            'vars': {
+                'DISP_MED21':    +1.0,
+                'DISP_PPAT21':   +0.8,
+                'DISP_PBEN21':   +0.5,
+                'DISP_TP6021':   -1.0,
+                'DISP_PPMINI21': -0.7,
+            }
+        },
+        {
+            'poids': 0.3,
+            'vars': {
+                'pct_proprietaires':  +0.8,
+                'pct_hlm':            -0.8,
+                'pct_suroccupation':  -0.5,
+            }
+        }
+    ],
+
+    # ── score_cap_cult ────────────────────────────────────────────────────────────
+    'score_cap_cult': [
+        {
+            'poids': 0.8,
+            'vars': {
+                'pct_sup5':              +1.0,
+                'pct_bac_plus':          +0.6,
+                'pct_csp_intermediaire': +0.5,
+                'pct_actifs_velo':       +0.3,
+                'pct_sans_diplome':      -1.0,
+                'pct_capbep':            -0.6,
+                'pct_csp_independant':   -0.3,
+                'pct_csp_agriculteur':   -0.3,
+            }
+        },
+        {
+            'poids': 0.2,
+            'vars': {
+                'bpe_ecole_privee_pour1000':  +0.8,
+                'bpe_sport_indoor_pour1000':  +0.4,
+            }
+        }
+    ],
+
+    # ── score_precarite ───────────────────────────────────────────────────────────
+    'score_precarite': [
+        {
+            'poids': 0.6,
+            'vars': {
+                'DISP_TP6021':   +1.0,
+                'DISP_PPMINI21': +0.8,
+                'DISP_PPSOC21':  +0.5,
+                'DISP_PPLOGT21': +0.4,
+                'DISP_MED21':    -1.0,
+            }
+        },
+        {
+            'poids': 0.4,
+            'vars': {
+                'pct_csp_sans_emploi': +0.8,
+                'pct_chomage':         +0.7,
+                'pct_interim':         +0.5,
+                'pct_cdd':             +0.4,
+                'pct_temps_partiel':   +0.3,
+                'pct_hlm':             +0.4,
+                'pct_suroccupation':   +0.5,
+            }
+        }
+    ],
+
+    # ── score_rentier ─────────────────────────────────────────────────────────────
+    'score_rentier': [
+        {
+            'poids': 1.0,
+            'vars': {
+                'DISP_PPAT21':  +1.0,
+                'DISP_PBEN21':  +0.7,
+                'DISP_PPEN21':  +0.5,
+                'DISP_PTSA21':  -1.0,
+                'DISP_PACT21':  -0.6,
+            }
+        }
+    ],
+
+    # score_ruralite retiré de grouped (valeur v1 conservée) — absorbé par score_urbanite
+
+    # ── score_urbanite (amélioré, absorbe ruralité/périphérie) ───────────────────
+    'score_urbanite': [
+        {
+            'poids': 0.6,
+            'vars': {
+                'pct_appart':            +1.0,
+                'pct_voiture_0':         +0.9,
+                'pct_actifs_transports': +0.8,
+                'pct_locataires':        +0.7,
+                'pct_petits_logements':  +0.6,
+                'pct_actifs_velo':       +0.5,
+                'pct_actifs_marche':     +0.4,
+                'pct_maison':            -1.0,
+                'pct_voiture_2plus':     -0.9,
+                'pct_garage':            -0.7,
+                'surface_moyenne':       -0.6,
+                'pct_chauffage_fioul':   -0.4,
+                'pct_csp_agriculteur':   -0.7,
+                'P21_ACTOCC15P_ILT3':   -0.5,
+            }
+        },
+        {
+            'poids': 0.4,
+            'vars': {
+                'bpe_E_transports_pour1000': +0.9,
+                'bpe_total_pour1000':        +0.7,
+                'P21_ACTOCC15P_ILT1':        +0.5,
+                'bpe_B_commerces_pour1000':  +0.4,
+            }
+        }
+    ],
+
+    # ── score_confort_residentiel ─────────────────────────────────────────────────
+    'score_confort_residentiel': [
+        {
+            'poids': 1.0,
+            'vars': {
+                'pct_proprietaires':     +0.7,
+                'pct_grands_logements':  +0.8,
+                'surface_moyenne':       +0.7,
+                'nb_pieces_moyen':       +0.6,
+                'pct_garage':            +0.5,
+                'pct_logements_5p_plus': +0.5,
+                'pct_suroccupation':     -1.0,
+                'pct_hlm':               -0.7,
+                'pct_petits_logements':  -0.6,
+                'pct_studios':           -0.5,
+                'pct_logvac':            -0.3,
+            }
+        }
+    ],
+
+    # ── score_equipement_public ───────────────────────────────────────────────────
+    'score_equipement_public': [
+        {
+            'poids': 1.0,
+            'vars': {
+                'bpe_D_sante_pour1000':          +1.0,
+                'bpe_C_enseignement_pour1000':   +0.8,
+                'bpe_A_services_pour1000':        +0.7,
+                'bpe_E_transports_pour1000':      +0.7,
+                'bpe_F_sports_culture_pour1000':  +0.6,
+                'bpe_B_commerces_pour1000':       +0.5,
+                'bpe_educ_prioritaire_pour1000':  +0.4,
+            }
+        }
+    ],
+
+    # score_france_pavillonnaire retiré de grouped (valeur v2 conservée) — absorbé par score_urbanite
+
+    # ── Migration v1 → grouped ──────────────────────────────────────────────────
+
+    'score_exploitation': [
+        {
+            'poids': 0.65,
+            'vars': {
+                'DISP_PPAT21':   +1.2,
+                'DISP_PBEN21':   +1.0,
+                'DISP_PPEN21':   +0.6,
+                'DISP_MED21':    +0.5,
+                'DISP_TP6021':   -1.0,
+                'DISP_PTSA21':   -0.7,
+                'DISP_PPLOGT21': -0.5,
+            }
+        },
+        {
+            'poids': 0.35,
+            'vars': {
+                'pct_csp_plus':       +0.8,
+                'pct_csp_retraite':   +0.5,
+                'P21_NSAL15P_EMPLOY': +0.7,
+                'P21_NSAL15P_AIDFAM': -0.6,
+            }
+        }
+    ],
+
+    # ── Scores ACP — conversion grouped des approximations v1 PC1–PC8 ──────────
+
+    'score_pca_pc1_logement_confort': [
+        {
+            'poids': 1.0,
+            'vars': {
+                'pct_grands_logements':  +1.0,
+                'pct_garage':            +0.9,
+                'pct_actifs_voiture':    +0.8,
+                'pct_logements_5p_plus': +0.8,
+                'nb_pieces_moyen':       +0.8,
+                'pct_voiture_2plus':     +0.9,
+                'pct_proprietaires':     +0.7,
+                'pct_maison':            +0.9,
+                'surface_moyenne':       +0.8,
+                'pct_appart':            -1.0,
+                'pct_locataires':        -0.8,
+                'pct_voiture_0':         -0.9,
+                'pct_immigres':          -0.5,
+                'pct_petits_logements':  -0.8,
+                'pct_actifs_transports': -0.7,
+                'pct_etrangers':         -0.4,
+                'pct_studios':           -0.7,
+            }
+        }
+    ],
+
+    'score_pca_pc2_composition_diplomes': [
+        {
+            'poids': 1.0,
+            'vars': {
+                'pct_capbep':       +0.8,
+                'pct_interim':      +0.8,
+                'pct_chomage':      +0.9,
+                'pct_csp_ouvrier':  +0.9,
+                'DISP_TP6021':      +1.0,
+                'DISP_PPLOGT21':    +0.7,
+                'DISP_PPMINI21':    +0.8,
+                'DISP_PPFAM21':     +0.6,
+                'DISP_PPSOC21':     +0.7,
+                'pct_sans_diplome': +0.8,
+                'DISP_PIMPOT21':    -0.6,
+                'DISP_MED21':       -1.0,
+                'pct_bac_plus':     -0.8,
+                'pct_csp_plus':     -0.8,
+                'pct_sup5':         -0.9,
+                'DISP_PACT21':      -0.7,
+                'DISP_PTSA21':      -0.7,
+            }
+        }
+    ],
+
+    'score_pca_pc3_equipements_demographie': [
+        {
+            'poids': 1.0,
+            'vars': {
+                'pct_csp_intermediaire':    +0.7,
+                'DISP_PACT21':              +0.8,
+                'DISP_PTSA21':              +0.7,
+                'pct_0_19':                 +0.6,
+                'pct_65_plus':              -1.0,
+                'age_moyen':                -0.9,
+                'DISP_PPEN21':              -0.7,
+                'bpe_total_pour1000':       -0.8,
+                'pct_csp_retraite':         -0.8,
+                'bpe_B_commerces_pour1000': -0.6,
+                'bpe_G_tourisme_pour1000':  -0.5,
+                'bpe_D_sante_pour1000':     -0.5,
+                'pct_actifs_marche':        -0.4,
+                'bpe_A_services_pour1000':  -0.5,
+            }
+        }
+    ],
+
+    'score_pca_pc4_demographie_chauffage': [
+        {
+            'poids': 1.0,
+            'vars': {
+                'age_moyen':                   +0.8,
+                'pct_csp_retraite':            +0.8,
+                'pct_65_plus':                 +0.9,
+                'DISP_PPEN21':                 +0.6,
+                'pct_chauffage_gaz_ville':     +0.5,
+                'pct_femmes':                  +0.4,
+                'pct_logements_anciens':       -0.7,
+                'bpe_A_services_pour1000':     -0.5,
+                'pct_20_64':                   -0.8,
+                'pct_chauffage_autre':         -0.4,
+                'pct_chauffage_gaz_bouteille': -0.4,
+                'pct_csp_agriculteur':         -0.5,
+                'bpe_total_pour1000':          -0.6,
+                'bpe_F_sports_culture_pour1000': -0.5,
+                'pct_chauffage_fioul':         -0.5,
+            }
+        }
+    ],
+
+    'score_pca_pc5_equipements_csp': [
+        {
+            'poids': 1.0,
+            'vars': {
+                'pct_grands_logements':    +0.6,
+                'pct_csp_sans_emploi':     +0.7,
+                'DISP_S80S2021':           +0.6,
+                'pct_temps_partiel':       +0.5,
+                'pct_inactif':             +0.5,
+                'pct_etudiants':           +0.5,
+                'bpe_total_pour1000':      -0.9,
+                'bpe_A_services_pour1000': -0.7,
+                'bpe_B_commerces_pour1000': -0.6,
+                'pct_csp_employe':         -0.5,
+                'bpe_D_sante_pour1000':    -0.6,
+                'pct_chauffage_elec':      -0.4,
+                'pct_logements_recents':   -0.5,
+                'pct_csp_intermediaire':   -0.6,
+            }
+        }
+    ],
+
+    'score_pca_pc6_equipements_diplomes': [
+        {
+            'poids': 1.0,
+            'vars': {
+                'pct_inactif':                 +0.5,
+                'bpe_sport_indoor_pour1000':   +0.7,
+                'bpe_ecole_privee_pour1000':   +0.7,
+                'bpe_C_enseignement_pour1000': +0.6,
+                'pct_hors_menage':             +0.5,
+                'pct_etudiants':               +0.5,
+                'bpe_E_transports_pour1000':   -0.7,
+                'pct_immigres':                -0.5,
+                'pct_etrangers':               -0.4,
+                'pct_cdi':                     -0.5,
+                'pct_actifs_transports':       -0.6,
+                'pct_actifs_2roues':           -0.4,
+                'pct_csp_independant':         -0.5,
+                'DISP_S80S2021':               -0.5,
+            }
+        }
+    ],
+
+    'score_pca_pc7_logement_csp': [
+        {
+            'poids': 1.0,
+            'vars': {
+                'DISP_S80S2021':           +0.7,
+                'pct_logements_recents':   +0.7,
+                'DISP_GI21':               +0.6,
+                'bpe_A_services_pour1000': +0.5,
+                'bpe_total_pour1000':      +0.5,
+                'pct_csp_sans_emploi':     +0.5,
+                'pct_inactif':             +0.4,
+                'pct_csp_independant':     +0.4,
+                'pct_0_19':                +0.4,
+                'DISP_PPAT21':             +0.5,
+                'pct_logvac':              -0.5,
+                'pct_logements_anciens':   -0.7,
+                'pct_csp_agriculteur':     -0.4,
+                'pct_20_64':               -0.5,
+                'pct_actifs_velo':         -0.4,
+            }
+        }
+    ],
+
+    'score_pca_pc8_equipements_logement': [
+        {
+            'poids': 1.0,
+            'vars': {
+                'pct_cdd':                       +0.5,
+                'pct_logements_recents':         +0.6,
+                'pct_chauffage_elec':            +0.5,
+                'bpe_sport_indoor_pour1000':     -0.8,
+                'bpe_C_enseignement_pour1000':   -0.7,
+                'bpe_ecole_privee_pour1000':     -0.7,
+                'pct_chauffage_gaz_ville':       -0.6,
+                'bpe_F_sports_culture_pour1000': -0.6,
+                'pct_logvac':                    -0.5,
+                'bpe_total_pour1000':            -0.7,
+                'bpe_D_sante_pour1000':          -0.6,
+            }
+        }
+    ],
+
+    # ── Migration v2 → grouped ──────────────────────────────────────────────────
+
+    'score_domination_v2': [
+        {
+            'poids': 0.5,
+            'vars': {
+                'DISP_MED21':        +1.0,
+                'DISP_PPAT21':       +0.8,
+                'pct_proprietaires': +0.5,
+                'DISP_TP6021':       -1.0,
+                'DISP_PPMINI21':     -0.8,
+            }
+        },
+        {
+            'poids': 0.5,
+            'vars': {
+                'pct_sup5':              +1.0,
+                'pct_bac_plus':          +0.7,
+                'pct_csp_plus':          +0.8,
+                'pct_csp_intermediaire': +0.6,
+                'pct_cdi':               +0.4,
+                'pct_sans_diplome':      -1.0,
+                'pct_capbep':            -0.7,
+                'pct_csp_ouvrier':       -0.8,
+                'pct_csp_sans_emploi':   -0.7,
+                'pct_chomage':           -0.6,
+            }
+        }
+    ],
+
+    'score_cap_eco_v2': [
+        {
+            'poids': 0.65,
+            'vars': {
+                'DISP_MED21':    +1.0,
+                'DISP_PPAT21':   +0.8,
+                'DISP_TP6021':   -1.0,
+                'DISP_PPMINI21': -0.8,
+            }
+        },
+        {
+            'poids': 0.35,
+            'vars': {
+                'pct_proprietaires':    +0.8,
+                'surface_moyenne':      +0.7,
+                'pct_grands_logements': +0.6,
+                'pct_hlm':              -0.9,
+                'pct_suroccupation':    -0.6,
+            }
+        }
+    ],
+
+    'score_cap_cult_v2': [
+        {
+            'poids': 0.75,
+            'vars': {
+                'pct_sup5':              +1.0,
+                'pct_bac_plus':          +0.7,
+                'pct_csp_intermediaire': +0.5,
+                'pct_actifs_velo':       +0.4,
+                'pct_sans_diplome':      -1.0,
+                'pct_capbep':            -0.7,
+                'pct_csp_independant':   -0.4,
+                'pct_csp_agriculteur':   -0.3,
+                'pct_actifs_voiture':    -0.5,
+            }
+        },
+        {
+            'poids': 0.25,
+            'vars': {
+                'bpe_ecole_privee_pour1000': +0.8,
+                'bpe_sport_indoor_pour1000': +0.5,
+            }
+        }
+    ],
+
+    'score_rentier_v2': [
+        {
+            'poids': 1.0,
+            'vars': {
+                'DISP_PPAT21':       +1.0,
+                'DISP_PBEN21':       +0.8,
+                'pct_proprietaires': +0.6,
+                'DISP_PTSA21':       -1.0,
+                'pct_cdd':           -0.5,
+                'pct_interim':       -0.6,
+            }
+        }
+    ],
+
+    # ── Transition énergétique ───────────────────────────────────────────────────
+
+    'score_dependance_carbone': [
+        {
+            'poids': 0.55,
+            'vars': {
+                'pct_actifs_voiture':    +1.0,
+                'pct_voiture_2plus':     +0.8,
+                'pct_actifs_transports': -0.9,
+                'pct_actifs_velo':       -0.7,
+                'pct_actifs_marche':     -0.5,
+            }
+        },
+        {
+            'poids': 0.45,
+            'vars': {
+                'pct_chauffage_fioul':         +1.0,
+                'pct_chauffage_gaz_bouteille': +0.6,
+                'pct_logements_recents':       -0.6,
+                'pct_chauffage_elec':          -0.5,
+            }
+        }
+    ],
+}
+
+# ── Variables pour la vraie ACP pondérée ──────────────────────────────────────
+EMBEDDING_VARS_PCA = [
+    'pct_etrangers', 'pct_immigres', 'age_moyen', 'pct_femmes',
+    'taille_menage_moy', 'pct_hors_menage', 'ecart_csp_plus_hf',
+    'pct_0_19', 'pct_20_64', 'pct_65_plus',
+    'pct_csp_agriculteur', 'pct_csp_independant', 'pct_csp_plus',
+    'pct_csp_intermediaire', 'pct_csp_employe', 'pct_csp_ouvrier',
+    'pct_csp_retraite', 'pct_csp_sans_emploi',
+    'DISP_MED21', 'DISP_TP6021', 'DISP_GI21', 'DISP_RD21', 'DISP_S80S2021',
+    'DISP_PTSA21', 'DISP_PPAT21', 'DISP_PPEN21', 'DISP_PPSOC21',
+    'DISP_PCHO21', 'DISP_PPFAM21', 'DISP_PPLOGT21', 'DISP_PPMINI21',
+    'DISP_PIMPOT21', 'DISP_PACT21',
+    'pct_sup5', 'pct_sans_diplome', 'pct_capbep', 'pct_bac_plus',
+    'pct_chomage', 'pct_cdi', 'pct_cdd', 'pct_interim',
+    'pct_temps_partiel', 'pct_inactif', 'pct_etudiants',
+    'pct_actifs_voiture', 'pct_actifs_transports', 'pct_actifs_velo',
+    'pct_actifs_2roues', 'pct_actifs_marche',
+    'pct_proprietaires', 'pct_locataires', 'pct_hlm', 'pct_logvac',
+    'pct_maison', 'pct_appart', 'pct_petits_logements', 'pct_grands_logements',
+    'pct_logements_anciens', 'pct_logements_recents',
+    'pct_voiture_0', 'pct_voiture_2plus', 'surface_moyenne', 'pct_suroccupation',
+    'pct_chauffage_elec', 'pct_chauffage_fioul', 'pct_chauffage_gaz_ville',
+    'pct_chauffage_gaz_bouteille', 'pct_chauffage_autre',
+    'pct_garage', 'nb_pieces_moyen', 'pct_studios', 'pct_logements_5p_plus',
+    'bpe_total_pour1000', 'bpe_A_services_pour1000', 'bpe_B_commerces_pour1000',
+    'bpe_C_enseignement_pour1000', 'bpe_D_sante_pour1000',
+    'bpe_E_transports_pour1000', 'bpe_F_sports_culture_pour1000',
+    'bpe_G_tourisme_pour1000', 'bpe_educ_prioritaire_pour1000',
+    'bpe_ecole_privee_pour1000', 'bpe_sport_indoor_pour1000',
+    'pct_sport_accessible',
+]
+
+
+def compute_pca_scores(df, n_components=8, pop_col='pop_totale'):
+    """
+    Calcule les vraies composantes ACP pondérées par population.
+    Produit les colonnes score_pca_1 .. score_pca_8 (rang centile pondéré, plage -50..+50).
+    """
+    var_names = [v for v in EMBEDDING_VARS_PCA if v in df.columns]
+    print(f"\n  ACP vraie : {len(var_names)} variables disponibles sur {len(EMBEDDING_VARS_PCA)}")
+
+    pop = df[pop_col].values.astype(float)
+    pop = np.where(np.isfinite(pop) & (pop > 0), pop, 1.0)
+
+    X = df[var_names].values.astype(float)
+    for j in range(X.shape[1]):
+        col = X[:, j]
+        nans = ~np.isfinite(col)
+        if nans.any():
+            valid = np.isfinite(col)
+            col[nans] = np.median(col[valid]) if valid.sum() > 0 else 0.0
+
+    w_norm = pop / pop.sum()
+    w_means = (X * w_norm[:, None]).sum(axis=0)
+    X_c = X - w_means
+    w_stds = np.sqrt((X_c ** 2 * w_norm[:, None]).sum(axis=0))
+    w_stds[w_stds < 1e-10] = 1e-10
+    X_std = X_c / w_stds
+
+    C = (X_std * w_norm[:, None]).T @ X_std
+    eigenvalues, eigenvectors = np.linalg.eigh(C)
+    idx = eigenvalues.argsort()[::-1]
+    eigenvalues = eigenvalues[idx]
+    eigenvectors = eigenvectors[:, idx]
+
+    var_explained = eigenvalues / eigenvalues.sum() * 100
+    print("  Variance expliquée par composante :")
+    for k in range(min(n_components, len(eigenvalues))):
+        print(f"    ACP-{k+1}: {var_explained[k]:.1f}%  (cumulée: {var_explained[:k+1].sum():.1f}%)")
+
+    X_pca = X_std @ eigenvectors[:, :n_components]
+    pop_series = pd.Series(pop, index=df.index)
+    df = df.copy()
+    for k in range(n_components):
+        col_name = f'score_pca_{k+1}'
+        s = pd.Series(X_pca[:, k], index=df.index)
+        df[col_name] = _rang_pondere(s, pop_series)
+        loadings = pd.Series(eigenvectors[:, k], index=var_names)
+        top_pos = loadings.nlargest(5).index.tolist()
+        top_neg = loadings.nsmallest(5).index.tolist()
+        print(f"  {col_name}: + {top_pos}")
+        print(f"  {col_name}: - {top_neg}")
+
+    return df
+
 
 def compute_scores(df):
     """Calcule tous les scores composites par rang centile pondéré."""
@@ -392,7 +1183,26 @@ def compute_scores(df):
         df[score_name] = make_score(df, cfg['pos_vars'], cfg['neg_vars'])
         print(f"  {score_name}: min={df[score_name].min():.1f} max={df[score_name].max():.1f}")
 
-    print(f"  {len(SCORES_CONFIG)} scores calculés")
+    print(f"  {len(SCORES_CONFIG)} scores v1 calculés")
+
+    print("\n  Scores v2 (débiaisés par clustering de corrélation) :")
+    for score_name, cfg in SCORES_CONFIG_V2.items():
+        df[score_name] = make_score_v2(df, cfg['pos_vars'], cfg['neg_vars'],
+                                       score_name=score_name, verbose=True)
+        print(f"  {score_name}: min={df[score_name].min():.1f} max={df[score_name].max():.1f}")
+
+    print(f"  {len(SCORES_CONFIG_V2)} scores v2 calculés")
+
+    print("\n  ACP vraie pondérée :")
+    df = compute_pca_scores(df)
+    print("  ACP vraie calculée (score_pca_1 .. score_pca_8)")
+
+    print("\n  Scores grouped (nouvelle architecture zscore→rang centile) :")
+    for score_name, groupes in SCORES_CONFIG_GROUPED.items():
+        df[score_name] = make_score_grouped(df, groupes)
+        print(f"  {score_name}: min={df[score_name].min():.1f} max={df[score_name].max():.1f}")
+    print(f"  {len(SCORES_CONFIG_GROUPED)} scores grouped calculés")
+
     return df
 
 
@@ -549,6 +1359,11 @@ def compute_demographics(df):
     df['pct_actifs_velo']       = (df['C21_ACTOCC15P_VELO'] / _actocc * 100).clip(0, 100)
     df['pct_actifs_2roues']     = (df['C21_ACTOCC15P_2ROUESMOT'] / _actocc * 100).clip(0, 100)
     df['pct_actifs_marche']     = (df['C21_ACTOCC15P_MAR'] / _actocc * 100).clip(0, 100)
+
+    # Employeurs en proportion des actifs (variable dérivée pour SCORES_CONFIG_GROUPED)
+    df['pct_employeurs'] = (
+        df['P21_NSAL15P_EMPLOY'] / df['P21_ACT1564'].replace(0, np.nan) * 100
+    ).clip(0, 100)
 
     n_computed = 20 + 23 + len(bpe_cols) + 21
     print(f"  {n_computed} variables dérivées calculées (démo + logement + énergie + BPE + diplômes + emploi + transport)")

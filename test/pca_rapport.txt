@@ -1,0 +1,255 @@
+=== RAPPORT PCA SCORES DIAGNOSTICS ===
+
+-- RECAP --
+                              n_groupes var_exp_g1 var_exp_g2 var_exp_final corr_grouped_pca            anchor_var
+score                                                                                                             
+score_domination                      1      35.6%          -         35.6%             0.95          pct_csp_plus
+score_domination_bis                  1      34.7%          -         34.7%            0.975          pct_csp_plus
+score_exploitation                    2      44.0%      37.7%         78.2%            0.727           DISP_PPAT21
+score_exploitation_bis                2      60.7%      45.4%         85.3%            0.876           DISP_PPAT21
+score_cap_eco                         2      72.1%      66.3%         81.2%            0.937            DISP_MED21
+score_cap_cult                        2      46.9%      55.6%         51.1%            0.455              pct_sup5
+score_cap_cult_bis                    1      53.5%          -         53.5%            0.991              pct_sup5
+score_precarite                       2      92.4%      44.4%         91.7%            0.976           DISP_TP6021
+score_rentier                         1      58.2%          -         58.2%            0.889           DISP_PPAT21
+score_rentier_bis                     1      66.4%          -         66.4%             0.94           DISP_PPAT21
+score_urbanite                        2      59.6%      47.4%         66.2%            0.953            pct_appart
+score_urbanite_bis                    2      59.6%      91.6%         61.6%            0.965            pct_appart
+score_confort_residentiel             1      63.8%          -         63.8%            0.994       surface_moyenne
+score_confort_residentiel_bis         1      69.9%          -         69.9%            0.994       surface_moyenne
+score_equipement_public               1      30.6%          -         30.6%            0.836  bpe_D_sante_pour1000
+score_equipement_public_bis           1      42.7%          -         42.7%             0.93  bpe_D_sante_pour1000
+score_dependance_carbone              2      64.5%      37.7%         78.0%            0.915    pct_actifs_voiture
+
+-- CORRELATIONS INTER-GROUPES (PC1 etage 1) --
+                   score  groupe_i  groupe_j  poids_i  poids_j  corr_inter_groupe
+      score_exploitation         1         2     0.75     0.25             0.4405
+  score_exploitation_bis         1         2     0.75     0.25             0.4419
+           score_cap_eco         1         2     0.70     0.30             0.5479
+          score_cap_cult         1         2     0.80     0.20             0.0456
+         score_precarite         1         2     0.60     0.40             0.7193
+          score_urbanite         1         2     0.60     0.40             0.3868
+      score_urbanite_bis         1         2     0.60     0.40             0.2978
+score_dependance_carbone         1         2     0.55     0.45             0.5155
+
+-- LOADINGS PAR SCORE/GROUPE --
+
+score_domination:
+  Groupe 1 (poids=1.0, var_exp_pc1=35.6%)
+    [OK] pct_cdi                                     poids_manuel=+0.30  loading_pca=+0.393
+    [OK] pct_csp_intermediaire                       poids_manuel=+0.80  loading_pca=+0.287
+    [OK] pct_csp_plus                                poids_manuel=+1.00  loading_pca=+0.268
+    [OK] pct_employeurs                              poids_manuel=+0.70  loading_pca=+0.216
+    [OK] pct_csp_independant                         poids_manuel=+0.60  loading_pca=+0.178
+    [OK] pct_csp_employe                             poids_manuel=-0.50  loading_pca=-0.157
+    [OK] pct_csp_ouvrier                             poids_manuel=-0.80  loading_pca=-0.237
+    [OK] pct_temps_partiel                           poids_manuel=-0.50  loading_pca=-0.272
+    [OK] pct_interim                                 poids_manuel=-0.50  loading_pca=-0.299
+    [OK] pct_csp_sans_emploi                         poids_manuel=-1.00  loading_pca=-0.324
+    [OK] pct_cdd                                     poids_manuel=-0.40  loading_pca=-0.331
+    [OK] pct_chomage                                 poids_manuel=-0.80  loading_pca=-0.393
+
+score_domination_bis:
+  Groupe 1 (poids=1.0, var_exp_pc1=34.7%)
+    [OK] pct_csp_plus                                poids_manuel=+1.00  loading_pca=+0.449
+    [OK] pct_employeurs                              poids_manuel=+0.70  loading_pca=+0.420
+    [OK] pct_csp_independant                         poids_manuel=+0.60  loading_pca=+0.331
+    [OK] pct_csp_intermediaire                       poids_manuel=+0.80  loading_pca=+0.269
+    [OK] pct_csp_sans_emploi                         poids_manuel=-1.00  loading_pca=-0.294
+    [OK] pct_csp_employe                             poids_manuel=-0.50  loading_pca=-0.382
+    [OK] pct_csp_ouvrier                             poids_manuel=-0.80  loading_pca=-0.455
+
+score_exploitation:
+  Groupe 1 (poids=0.75, var_exp_pc1=44.0%)
+    [OK] DISP_PPAT21                                 poids_manuel=+1.50  loading_pca=+0.691
+    [OK] DISP_PBEN21                                 poids_manuel=+1.00  loading_pca=+0.371
+    [OK] DISP_PTSA21                                 poids_manuel=-1.00  loading_pca=-0.132
+    [OK] DISP_PCHO21                                 poids_manuel=-0.50  loading_pca=-0.606
+  Groupe 2 (poids=0.25, var_exp_pc1=37.7%)
+    [!!] pct_cdi                                     poids_manuel=-0.50  loading_pca=+0.511
+    [OK] pct_proprietaires                           poids_manuel=+1.50  loading_pca=+0.389
+    [OK] pct_employeurs                              poids_manuel=+0.80  loading_pca=+0.278
+    [OK] pct_csp_employe                             poids_manuel=-0.50  loading_pca=-0.212
+    [OK] pct_csp_ouvrier                             poids_manuel=-0.80  loading_pca=-0.235
+    [OK] pct_temps_partiel                           poids_manuel=-0.70  loading_pca=-0.306
+    [OK] pct_interim                                 poids_manuel=-0.70  loading_pca=-0.355
+    [OK] pct_cdd                                     poids_manuel=-0.60  loading_pca=-0.436
+
+score_exploitation_bis:
+  Groupe 1 (poids=0.75, var_exp_pc1=60.7%)
+    [OK] DISP_PPAT21                                 poids_manuel=+1.50  loading_pca=+0.687
+    [OK] DISP_PBEN21                                 poids_manuel=+1.00  loading_pca=+0.377
+    [OK] DISP_PCHO21                                 poids_manuel=-0.50  loading_pca=-0.621
+  Groupe 2 (poids=0.25, var_exp_pc1=45.4%)
+    [OK] pct_employeurs                              poids_manuel=+0.80  loading_pca=+0.611
+    [OK] pct_proprietaires                           poids_manuel=+1.50  loading_pca=+0.436
+    [OK] pct_csp_ouvrier                             poids_manuel=-0.80  loading_pca=-0.368
+    [OK] pct_csp_employe                             poids_manuel=-0.50  loading_pca=-0.548
+
+score_cap_eco:
+  Groupe 1 (poids=0.7, var_exp_pc1=72.1%)
+    [OK] DISP_MED21                                  poids_manuel=+1.00  loading_pca=+0.458
+    [OK] DISP_PPAT21                                 poids_manuel=+0.80  loading_pca=+0.291
+    [OK] DISP_PBEN21                                 poids_manuel=+0.50  loading_pca=+0.177
+    [OK] DISP_TP6021                                 poids_manuel=-1.00  loading_pca=-0.472
+    [OK] DISP_PPLOGT21                               poids_manuel=-0.60  loading_pca=-0.475
+    [OK] DISP_PPMINI21                               poids_manuel=-1.00  loading_pca=-0.476
+  Groupe 2 (poids=0.3, var_exp_pc1=66.3%)
+    [OK] pct_proprietaires                           poids_manuel=+0.80  loading_pca=+0.667
+    [OK] pct_suroccupation                           poids_manuel=-0.50  loading_pca=-0.451
+    [OK] pct_hlm                                     poids_manuel=-0.80  loading_pca=-0.594
+
+score_cap_cult:
+  Groupe 1 (poids=0.8, var_exp_pc1=46.9%)
+    [OK] pct_bac_plus                                poids_manuel=+0.60  loading_pca=+0.505
+    [OK] pct_sup5                                    poids_manuel=+1.00  loading_pca=+0.484
+    [OK] pct_actifs_velo                             poids_manuel=+0.30  loading_pca=+0.318
+    [OK] pct_csp_intermediaire                       poids_manuel=+0.50  loading_pca=+0.246
+    [!!] pct_csp_independant                         poids_manuel=-0.30  loading_pca=+0.033
+    [OK] pct_csp_agriculteur                         poids_manuel=-0.30  loading_pca=-0.157
+    [OK] pct_sans_diplome                            poids_manuel=-1.00  loading_pca=-0.380
+    [OK] pct_capbep                                  poids_manuel=-0.60  loading_pca=-0.423
+  Groupe 2 (poids=0.2, var_exp_pc1=55.6%)
+    [OK] bpe_sport_indoor_pour1000                   poids_manuel=+0.40  loading_pca=+0.707
+    [OK] bpe_ecole_privee_pour1000                   poids_manuel=+0.80  loading_pca=+0.707
+
+score_cap_cult_bis:
+  Groupe 1 (poids=1.0, var_exp_pc1=53.5%)
+    [OK] pct_bac_plus                                poids_manuel=+0.60  loading_pca=+0.505
+    [OK] pct_sup5                                    poids_manuel=+1.00  loading_pca=+0.484
+    [OK] pct_actifs_velo                             poids_manuel=+0.30  loading_pca=+0.320
+    [OK] pct_csp_intermediaire                       poids_manuel=+0.50  loading_pca=+0.246
+    [OK] pct_csp_agriculteur                         poids_manuel=-0.30  loading_pca=-0.159
+    [OK] pct_sans_diplome                            poids_manuel=-1.00  loading_pca=-0.378
+    [OK] pct_capbep                                  poids_manuel=-0.60  loading_pca=-0.424
+
+score_precarite:
+  Groupe 1 (poids=0.6, var_exp_pc1=92.4%)
+    [OK] DISP_PPSOC21                                poids_manuel=+0.50  loading_pca=+0.460
+    [OK] DISP_PPMINI21                               poids_manuel=+0.80  loading_pca=+0.456
+    [OK] DISP_PPLOGT21                               poids_manuel=+0.40  loading_pca=+0.454
+    [OK] DISP_TP6021                                 poids_manuel=+1.00  loading_pca=+0.451
+    [OK] DISP_MED21                                  poids_manuel=-1.00  loading_pca=-0.413
+  Groupe 2 (poids=0.4, var_exp_pc1=44.4%)
+    [OK] pct_chomage                                 poids_manuel=+0.70  loading_pca=+0.495
+    [OK] pct_csp_sans_emploi                         poids_manuel=+0.80  loading_pca=+0.465
+    [OK] pct_hlm                                     poids_manuel=+0.40  loading_pca=+0.401
+    [OK] pct_cdd                                     poids_manuel=+0.40  loading_pca=+0.379
+    [OK] pct_temps_partiel                           poids_manuel=+0.30  loading_pca=+0.310
+    [OK] pct_interim                                 poids_manuel=+0.50  loading_pca=+0.288
+    [OK] pct_suroccupation                           poids_manuel=+0.50  loading_pca=+0.235
+
+score_rentier:
+  Groupe 1 (poids=1.0, var_exp_pc1=58.2%)
+    [OK] DISP_PPEN21                                 poids_manuel=+0.50  loading_pca=+0.538
+    [OK] DISP_PPAT21                                 poids_manuel=+1.00  loading_pca=+0.087
+    [!!] DISP_PBEN21                                 poids_manuel=+0.70  loading_pca=-0.029
+    [OK] DISP_PTSA21                                 poids_manuel=-1.00  loading_pca=-0.592
+    [OK] DISP_PACT21                                 poids_manuel=-0.60  loading_pca=-0.593
+
+score_rentier_bis:
+  Groupe 1 (poids=1.0, var_exp_pc1=66.4%)
+    [OK] DISP_PPEN21                                 poids_manuel=+0.50  loading_pca=+0.539
+    [OK] DISP_PPAT21                                 poids_manuel=+1.00  loading_pca=+0.094
+    [OK] DISP_PACT21                                 poids_manuel=-0.60  loading_pca=-0.592
+    [OK] DISP_PTSA21                                 poids_manuel=-1.00  loading_pca=-0.592
+
+score_urbanite:
+  Groupe 1 (poids=0.6, var_exp_pc1=59.6%)
+    [OK] pct_appart                                  poids_manuel=+1.00  loading_pca=+0.321
+    [OK] pct_voiture_0                               poids_manuel=+0.90  loading_pca=+0.316
+    [OK] pct_locataires                              poids_manuel=+0.70  loading_pca=+0.302
+    [OK] pct_petits_logements                        poids_manuel=+0.60  loading_pca=+0.284
+    [OK] pct_actifs_transports                       poids_manuel=+0.80  loading_pca=+0.268
+    [OK] pct_actifs_marche                           poids_manuel=+0.40  loading_pca=+0.212
+    [OK] pct_actifs_velo                             poids_manuel=+0.50  loading_pca=+0.188
+    [!!] P21_ACTOCC15P_ILT3                          poids_manuel=-0.50  loading_pca=+0.107
+    [OK] pct_csp_agriculteur                         poids_manuel=-0.70  loading_pca=-0.134
+    [OK] pct_chauffage_fioul                         poids_manuel=-0.40  loading_pca=-0.204
+    [OK] pct_garage                                  poids_manuel=-0.70  loading_pca=-0.285
+    [OK] pct_maison                                  poids_manuel=-1.00  loading_pca=-0.323
+    [OK] pct_voiture_2plus                           poids_manuel=-0.90  loading_pca=-0.327
+    [OK] surface_moyenne                             poids_manuel=-0.60  loading_pca=-0.330
+  Groupe 2 (poids=0.4, var_exp_pc1=47.4%)
+    [OK] bpe_B_commerces_pour1000                    poids_manuel=+0.40  loading_pca=+0.686
+    [OK] bpe_total_pour1000                          poids_manuel=+0.70  loading_pca=+0.679
+    [OK] P21_ACTOCC15P_ILT1                          poids_manuel=+0.50  loading_pca=+0.261
+    [OK] bpe_E_transports_pour1000                   poids_manuel=+0.90  loading_pca=+0.031
+
+score_urbanite_bis:
+  Groupe 1 (poids=0.6, var_exp_pc1=59.6%)
+    [OK] pct_appart                                  poids_manuel=+1.00  loading_pca=+0.321
+    [OK] pct_voiture_0                               poids_manuel=+0.90  loading_pca=+0.316
+    [OK] pct_locataires                              poids_manuel=+0.70  loading_pca=+0.302
+    [OK] pct_petits_logements                        poids_manuel=+0.60  loading_pca=+0.284
+    [OK] pct_actifs_transports                       poids_manuel=+0.80  loading_pca=+0.268
+    [OK] pct_actifs_marche                           poids_manuel=+0.40  loading_pca=+0.212
+    [OK] pct_actifs_velo                             poids_manuel=+0.50  loading_pca=+0.188
+    [!!] P21_ACTOCC15P_ILT3                          poids_manuel=-0.50  loading_pca=+0.107
+    [OK] pct_csp_agriculteur                         poids_manuel=-0.70  loading_pca=-0.134
+    [OK] pct_chauffage_fioul                         poids_manuel=-0.40  loading_pca=-0.204
+    [OK] pct_garage                                  poids_manuel=-0.70  loading_pca=-0.285
+    [OK] pct_maison                                  poids_manuel=-1.00  loading_pca=-0.323
+    [OK] pct_voiture_2plus                           poids_manuel=-0.90  loading_pca=-0.327
+    [OK] surface_moyenne                             poids_manuel=-0.60  loading_pca=-0.330
+  Groupe 2 (poids=0.4, var_exp_pc1=91.6%)
+    [OK] bpe_total_pour1000                          poids_manuel=+0.70  loading_pca=+0.707
+    [OK] bpe_B_commerces_pour1000                    poids_manuel=+0.40  loading_pca=+0.707
+
+score_confort_residentiel:
+  Groupe 1 (poids=1.0, var_exp_pc1=63.8%)
+    [OK] surface_moyenne                             poids_manuel=+0.70  loading_pca=+0.369
+    [OK] nb_pieces_moyen                             poids_manuel=+0.60  loading_pca=+0.364
+    [OK] pct_logements_5p_plus                       poids_manuel=+0.50  loading_pca=+0.351
+    [OK] pct_proprietaires                           poids_manuel=+0.70  loading_pca=+0.339
+    [OK] pct_grands_logements                        poids_manuel=+0.80  loading_pca=+0.319
+    [OK] pct_garage                                  poids_manuel=+0.50  loading_pca=+0.308
+    [OK] pct_logvac                                  poids_manuel=-0.30  loading_pca=-0.071
+    [OK] pct_hlm                                     poids_manuel=-0.70  loading_pca=-0.193
+    [OK] pct_suroccupation                           poids_manuel=-1.00  loading_pca=-0.253
+    [OK] pct_studios                                 poids_manuel=-0.50  loading_pca=-0.297
+    [OK] pct_petits_logements                        poids_manuel=-0.60  loading_pca=-0.319
+
+score_confort_residentiel_bis:
+  Groupe 1 (poids=1.0, var_exp_pc1=69.9%)
+    [OK] surface_moyenne                             poids_manuel=+0.70  loading_pca=+0.370
+    [OK] nb_pieces_moyen                             poids_manuel=+0.60  loading_pca=+0.365
+    [OK] pct_logements_5p_plus                       poids_manuel=+0.50  loading_pca=+0.352
+    [OK] pct_proprietaires                           poids_manuel=+0.70  loading_pca=+0.340
+    [OK] pct_grands_logements                        poids_manuel=+0.80  loading_pca=+0.320
+    [OK] pct_garage                                  poids_manuel=+0.50  loading_pca=+0.307
+    [OK] pct_hlm                                     poids_manuel=-0.70  loading_pca=-0.195
+    [OK] pct_suroccupation                           poids_manuel=-1.00  loading_pca=-0.254
+    [OK] pct_studios                                 poids_manuel=-0.50  loading_pca=-0.298
+    [OK] pct_petits_logements                        poids_manuel=-0.60  loading_pca=-0.320
+
+score_equipement_public:
+  Groupe 1 (poids=1.0, var_exp_pc1=30.6%)
+    [OK] bpe_B_commerces_pour1000                    poids_manuel=+0.50  loading_pca=+0.587
+    [OK] bpe_A_services_pour1000                     poids_manuel=+0.70  loading_pca=+0.567
+    [OK] bpe_D_sante_pour1000                        poids_manuel=+1.00  loading_pca=+0.472
+    [OK] bpe_C_enseignement_pour1000                 poids_manuel=+0.80  loading_pca=+0.268
+    [OK] bpe_F_sports_culture_pour1000               poids_manuel=+0.60  loading_pca=+0.174
+    [!!] bpe_E_transports_pour1000                   poids_manuel=+0.70  loading_pca=-0.063
+    [!!] bpe_educ_prioritaire_pour1000               poids_manuel=+0.40  loading_pca=-0.068
+
+score_equipement_public_bis:
+  Groupe 1 (poids=1.0, var_exp_pc1=42.7%)
+    [OK] bpe_B_commerces_pour1000                    poids_manuel=+0.50  loading_pca=+0.591
+    [OK] bpe_A_services_pour1000                     poids_manuel=+0.70  loading_pca=+0.570
+    [OK] bpe_D_sante_pour1000                        poids_manuel=+1.00  loading_pca=+0.475
+    [OK] bpe_C_enseignement_pour1000                 poids_manuel=+0.80  loading_pca=+0.273
+    [OK] bpe_F_sports_culture_pour1000               poids_manuel=+0.60  loading_pca=+0.160
+
+score_dependance_carbone:
+  Groupe 1 (poids=0.55, var_exp_pc1=64.5%)
+    [OK] pct_actifs_voiture                          poids_manuel=+1.00  loading_pca=+0.523
+    [OK] pct_voiture_2plus                           poids_manuel=+0.80  loading_pca=+0.502
+    [OK] pct_actifs_velo                             poids_manuel=-0.70  loading_pca=-0.364
+    [OK] pct_actifs_marche                           poids_manuel=-0.50  loading_pca=-0.365
+    [OK] pct_actifs_transports                       poids_manuel=-0.90  loading_pca=-0.457
+  Groupe 2 (poids=0.45, var_exp_pc1=37.7%)
+    [OK] pct_chauffage_gaz_bouteille                 poids_manuel=+0.60  loading_pca=+0.716
+    [OK] pct_chauffage_fioul                         poids_manuel=+1.00  loading_pca=+0.676
+    [!!] pct_logements_recents                       poids_manuel=-0.60  loading_pca=+0.124
+    [!!] pct_chauffage_elec                          poids_manuel=-0.50  loading_pca=+0.122

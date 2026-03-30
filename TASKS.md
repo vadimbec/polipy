@@ -3,6 +3,59 @@
 
 ## Historique
 
+### 2026-03-29 — Migration complète vers make_score_grouped + consolidation territoriale
+
+- **SCORES_CONFIG_GROUPED étendu** (14 nouveaux scores dans `rebuild_vizu_iris.py` et `build_iris_final.py`) :
+  - `score_exploitation` (2 groupes : revenus du capital / structure de classe)
+  - `score_pca_pc1..8` (8 scores × 1 groupe : conversion directe des listes pos/neg vars v1 en poids signés)
+  - `score_domination_v2` (2 groupes : capital éco 0.5 / capital culturel+position 0.5)
+  - `score_cap_eco_v2` (2 groupes : richesse/revenus 0.65 / capital immobilier 0.35)
+  - `score_cap_cult_v2` (2 groupes : diplômes/CSP 0.75 / BPE culturels 0.25)
+  - `score_rentier_v2` (1 groupe : patrimoine/bénéfices/proprio vs salaires/CDD/intérim)
+  - `score_dependance_carbone` (nouveau, 2 groupes : mobilité fossile 0.55 / chauffage fossile 0.45)
+- **score_urbanite amélioré** : définition grouped enrichie (+ agriculteurs, + navettes longues, + ILT1, + bpe_commerces, voiture_0 renforcé, voiture_2plus renforcé). Absorbe les dimensions de score_ruralite, score_france_pavillonnaire, score_peripherie_metropole.
+- **Consolidation territoriale** : `score_ruralite` et `score_france_pavillonnaire` retirés de `SCORES_CONFIG_GROUPED` (valeurs v1/v2 conservées dans le dataframe mais ne sont plus la valeur finale).
+- **Presets AXIS_PRESETS consolidés** dans `rebuild_vizu_iris.py` :
+  - `ruralite` → renommé "Territoire × Précarité", xVar=`score_urbanite` xInvert=True (absorbe `precarite_peripherie` et `france_pavillonnaire`)
+  - `precarite_peripherie` → supprimé (absorbé)
+  - `france_pavillonnaire` → supprimé (absorbé)
+  - `energie` → nouveau preset : xVar=`score_dependance_carbone`, yVar=`score_urbanite` (remplace fioul×élec bruts)
+- **`rebuild_vizu_iris_mobile.py` mis à parité** :
+  - `make_score_v2`, `_zscore_pondere`, `make_score_grouped` ajoutés
+  - `SCORES_CONFIG_V2`, `SCORES_CONFIG_GROUPED` ajoutés (identiques à desktop)
+  - `pct_employeurs` calculé avant les boucles de scores
+  - Boucles v2 et grouped ajoutées après la boucle v1
+  - Preset `ruralite` mis à jour (score_urbanite inverted), `precarite_peripherie` supprimé
+
+### 2026-03-29 — Nouvelle architecture make_score_grouped (zscore→agrégation→rang centile)
+
+- **`_zscore_pondere`** ajoutée dans `build_iris_final.py` et `rebuild_vizu_iris.py` : zscore pondéré par population (centrage/réduction avec moyenne et écart-type pondérés).
+- **`make_score_grouped(df, groupes)`** / **`make_score_grouped(groupes)`** ajoutée dans les deux fichiers : nouvelle architecture en 3 étapes — (1) zscore pondéré par variable + agrégation pondérée par poids théoriques → indice composite de groupe, (2) rang centile pondéré de l'indice, (3) moyenne pondérée des rangs de groupes. Signature différente de `make_score` pour coexistence sans conflit.
+- **`SCORES_CONFIG_GROUPED`** : nouveau dict dans les deux fichiers. Format `{score_name: [{vars: {var: poids}, poids: float}]}`. Couvre 10 scores : `score_domination`, `score_composition_capital`, `score_cap_eco`, `score_cap_cult`, `score_precarite`, `score_rentier`, `score_ruralite`, `score_urbanite`, `score_confort_residentiel`, `score_equipement_public`, `score_france_pavillonnaire`. La boucle tourne en dernier → écrase les valeurs v1/v2 pour les noms communs.
+- **`pct_employeurs`** : nouvelle variable dérivée ajoutée dans `compute_demographics()` de `build_iris_final.py` et avant les boucles de scores dans `rebuild_vizu_iris.py`. Calculée comme `P21_NSAL15P_EMPLOY / P21_ACT1564 * 100`. Utilisée dans les groupes de `score_domination` et `score_composition_capital`.
+- **Rien de supprimé** : `make_score`, `make_score_v2`, `SCORES_CONFIG`, `SCORES_CONFIG_V2`, et tous les presets existants restent intacts.
+
+### 2026-03-28 — Nouveaux axes v2 + vraie ACP pondérée
+
+- **`make_score_v2`** ajoutée dans `build_iris_final.py` et `rebuild_vizu_iris.py` : débiaisage par clustering de corrélation (liaison complète, seuil 0.75) pour éviter la surpondération des dimensions redondantes.
+- **`SCORES_CONFIG_V2`** : 8 nouveaux scores ajoutés (sans rien supprimer) :
+  - `score_composition_capital` — nouveau : revenus patrimoniaux/bénéfices vs salaires (axe X Saint-Graphique v2)
+  - `score_domination_v2` — hiérarchie sociale v2 débiaisée
+  - `score_cap_eco_v2` — capital économique pur (revenu/patrimoine/propriété) v2
+  - `score_cap_cult_v2` — capital culturel pur (diplômes/vélo/écoles privées) v2, sans variables économiques
+  - `score_rentier_v2` — ratio capital/travail v2 (patrimoine/bénéfices vs salaires/CDD/intérim)
+  - `score_ruralite_v2` — ruralité v2 sans `pct_immigres`, avec BPE comme négatif
+  - `score_periurbain` — nouveau : zone de tension péri-urbaine (maison/voiture/HLM vs transports/appartements)
+  - `score_france_pavillonnaire` — nouveau nom pour score_peripherie_metropole (variables inchangées, computé avec make_score_v2)
+- **Vraie ACP pondérée** : `EMBEDDING_VARS_PCA` + `compute_pca_scores()` / `compute_pca_vraie()` ajoutées dans les deux fichiers. Produit `score_pca_1..8` (vraie décomposition spectrale pondérée par population, ~80 variables, rangées en centile pondéré [-50,+50]).
+- **4 nouveaux presets** dans `AXIS_PRESETS` (insérés avant t-SNE) :
+  - `saint_graphique_v2` : x=`score_composition_capital`, y=`score_domination_v2`
+  - `bourdieu_v2` : x=`score_cap_eco_v2`, y=`score_cap_cult_v2`
+  - `france_pavillonnaire` : x=`score_france_pavillonnaire`, y=`score_precarite`
+  - `pca_vraie` : x=`score_pca_1`, y=`score_pca_2` (PCA 2 vs PCA 1)
+- **Renommage** : preset `acp` renommé "Score-ACP (PC1 x PC2)" pour distinguer des approximations par score vs la vraie ACP.
+- **Dropdown** : 16 nouvelles variables ajoutées dans `VARS_BY_CAT['Scores composites']` + leurs labels dans `VAR_LABELS`.
+
 ### 2026-03-26 — OSM lieux de culte : exploration + notebook corrélations politique
 
 - **`export.geojson`** (Overpass, 170 MB) : 60 993 lieux de culte France entière avec `religion` + `denomination`. Bien plus riche que RNA/BPE.

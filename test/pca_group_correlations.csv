@@ -1,0 +1,9 @@
+score,groupe_i,groupe_j,poids_i,poids_j,corr_inter_groupe
+score_exploitation,1,2,0.75,0.25,0.4405
+score_exploitation_bis,1,2,0.75,0.25,0.4419
+score_cap_eco,1,2,0.7,0.3,0.5479
+score_cap_cult,1,2,0.8,0.2,0.0456
+score_precarite,1,2,0.6,0.4,0.7193
+score_urbanite,1,2,0.6,0.4,0.3868
+score_urbanite_bis,1,2,0.6,0.4,0.2978
+score_dependance_carbone,1,2,0.55,0.45,0.5155
