@@ -109,3 +109,6 @@ iris/contours_tmp/
 *old.py
 osm_cultes/*
 eda_osm_cultes_politique.ipynb
+.claude/settings.local.json
+
+.claude/*
