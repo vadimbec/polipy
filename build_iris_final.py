@@ -17,11 +17,9 @@ import os
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import HistGradientBoostingRegressor
 from sklearn.metrics import r2_score, mean_absolute_error
-
+from shared_config import *
 from shared_config import (
-    SCORES_CONFIG_GROUPED_PCA, SCORES_PCA_ANCHORS,
-    make_score_pca_grouped, compute_pca_vraie,
-    _rang_pondere, _zscore_pondere, _pca_weighted_pc1,
+    _rang_pondere,
 )
 
 pd.set_option('display.float_format', lambda x: '%.3f' % x)
@@ -247,18 +245,21 @@ def build_ml(hybride_path):
     X_cols = [c for c in df_num.columns if c not in vars_cibles and c not in cols_a_exclure]
 
     # Seuils
-    r2_threshold = 0.73
+    r2_threshold = 0.65
     corr_threshold = 0.8
     err_rel_threshold = 25.0
 
     print(f"  {len(vars_cibles)} variables cibles détectées")
     print(f"  Critères : R² > {r2_threshold*100:.0f}% | Corr > {corr_threshold:.2f} | Err Rel < {err_rel_threshold:.1f}%")
 
+    imputation_flags = {}  # {varname: boolean Series} — True = imputé par ML
+
     for cible in vars_cibles:
         mask_known = df_num[cible].notna()
         mask_unknown = df_num[cible].isna()
 
         if mask_unknown.sum() == 0:
+            imputation_flags[cible] = pd.Series(False, index=df.index)
             continue
 
         X = df_num[X_cols]
@@ -283,217 +284,27 @@ def build_ml(hybride_path):
         if r2 > r2_threshold and corr > corr_threshold and erreur_relative < err_rel_threshold:
             trous = mask_unknown.sum()
             df_imputed.loc[mask_unknown, cible] = model.predict(X[mask_unknown])
+            imputation_flags[cible] = mask_unknown.copy()  # True là où on a imputé
             print(f"  {cible}: ACCEPTÉ (R²={r2*100:.1f}%, Corr={corr:.2f}, Err={erreur_relative:.1f}%) — {trous} trous bouchés")
         else:
+            imputation_flags[cible] = pd.Series(False, index=df.index)
             print(f"  {cible}: rejeté (R²={r2*100:.1f}%, Corr={corr:.2f}, Err={erreur_relative:.1f}%)")
+
+    # Ajout des colonnes de flag ML au DataFrame
+    n_flags = 0
+    for varname, flag in imputation_flags.items():
+        df_imputed[f'ml_imputed_{varname}'] = flag.astype(bool)
+        n_imputed = flag.sum()
+        if n_imputed > 0:
+            n_flags += 1
+            print(f"  Flag ml_imputed_{varname} : {n_imputed} IRIS imputés")
+    print(f"  {n_flags} variables avec imputations ML flaggées")
 
     output_path = os.path.join(PATH_IRIS, "iris_database_machine_learning.csv")
     df_imputed.to_csv(output_path, index=False)
     print(f"  Sauvegardé : {output_path} ({len(df_imputed)} IRIS)")
     return output_path
 
-
-# =============================================================================
-# Fonctions de scoring (rang centile pondéré par population)
-# =============================================================================
-def _rang_pondere(series, pop):
-    """Centile pondéré par population, centré à 0 (range ~ -50 à +50)."""
-    s = series.copy().astype(float)
-    p = pop.copy().astype(float)
-    valid = s.notna() & p.notna() & (p > 0)
-    if valid.sum() < 10:
-        return pd.Series(0.0, index=s.index)
-    s_v = s[valid]
-    p_v = p[valid]
-    order = s_v.argsort()
-    p_sorted = p_v.iloc[order]
-    cumsum = p_sorted.cumsum()
-    total = p_sorted.sum()
-    centile = (cumsum - p_sorted / 2) / total * 100
-    result = pd.Series(np.nan, index=s.index)
-    orig_positions = np.where(valid.values)[0][order.values]
-    result.iloc[orig_positions] = centile.values
-    return result.fillna(50.0) - 50.0
-
-
-def make_score(df, pos_vars, neg_vars, pop_col='pop_totale'):
-    """Score composite par rang centile pondéré par population."""
-    parts = []
-    pop = df[pop_col]
-    for v in pos_vars:
-        if v not in df.columns:
-            continue
-        parts.append(_rang_pondere(df[v], pop))
-    for v in neg_vars:
-        if v not in df.columns:
-            continue
-        parts.append(-_rang_pondere(df[v], pop))
-    if not parts:
-        return pd.Series(0.0, index=df.index)
-    return pd.concat(parts, axis=1).mean(axis=1)
-
-
-def make_score_v2(df, pos_vars, neg_vars, pop_col='pop_totale',
-                  corr_threshold=0.75, score_name=None, verbose=True):
-    """
-    Score composite par rang centile pondéré par population (version débiaisée).
-    Les variables fortement corrélées (> corr_threshold) sont regroupées
-    en clusters (liaison complète) ; chaque variable reçoit un poids
-    1/taille_cluster pour éviter de surpondérer les dimensions redondantes.
-    """
-    all_vars  = [(v, +1) for v in pos_vars if v in df.columns]
-    all_vars += [(v, -1) for v in neg_vars if v in df.columns]
-    if not all_vars:
-        return pd.Series(0.0, index=df.index)
-
-    names = [v for v, _ in all_vars]
-    signs = [s for _, s in all_vars]
-    pop   = df[pop_col]
-
-    # Matrice de corrélation (imputation médiane locale)
-    data = df[names].copy()
-    for col in names:
-        data[col] = data[col].fillna(data[col].median())
-    corr = data.corr().abs()
-
-    # Clustering greedy (liaison complète intra-cluster)
-    clusters: list = []
-    assigned: dict = {}
-    for v in names:
-        placed = False
-        for c_idx, cluster in enumerate(clusters):
-            if all(corr.loc[v, u] >= corr_threshold for u in cluster):
-                cluster.append(v)
-                assigned[v] = c_idx
-                placed = True
-                break
-        if not placed:
-            clusters.append([v])
-            assigned[v] = len(clusters) - 1
-
-    cluster_sizes = {v: len(clusters[assigned[v]]) for v in names}
-
-    if verbose and score_name:
-        cluster_members = {}
-        for v, c_idx in assigned.items():
-            cluster_members.setdefault(c_idx, []).append(v)
-        for c_idx, members in cluster_members.items():
-            if len(members) > 1:
-                print(f"  [{score_name}] cluster {c_idx}: {members} (poids 1/{len(members)} chacune)")
-
-    parts = []
-    for v, sign in zip(names, signs):
-        w = 1.0 / cluster_sizes[v]
-        parts.append(sign * w * _rang_pondere(df[v], pop))
-
-    total_weight = sum(1.0 / cluster_sizes[v] for v in names)
-    return pd.concat(parts, axis=1).sum(axis=1) / total_weight
-
-
-def _zscore_pondere(series, pop):
-    """
-    Zscore pondéré par population.
-    Chaque valeur est centrée/réduite par rapport à la moyenne et l'écart-type
-    pondérés par la population de chaque IRIS. NaN remplacés par 0.
-    """
-    s = series.copy().astype(float)
-    p = pop.copy().astype(float)
-    valid = s.notna() & p.notna() & (p > 0)
-    if valid.sum() < 10:
-        return pd.Series(0.0, index=s.index)
-    s_v = s[valid]
-    p_v = p[valid]
-    w = p_v / p_v.sum()
-    w_mean = (s_v * w).sum()
-    w_std = np.sqrt(((s_v - w_mean) ** 2 * w).sum())
-    if w_std < 1e-10:
-        return pd.Series(0.0, index=s.index)
-    result = pd.Series(np.nan, index=s.index)
-    result[valid] = (s_v - w_mean) / w_std
-    return result.fillna(0.0)
-
-
-def make_score_grouped(df, groupes, pop_col='pop_totale'):
-    """
-    Score composite en trois étapes :
-      1. Pour chaque groupe : zscore pondéré population de chaque variable,
-         puis somme pondérée par les poids théoriques → indice composite du groupe
-      2. Rang centile pondéré population de chaque indice composite de groupe
-      3. Moyenne pondérée des rangs centiles des groupes (poids entre groupes)
-
-    Paramètre `groupes` : liste de dicts, chacun avec :
-      - 'vars'   : dict {nom_variable: poids_signé}  (poids théoriques)
-      - 'poids'  : float  (poids de ce groupe dans le score final)
-
-    Range résultant : ~ [-50, +50], identique à l'ancienne implémentation.
-    """
-    pop = df[pop_col]
-    rangs_groupes = []
-    poids_groupes = []
-
-    for groupe in groupes:
-        var_poids = groupe['vars']
-        poids_groupe = groupe['poids']
-
-        parts = []
-        total_poids = sum(abs(p) for p in var_poids.values())
-        if total_poids == 0:
-            continue
-        for var, poids in var_poids.items():
-            if var not in df.columns:
-                continue
-            z = _zscore_pondere(df[var], pop)
-            parts.append((poids / total_poids) * z)
-
-        if not parts:
-            continue
-
-        indice_groupe = pd.concat(parts, axis=1).sum(axis=1)
-        rang_groupe = _rang_pondere(indice_groupe, pop)
-        rangs_groupes.append(rang_groupe)
-        poids_groupes.append(poids_groupe)
-
-    if not rangs_groupes:
-        return pd.Series(0.0, index=df.index)
-
-    total_poids_groupes = sum(poids_groupes)
-    score_final = sum(r * p for r, p in zip(rangs_groupes, poids_groupes))
-    return score_final / total_poids_groupes
-
-
-# Configuration de tous les scores composites
-# ── Variables pour la vraie ACP pondérée ──────────────────────────────────────
-
-EMBEDDING_VARS_PCA = [
-    'pct_etrangers', 'pct_immigres', 'age_moyen', 'pct_femmes',
-    'taille_menage_moy', 'pct_hors_menage', 'ecart_csp_plus_hf',
-    'pct_0_19', 'pct_20_64', 'pct_65_plus',
-    'pct_csp_agriculteur', 'pct_csp_independant', 'pct_csp_plus',
-    'pct_csp_intermediaire', 'pct_csp_employe', 'pct_csp_ouvrier',
-    'pct_csp_retraite', 'pct_csp_sans_emploi',
-    'DISP_MED21', 'DISP_TP6021', 'DISP_GI21', 'DISP_RD21', 'DISP_S80S2021',
-    'DISP_PTSA21', 'DISP_PPAT21', 'DISP_PPEN21', 'DISP_PPSOC21',
-    'DISP_PCHO21', 'DISP_PPFAM21', 'DISP_PPLOGT21', 'DISP_PPMINI21',
-    'DISP_PIMPOT21', 'DISP_PACT21',
-    'pct_sup5', 'pct_sans_diplome', 'pct_capbep', 'pct_bac_plus',
-    'pct_chomage', 'pct_cdi', 'pct_cdd', 'pct_interim',
-    'pct_temps_partiel', 'pct_inactif', 'pct_etudiants',
-    'pct_actifs_voiture', 'pct_actifs_transports', 'pct_actifs_velo',
-    'pct_actifs_2roues', 'pct_actifs_marche',
-    'pct_proprietaires', 'pct_locataires', 'pct_hlm', 'pct_logvac',
-    'pct_maison', 'pct_appart', 'pct_petits_logements', 'pct_grands_logements',
-    'pct_logements_anciens', 'pct_logements_recents',
-    'pct_voiture_0', 'pct_voiture_2plus', 'surface_moyenne', 'pct_suroccupation',
-    'pct_chauffage_elec', 'pct_chauffage_fioul', 'pct_chauffage_gaz_ville',
-    'pct_chauffage_gaz_bouteille', 'pct_chauffage_autre',
-    'pct_garage', 'nb_pieces_moyen', 'pct_studios', 'pct_logements_5p_plus',
-    'bpe_total_pour1000', 'bpe_A_services_pour1000', 'bpe_B_commerces_pour1000',
-    'bpe_C_enseignement_pour1000', 'bpe_D_sante_pour1000',
-    'bpe_E_transports_pour1000', 'bpe_F_sports_culture_pour1000',
-    'bpe_G_tourisme_pour1000', 'bpe_educ_prioritaire_pour1000',
-    'bpe_ecole_privee_pour1000', 'bpe_sport_indoor_pour1000',
-    'pct_sport_accessible',
-]
 
 
 def compute_scores(df):
@@ -517,10 +328,62 @@ def compute_scores(df):
         print(f"  {score_name}: var_exp={fve*100:.1f}%  min={df[score_name].min():.1f} max={df[score_name].max():.1f}")
     print(f"  {len(SCORES_CONFIG_GROUPED_PCA)} scores PCA calculés")
 
-    # Vraie ACP pondérée (score_pca_1 .. score_pca_8)
+    # Vraie ACP pondérée (score_pca_1 .. score_pca_8) — modifie df en place
     print("\n  ACP vraie pondérée :")
     compute_pca_vraie(df, n_components=8)
     print("  ACP vraie calculée (score_pca_1 .. score_pca_8)")
+
+    # ── Versions strictes (sans IRIS imputés ML) ─────────────────────────────
+    print("\n  Calcul versions strictes (exclusion IRIS imputés ML)...")
+
+    # Scores composites stricts
+    for score_name, groupes in SCORES_CONFIG_GROUPED_PCA.items():
+        strict_col = f'{score_name}_strict'
+        disp_vars = [v for g in groupes for v in g.get('vars', {}) if v.startswith('DISP_')]
+        if not disp_vars:
+            # Pas de dépendance DISP_* : strict == full
+            df[strict_col] = df[score_name]
+            continue
+        flag_cols = [f'ml_imputed_{v}' for v in disp_vars if f'ml_imputed_{v}' in df.columns]
+        if not flag_cols:
+            df[strict_col] = df[score_name]
+            continue
+        imputed_mask = df[flag_cols].any(axis=1)
+        n_excl = imputed_mask.sum()
+        df_sub = df[~imputed_mask].copy()
+        if len(df_sub) < 50:
+            df[strict_col] = np.nan
+            print(f"  {strict_col}: sous-ensemble trop petit ({len(df_sub)}), NaN")
+            continue
+        anchor = SCORES_PCA_ANCHORS.get(score_name)
+        strict_series, _ = make_score_pca_grouped(groupes, df_sub, anchor_var=anchor)
+        df[strict_col] = np.nan
+        df.loc[~imputed_mask, strict_col] = strict_series
+        print(f"  {strict_col}: {len(df_sub)} IRIS ({n_excl} exclus)")
+
+    # ACP stricte
+    print("\n  ACP vraie pondérée (strict)...")
+    _emb_disp = [v for v in EMBEDDING_VARS_PCA if v.startswith('DISP_')]
+    flag_cols_pca = [f'ml_imputed_{v}' for v in _emb_disp if f'ml_imputed_{v}' in df.columns]
+    if flag_cols_pca:
+        pca_imputed_mask = df[flag_cols_pca].any(axis=1)
+        n_excl_pca = pca_imputed_mask.sum()
+        df_strict_pca = df[~pca_imputed_mask].copy()
+        if len(df_strict_pca) >= 50:
+            compute_pca_vraie(df_strict_pca, n_components=8)  # modifie en place
+            for k in range(1, 9):
+                df[f'score_pca_{k}_strict'] = np.nan
+                df.loc[~pca_imputed_mask, f'score_pca_{k}_strict'] = df_strict_pca[f'score_pca_{k}']
+            print(f"  ACP stricte : {len(df_strict_pca)} IRIS ({n_excl_pca} exclus)")
+        else:
+            for k in range(1, 9):
+                df[f'score_pca_{k}_strict'] = np.nan
+            print(f"  ACP stricte : sous-ensemble trop petit, NaN")
+    else:
+        # Pas de flags PCA disponibles : strict == full
+        for k in range(1, 9):
+            df[f'score_pca_{k}_strict'] = df.get(f'score_pca_{k}', np.nan)
+        print("  ACP stricte : aucun flag DISP_* PCA trouvé, strict == full")
 
     return df
 
@@ -694,37 +557,6 @@ def compute_demographics(df):
 # =============================================================================
 # Variables socio utilisées pour les embeddings
 
-EMBEDDING_VARS_PCA = [
-    'pct_etrangers', 'pct_immigres', 'age_moyen', 'pct_femmes',
-    'taille_menage_moy', 'pct_hors_menage', 'ecart_csp_plus_hf',
-    'pct_0_19', 'pct_20_64', 'pct_65_plus',
-    'pct_csp_agriculteur', 'pct_csp_independant', 'pct_csp_plus',
-    'pct_csp_intermediaire', 'pct_csp_employe', 'pct_csp_ouvrier',
-    'pct_csp_retraite', 'pct_csp_sans_emploi',
-    'DISP_MED21', 'DISP_TP6021', 'DISP_GI21', 'DISP_RD21', 'DISP_S80S2021',
-    'DISP_PTSA21', 'DISP_PPAT21', 'DISP_PPEN21', 'DISP_PPSOC21',
-    'DISP_PCHO21', 'DISP_PPFAM21', 'DISP_PPLOGT21', 'DISP_PPMINI21',
-    'DISP_PIMPOT21', 'DISP_PACT21',
-    'pct_sup5', 'pct_sans_diplome', 'pct_capbep', 'pct_bac_plus',
-    'pct_chomage', 'pct_cdi', 'pct_cdd', 'pct_interim',
-    'pct_temps_partiel', 'pct_inactif', 'pct_etudiants',
-    'pct_actifs_voiture', 'pct_actifs_transports', 'pct_actifs_velo',
-    'pct_actifs_2roues', 'pct_actifs_marche',
-    'pct_proprietaires', 'pct_locataires', 'pct_hlm', 'pct_logvac',
-    'pct_maison', 'pct_appart', 'pct_petits_logements', 'pct_grands_logements',
-    'pct_logements_anciens', 'pct_logements_recents',
-    'pct_voiture_0', 'pct_voiture_2plus', 'surface_moyenne', 'pct_suroccupation',
-    'pct_chauffage_elec', 'pct_chauffage_fioul', 'pct_chauffage_gaz_ville',
-    'pct_chauffage_gaz_bouteille', 'pct_chauffage_autre',
-    'pct_garage', 'nb_pieces_moyen', 'pct_studios', 'pct_logements_5p_plus',
-    'bpe_total_pour1000', 'bpe_A_services_pour1000', 'bpe_B_commerces_pour1000',
-    'bpe_C_enseignement_pour1000', 'bpe_D_sante_pour1000',
-    'bpe_E_transports_pour1000', 'bpe_F_sports_culture_pour1000',
-    'bpe_G_tourisme_pour1000', 'bpe_educ_prioritaire_pour1000',
-    'bpe_ecole_privee_pour1000', 'bpe_sport_indoor_pour1000',
-    'pct_sport_accessible',
-]
-
 def compute_pca_scores(df, n_components=8, pop_col='pop_totale'):
     """
     Calcule les vraies composantes ACP pondérées par population.
@@ -800,7 +632,7 @@ def compute_embeddings(df):
     X_pca = df[pca_cols].values.astype(float)
     print(f"  Entrée : {len(pca_cols)} composantes PCA (score_pca_1..{len(pca_cols)})")
 
-    # t-SNE
+    # t-SNE (full)
     print("  t-SNE en cours (peut prendre quelques minutes)...")
     tsne = TSNE(n_components=2, perplexity=30, max_iter=1000,
                 random_state=42, init='pca', learning_rate='auto')
@@ -809,7 +641,7 @@ def compute_embeddings(df):
     df['tsne_y'] = tsne_coords[:, 1]
     print(f"  t-SNE terminé : x=[{tsne_coords[:, 0].min():.1f}, {tsne_coords[:, 0].max():.1f}]")
 
-    # UMAP
+    # UMAP (full)
     if HAS_UMAP:
         print("  UMAP en cours...")
         reducer = umap.UMAP(n_neighbors=15, min_dist=0.1, n_components=2,
@@ -818,6 +650,35 @@ def compute_embeddings(df):
         df['umap_x'] = umap_coords[:, 0]
         df['umap_y'] = umap_coords[:, 1]
         print(f"  UMAP terminé : x=[{umap_coords[:, 0].min():.1f}, {umap_coords[:, 0].max():.1f}]")
+
+    # Versions strictes (basées sur score_pca_*_strict)
+    strict_pca_cols = [f'score_pca_{i}_strict' for i in range(1, 9) if f'score_pca_{i}_strict' in df.columns]
+    if strict_pca_cols:
+        # Masque : IRIS avec au moins un score_pca_*_strict NaN sont exclus
+        strict_nan_mask = df[strict_pca_cols].isna().any(axis=1)
+        df_strict = df.loc[~strict_nan_mask, strict_pca_cols].copy()
+        X_pca_strict = df_strict.values.astype(float)
+        n_strict = len(df_strict)
+        print(f"\n  t-SNE strict ({n_strict} IRIS, {strict_nan_mask.sum()} exclus)...")
+        tsne_strict = TSNE(n_components=2, perplexity=30, max_iter=1000,
+                           random_state=42, init='pca', learning_rate='auto')
+        tsne_strict_coords = tsne_strict.fit_transform(X_pca_strict)
+        df['tsne_x_strict'] = np.nan
+        df['tsne_y_strict'] = np.nan
+        df.loc[~strict_nan_mask, 'tsne_x_strict'] = tsne_strict_coords[:, 0]
+        df.loc[~strict_nan_mask, 'tsne_y_strict'] = tsne_strict_coords[:, 1]
+        print(f"  t-SNE strict terminé")
+
+        if HAS_UMAP:
+            print("  UMAP strict en cours...")
+            reducer_strict = umap.UMAP(n_neighbors=15, min_dist=0.1, n_components=2,
+                                       random_state=42, metric='euclidean')
+            umap_strict_coords = reducer_strict.fit_transform(X_pca_strict)
+            df['umap_x_strict'] = np.nan
+            df['umap_y_strict'] = np.nan
+            df.loc[~strict_nan_mask, 'umap_x_strict'] = umap_strict_coords[:, 0]
+            df.loc[~strict_nan_mask, 'umap_y_strict'] = umap_strict_coords[:, 1]
+            print(f"  UMAP strict terminé")
 
     return df
 
@@ -837,7 +698,14 @@ def build_final(ml_path, with_embeddings=False):
     # Calcul des variables démographiques dérivées (colonnes P21_/C21_ déjà présentes)
     df_final = compute_demographics(df_final)
 
-    # Calcul des scores composites 
+    # Filtrage IRIS à population nulle
+    n_before = len(df_final)
+    df_final = df_final[df_final['pop_totale'].fillna(0) > 0].copy()
+    n_removed = n_before - len(df_final)
+    if n_removed > 0:
+        print(f"  Filtrage pop==0 : {n_removed} IRIS supprimés, {len(df_final)} restants")
+
+    # Calcul des scores composites
     df_final = compute_scores(df_final)
 
     # Calcul des scores PCA

@@ -13,25 +13,32 @@ from shared_config import _build_electoral_axis_vars  # private, not exported by
 
 # Partis, scores, axes, variables, élections — depuis shared_config
 
+_SKIP_BUILD = '--skipbuild' in sys.argv
+
 # ── Chargement des données ────────────────────────────────────────────────────
-print("Chargement des données IRIS...")
-df = load_iris_base()
-df = df.assign(**_build_electoral_axis_vars(df)).copy()
-print("Chargement données électorales...")
-iris_election_data = load_election_data(df)
-df = compute_parti_dominant(df, iris_election_data)
-marker_size = compute_marker_sizes(df)
-print("Calcul jitter...")
-var_data_x, var_data_y = compute_jitter_vars(df)
-print("Calcul barycentres...")
-iris_election_precomputed = compute_barycentres(df, iris_election_data, var_data_x, var_data_y)
+if not _SKIP_BUILD:
+    print("Chargement des données IRIS...")
+    df = load_iris_base()
+    df = df.assign(**_build_electoral_axis_vars(df)).copy()
+    print("Chargement données électorales...")
+    iris_election_data = load_election_data(df)
+    df = compute_parti_dominant(df, iris_election_data)
+    marker_size = compute_marker_sizes(df)
+    print("Calcul jitter...")
+    _strict_cols = [c for c in df.columns if c.endswith('_strict')]
+    var_data_x, var_data_y = compute_jitter_vars(df, extra_vars=_strict_cols)
+    print("Calcul barycentres...")
+    iris_election_precomputed = compute_barycentres(df, iris_election_data, var_data_x, var_data_y)
+else:
+    print("Mode --skipbuild : données JSON existantes conservées.")
 
 # ── 9. HELPER JS DATA ─────────────────────────────────────────────────────────
 def _round2(arr):
     return [round(float(v), 2) for v in arr]
 
 def _round3(arr):
-    return [round(float(v), 3) for v in arr]
+    import math as _math
+    return [None if v is None or (isinstance(v, float) and not _math.isfinite(v)) else round(float(v), 3) for v in arr]
 
 # Composite score vars get 3 decimals; age_moyen gets 1 decimal; pct vars get 0 (integer %)
 _COMPOSITE_VARS = set(VARS_BY_CAT.get('Scores composites', []))
@@ -44,9 +51,24 @@ _CD_PARTY_SCORES = [f'score_{g}' for g in ALL_ORDER]
 
 
 def _build_trace_data_single():
-    """Desktop: 2 traces only — trace 0 = barycentres (empty), trace 1 = all IRIS (empty)."""
+    """Mobile: 3 traces — trace 0 = densité pop. (empty), trace 1 = barycentres (empty), trace 2 = all IRIS (empty)."""
     traces = []
-    # Trace 0: barycentres (filled by applyElection)
+    # Trace 0: densité population (remplie par restyleDensity en JS)
+    traces.append(go.Histogram2dContour(
+        x=[], y=[], z=[],
+        histfunc='sum',
+        colorscale=[[0, 'rgba(200,200,200,0)'], [1, 'rgba(80,80,80,0.4)']],
+        showscale=False,
+        ncontours=10,
+        nbinsx=40, nbinsy=40,
+        contours=dict(coloring='fill', showlines=True),
+        line=dict(color='rgba(120,120,120,0.5)', width=0.5),
+        hoverinfo='none',
+        showlegend=False,
+        name='densité pop.',
+        opacity=0.7,
+    ))
+    # Trace 1: barycentres (filled by applyElection)
     traces.append(go.Scattergl(
         x=[], y=[], mode="markers+text",
         marker=dict(symbol="cross-thin", size=[], color=[], line=dict(width=3, color=[])),
@@ -55,7 +77,7 @@ def _build_trace_data_single():
         hovertemplate="<b>Barycentre %{text}</b><br>X : <b>%{x:.3f}</b><br>Y : <b>%{y:.3f}</b><extra></extra>",
         showlegend=False, opacity=0.9, name="barycentres"
     ))
-    # Trace 1: all IRIS points (filled by applyElection)
+    # Trace 2: all IRIS points (filled by applyElection)
     traces.append(go.Scattergl(
         x=[], y=[], mode="markers", name="iris",
         marker=dict(color=[], size=[], opacity=0.75,
@@ -76,115 +98,132 @@ VOTE_PARTIES_JS = [
 
 
 # ── 12. BUILD MOBILE HTML ─────────────────────────────────────────────────────
-def build_mobile_html():
-    import math
-    def _is_nan(v):
-        return v is None or (isinstance(v, float) and math.isnan(v))
+def build_mobile_html(skip_build=False):
+    import math, os as _os
 
     traces = _build_trace_data_single()
 
-    # Données socio (IRIS_X / IRIS_Y) → fichiers JSON externes (précision réduite mobile)
-    import math as _math2, os as _os
-    iris_x_js = {}
-    iris_y_js = {}
-    for v in var_data_x:
-        fn = _round3 if v in _COMPOSITE_VARS else _round2
-        iris_x_js[v] = fn(var_data_x[v])
-        iris_y_js[v] = fn(var_data_y[v])
+    if not skip_build:
+        def _is_nan(v):
+            return v is None or (isinstance(v, float) and math.isnan(v))
 
-    iris_elec = {}
-    for eid_s, data_list in iris_election_data.items():
-        iris_elec[eid_s] = {
-            'colors': [d['color'] for d in data_list],
-            'partis': [d['parti'] for d in data_list],
-            'scores': [d['scores'] for d in data_list],
-            'abst': [round(d['abst'], 1) if not _is_nan(d['abst']) else None for d in data_list],
-            'inscrits': [int(d['inscrits']) if not _is_nan(d['inscrits']) else None for d in data_list],
-            'exprimes': [int(d['exprimes']) if not _is_nan(d['exprimes']) else None for d in data_list],
-            'blancs': [int(d['blancs']) if not _is_nan(d['blancs']) else None for d in data_list],
-            'nuls': [int(d['nuls']) if not _is_nan(d['nuls']) else None for d in data_list],
-            **iris_election_precomputed.get(eid_s, {}),
-        }
+        # Données socio (IRIS_X / IRIS_Y) → fichiers JSON externes (précision réduite mobile)
+        # Les colonnes _strict utilisent _round3 ; NaN → null
+        _strict_col_set = set(_strict_cols)
+        iris_x_js = {}
+        iris_y_js = {}
+        for v in var_data_x:
+            fn = _round3 if (v in _COMPOSITE_VARS or v in _strict_col_set) else _round2
+            iris_x_js[v] = fn(var_data_x[v])
+            iris_y_js[v] = fn(var_data_y[v])
 
-    all_customdata = _make_customdata(df)
-    iris_pops = [int(round(float(v))) for v in df['_pop'].fillna(1).tolist()]
-    marker_sizes_list = [round(float(marker_size.loc[i]), 1) for i in df.index]
-    group_indices = {g: df.index[df['parti_dominant'] == g].tolist() for g in ALL_ORDER}
+        iris_elec = {}
+        for eid_s, data_list in iris_election_data.items():
+            iris_elec[eid_s] = {
+                'colors': [d['color'] for d in data_list],
+                'partis': [d['parti'] for d in data_list],
+                'scores': [d['scores'] for d in data_list],
+                'abst': [round(d['abst'], 1) if not _is_nan(d['abst']) else None for d in data_list],
+                'inscrits': [int(d['inscrits']) if not _is_nan(d['inscrits']) else None for d in data_list],
+                'exprimes': [int(d['exprimes']) if not _is_nan(d['exprimes']) else None for d in data_list],
+                'blancs': [int(d['blancs']) if not _is_nan(d['blancs']) else None for d in data_list],
+                'nuls': [int(d['nuls']) if not _is_nan(d['nuls']) else None for d in data_list],
+                **iris_election_precomputed.get(eid_s, {}),
+            }
 
-    # ── Écriture des fichiers JSON dans data/ ──────────────────────────────
-    def _build_geo_centroids(df_arg):
-        import geopandas as gpd
-        # Source principale : contours_iris_2025.gpkg (EPSG:4326, contient DROM)
-        print("  Calcul des centroïdes IRIS depuis contours_iris_2025.gpkg...")
-        gdf = gpd.read_file('iris/contours_iris_2025.gpkg')
-        centroids = gdf.to_crs('EPSG:2154').geometry.centroid.to_crs('EPSG:4326')
-        gdf['lat'] = centroids.y
-        gdf['lon'] = centroids.x
-        lookup = dict(zip(gdf['CODE_IRIS'].astype(str), zip(gdf['lat'], gdf['lon'])))
-        # Fallback : iris-stats.geojson pour les IRIS manquants
-        missing = [str(c) for c in df_arg['IRIS'] if str(c) not in lookup]
-        if missing:
-            gdf2 = gpd.read_file('iris-stats.geojson')
-            gdf2 = gdf2.set_crs('EPSG:2154', allow_override=True)
-            centroids2 = gdf2.geometry.centroid.to_crs('EPSG:4326')
-            gdf2['lat'] = centroids2.y
-            gdf2['lon'] = centroids2.x
-            for _, row in gdf2[gdf2['index'].astype(str).isin(set(missing))].iterrows():
-                lookup[str(row['index'])] = (row['lat'], row['lon'])
-        lats, lons = [], []
-        for iris_code in df_arg['IRIS']:
-            coords = lookup.get(str(iris_code))
-            if coords:
-                lats.append(round(float(coords[0]), 5))
-                lons.append(round(float(coords[1]), 5))
-            else:
-                lats.append(None)
-                lons.append(None)
-        return lats, lons
+        all_customdata = make_customdata(df)
+        iris_pops = [int(round(float(v))) for v in df['_pop'].fillna(1).tolist()]
+        marker_sizes_list = [round(float(marker_size.loc[i]), 1) for i in df.index]
+        group_indices = {g: df.index[df['parti_dominant'] == g].tolist() for g in ALL_ORDER}
 
-    _os.makedirs('data', exist_ok=True)
+        # ── Écriture des fichiers JSON dans data/ ──────────────────────────────
+        def _build_geo_centroids(df_arg):
+            import geopandas as gpd
+            # Source principale : contours_iris_2025.gpkg (EPSG:4326, contient DROM)
+            print("  Calcul des centroïdes IRIS depuis contours_iris_2025.gpkg...")
+            gdf = gpd.read_file('iris/contours_iris_2025.gpkg')
+            centroids = gdf.to_crs('EPSG:2154').geometry.centroid.to_crs('EPSG:4326')
+            gdf['lat'] = centroids.y
+            gdf['lon'] = centroids.x
+            lookup = dict(zip(gdf['CODE_IRIS'].astype(str), zip(gdf['lat'], gdf['lon'])))
+            # Fallback : iris-stats.geojson pour les IRIS manquants
+            missing = [str(c) for c in df_arg['IRIS'] if str(c) not in lookup]
+            if missing:
+                gdf2 = gpd.read_file('iris-stats.geojson')
+                gdf2 = gdf2.set_crs('EPSG:2154', allow_override=True)
+                centroids2 = gdf2.geometry.centroid.to_crs('EPSG:4326')
+                gdf2['lat'] = centroids2.y
+                gdf2['lon'] = centroids2.x
+                for _, row in gdf2[gdf2['index'].astype(str).isin(set(missing))].iterrows():
+                    lookup[str(row['index'])] = (row['lat'], row['lon'])
+            lats, lons = [], []
+            for iris_code in df_arg['IRIS']:
+                coords = lookup.get(str(iris_code))
+                if coords:
+                    lats.append(round(float(coords[0]), 5))
+                    lons.append(round(float(coords[1]), 5))
+                else:
+                    lats.append(None)
+                    lons.append(None)
+            return lats, lons
 
-    # static.json (partagé avec desktop — ne réécrire que si absent ou si desktop a déjà écrit)
-    _static_path = 'data/static.json'
-    if not _os.path.exists(_static_path):
-        _static = {
-            'IRIS_INFO': all_customdata,
-            'IRIS_POPS': iris_pops,
-            'MARKER_SIZES': marker_sizes_list,
-            'GROUP_INDICES': group_indices,
-        }
-        with open(_static_path, 'w', encoding='utf-8') as _f:
-            _json.dump(_static, _f, ensure_ascii=False, separators=(',', ':'))
-        print(f"  data/static.json : {_os.path.getsize(_static_path)//1024} KB")
-    else:
-        print(f"  data/static.json : déjà présent ({_os.path.getsize(_static_path)//1024} KB)")
+        _os.makedirs('data', exist_ok=True)
 
-    _geo_path = 'data/geo.json'
-    if not _os.path.exists(_geo_path):
-        _lats, _lons = _build_geo_centroids(df)
-        with open(_geo_path, 'w', encoding='utf-8') as _f:
-            _json.dump({'lat': _lats, 'lon': _lons}, _f, separators=(',', ':'))
-        print(f"  data/geo.json : {_os.path.getsize(_geo_path)//1024} KB")
-    else:
-        print(f"  data/geo.json : déjà présent ({_os.path.getsize(_geo_path)//1024} KB)")
+        # static.json (partagé avec desktop — ne réécrire que si absent ou si desktop a déjà écrit)
+        _static_path = 'data/static.json'
+        if not _os.path.exists(_static_path):
+            _static = {
+                'IRIS_INFO': all_customdata,
+                'IRIS_POPS': iris_pops,
+                'MARKER_SIZES': marker_sizes_list,
+                'GROUP_INDICES': group_indices,
+            }
+            with open(_static_path, 'w', encoding='utf-8') as _f:
+                _json.dump(_static, _f, ensure_ascii=False, separators=(',', ':'))
+            print(f"  data/static.json : {_os.path.getsize(_static_path)//1024} KB")
+        else:
+            print(f"  data/static.json : déjà présent ({_os.path.getsize(_static_path)//1024} KB)")
 
-    # Fichiers élection (partagés avec desktop)
-    for eid_s, elec_obj in iris_elec.items():
-        _path = f'data/elec_{eid_s}.json'
-        if not _os.path.exists(_path):
-            with open(_path, 'w', encoding='utf-8') as _f:
-                _json.dump(elec_obj, _f, ensure_ascii=False, separators=(',', ':'))
-            print(f"  data/elec_{eid_s}.json : {_os.path.getsize(_path)//1024} KB")
+        _geo_path = 'data/geo.json'
+        if not _os.path.exists(_geo_path):
+            _lats, _lons = _build_geo_centroids(df)
+            with open(_geo_path, 'w', encoding='utf-8') as _f:
+                _json.dump({'lat': _lats, 'lon': _lons}, _f, separators=(',', ':'))
+            print(f"  data/geo.json : {_os.path.getsize(_geo_path)//1024} KB")
+        else:
+            print(f"  data/geo.json : déjà présent ({_os.path.getsize(_geo_path)//1024} KB)")
 
-    # iris_x_mobile.json et iris_y_mobile.json (précision réduite)
-    _path = 'data/iris_x_mobile.json'
-    with open(_path, 'w', encoding='utf-8') as _f:
-        _json.dump(iris_x_js, _f, separators=(',', ':'))
-    print(f"  data/iris_x_mobile.json : {_os.path.getsize(_path)//1024} KB")
-    _path = 'data/iris_y_mobile.json'
-    with open(_path, 'w', encoding='utf-8') as _f:
-        _json.dump(iris_y_js, _f, separators=(',', ':'))
-    print(f"  data/iris_y_mobile.json : {_os.path.getsize(_path)//1024} KB")
+        # Fichiers élection (partagés avec desktop)
+        for eid_s, elec_obj in iris_elec.items():
+            _path = f'data/elec_{eid_s}.json'
+            if not _os.path.exists(_path):
+                with open(_path, 'w', encoding='utf-8') as _f:
+                    _json.dump(elec_obj, _f, ensure_ascii=False, separators=(',', ':'))
+                print(f"  data/elec_{eid_s}.json : {_os.path.getsize(_path)//1024} KB")
+
+        # iris_x_mobile.json et iris_y_mobile.json (précision réduite)
+        _path = 'data/iris_x_mobile.json'
+        with open(_path, 'w', encoding='utf-8') as _f:
+            _json.dump(iris_x_js, _f, separators=(',', ':'))
+        print(f"  data/iris_x_mobile.json : {_os.path.getsize(_path)//1024} KB")
+        _path = 'data/iris_y_mobile.json'
+        with open(_path, 'w', encoding='utf-8') as _f:
+            _json.dump(iris_y_js, _f, separators=(',', ':'))
+        print(f"  data/iris_y_mobile.json : {_os.path.getsize(_path)//1024} KB")
+
+        # ml_flags.json (partagé avec desktop — écrire si absent)
+        _ml_path = 'data/ml_flags.json'
+        if not _os.path.exists(_ml_path):
+            ml_flags = {}
+            for col in df.columns:
+                if col.startswith('ml_imputed_'):
+                    varname = col[len('ml_imputed_'):]
+                    ml_flags[varname] = df[col].astype(int).tolist()
+            with open(_ml_path, 'w', encoding='utf-8') as _f:
+                _json.dump(ml_flags, _f, separators=(',', ':'))
+            print(f"  data/ml_flags.json : {_os.path.getsize(_ml_path)//1024} KB")
+        else:
+            print(f"  data/ml_flags.json : déjà présent")
 
     # ── Métadonnées inline (petites, <500 KB) ─────────────────────────────
     elections_meta_str = _json.dumps(ELECTIONS_AVAILABLE, ensure_ascii=False, separators=(',', ':'))
@@ -196,9 +235,19 @@ def build_mobile_html():
     vote_parties_str = _json.dumps(VOTE_PARTIES_JS, separators=(',', ':'))
     all_parties_colors_str = _json.dumps(ALL_PARTIES_COLORS, ensure_ascii=False, separators=(',', ':'))
 
-    buttons_data = [{'key': g, 'short': SHORT.get(g, g), 'label': LABELS.get(g, g),
-                     'color': ALL_PARTIES_COLORS.get(g, '#9CA3AF'),
-                     'count': int((df['parti_dominant'] == g).sum())} for g in ALL_ORDER]
+    if skip_build:
+        with open('data/static.json', encoding='utf-8') as _f:
+            _static_cached = _json.load(_f)
+        _group_indices_cached = _static_cached['GROUP_INDICES']
+        buttons_data = [{'key': g, 'short': SHORT.get(g, g), 'label': LABELS.get(g, g),
+                         'color': ALL_PARTIES_COLORS.get(g, '#9CA3AF'),
+                         'count': len(_group_indices_cached.get(g, []))} for g in ALL_ORDER]
+        n_iris = len(_static_cached['IRIS_POPS'])
+    else:
+        buttons_data = [{'key': g, 'short': SHORT.get(g, g), 'label': LABELS.get(g, g),
+                         'color': ALL_PARTIES_COLORS.get(g, '#9CA3AF'),
+                         'count': int((df['parti_dominant'] == g).sum())} for g in ALL_ORDER]
+        n_iris = len(df)
     btns_str = _json.dumps(buttons_data, ensure_ascii=False, separators=(',', ':'))
     order_str = _json.dumps(ALL_ORDER, ensure_ascii=False, separators=(',', ':'))
 
@@ -229,7 +278,6 @@ def build_mobile_html():
     fig_json = fig.to_json()
 
     sg = AXIS_PRESETS[0]
-    n_iris = len(df)
 
     html = f"""<!DOCTYPE html>
 <html lang="fr">
@@ -256,6 +304,11 @@ html, body {{ background: #FAF9F7; font-family: 'Helvetica Neue', system-ui, san
 .custom-toggle {{ padding: 4px 10px; border-radius: 14px; border: 1.5px dashed #C0C0C0;
                   background: transparent; font-size: 10px; font-weight: 600; color: #888;
                   font-family: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; }}
+.ml-toggle-btn {{ padding: 4px 10px; border-radius: 14px; border: 1.5px solid #D97706;
+                  background: transparent; font-size: 10px; font-weight: 600; color: #D97706;
+                  font-family: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; margin-top: 4px; }}
+.ml-toggle-btn.full-mode {{ background: #FEF3C7; color: #92400E; }}
+.ml-flag {{ font-size: 9px; color: #D97706; font-style: italic; font-weight: 400; }}
 .custom-panel {{ display: none; padding: 6px 0 2px; gap: 8px; flex-direction: column; }}
 .custom-panel.open {{ display: flex; }}
 .custom-panel select {{ padding: 4px 6px; border-radius: 6px; border: 1px solid #D0D0D0;
@@ -376,6 +429,8 @@ html, body {{ background: #FAF9F7; font-family: 'Helvetica Neue', system-ui, san
   <div class="axis-bar-label">Axes :</div>
   <div class="preset-btns" id="presetBtns"></div>
   <button class="custom-toggle" id="customToggle">Personnaliser ▾</button>
+  <button class="ml-toggle-btn" id="mlToggleBtn" style="display:none" title="Basculer mode strict/full ML">⚠ Imputés ML : masqués</button>
+  <button class="ml-toggle-btn" id="densityToggleBtn" style="border-color:#9CA3AF;color:#9CA3AF;">Densité : affichée</button>
   <div class="custom-panel" id="customPanel">
     <div>
       <label>Axe X :</label>
@@ -489,6 +544,11 @@ let mapReady = false;
 let mapInitialized = false;
 let isCarteActive = false;
 let IRIS_INFO = null, IRIS_POPS = null, MARKER_SIZES = null, GROUP_INDICES = null;
+let ML_FLAGS = null;      // chargé depuis data/ml_flags.json (tableaux 0/1 par var DISP_*)
+let mlStrictMode = true;  // true = masquer les IRIS imputés ML (mode par défaut)
+let densityVisible = true;
+let currentXVarData = 'score_exploitation';
+let currentYVarData = 'score_domination';
 const elecCache = {{}};  // cache élections déjà fetché
 const domMaps = [];
 const domMapsReady = [];
@@ -701,7 +761,8 @@ function showCard(irisGlobalIdx) {{
   partyEl.style.color = '#666';
   document.getElementById('cardPop').textContent = fmtNum(cd[2], ' hab.');
   document.getElementById('cardAge').textContent = cd[18] !== '' && cd[18] != null ? Number(cd[18]).toFixed(1) + ' ans' : '—';
-  document.getElementById('cardRev').textContent = fmtNum(cd[3], ' €/UC');
+  document.getElementById('cardRev').innerHTML = fmtNum(cd[3], ' €/UC') +
+    (isMLImputed(irisGlobalIdx, 'DISP_MED21') ? ' <span style="font-size:10px;color:#D97706;font-style:italic;font-weight:400">(imputé ML)</span>' : '');
   document.getElementById('cardCSP').innerHTML =
     `<div class="stat-row"><span class="stat-lbl">Cadres sup.</span><div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${{Math.min(100,cd[4]||0)}}%;background:#5B8DB8"></div></div><span class="stat-pct">${{fmtPct(cd[4])}}</span></div>` +
     `<div class="stat-row"><span class="stat-lbl">Prof. interm.</span><div class="stat-bar-bg"><div class="stat-bar-fill" style="width:${{Math.min(100,cd[6]||0)}}%;background:#82AAC8"></div></div><span class="stat-pct">${{fmtPct(cd[6])}}</span></div>` +
@@ -763,8 +824,8 @@ function restyleIRIS() {{
   const data = elecCache[currentElectionId];
   if (!data) return;
   const t1Data = getT1FallbackData(currentElectionId);
-  const xArr = IRIS_X[currentXVar] || [];
-  const yArr = IRIS_Y[currentYVar] || [];
+  const xArr = IRIS_X[currentXVarData] || IRIS_X[currentXVar] || [];
+  const yArr = IRIS_Y[currentYVarData] || IRIS_Y[currentYVar] || [];
   const colorArr = currentColorVar ? (IRIS_X[currentColorVar] || IRIS_Y[currentColorVar] || null) : null;
   const n = xArr.length;
   const knownKeys = new Set(btns.map(b => b.key));
@@ -797,7 +858,7 @@ function restyleIRIS() {{
     'marker.color': [fc],
     'marker.size': [fs],
     customdata: [fcd],
-  }}, [1]);
+  }}, [2]);
 }}
 
 // ── Restyle barycentres (trace 0) ─────────────────────────────────────────
@@ -820,8 +881,10 @@ function restyleBarycentres() {{
       return pb - pa;
     }});
   topG.forEach(g => {{
-    const xm = baryMeans[g][currentXVar] !== undefined ? baryMeans[g][currentXVar] : 0;
-    const ym = baryMeans[g][currentYVar] !== undefined ? baryMeans[g][currentYVar] : 0;
+    const xm = (baryMeans[g][currentXVarData] !== undefined ? baryMeans[g][currentXVarData] : null)
+               ?? (baryMeans[g][currentXVar] !== undefined ? baryMeans[g][currentXVar] : 0);
+    const ym = (baryMeans[g][currentYVarData] !== undefined ? baryMeans[g][currentYVarData] : null)
+               ?? (baryMeans[g][currentYVar] !== undefined ? baryMeans[g][currentYVar] : 0);
     baryX.push(currentXInvert ? -xm : xm);
     baryY.push(ym);
     baryColors.push(ALL_PARTIES_COLORS_JS[g] || COULEURS_JS[g] || '#999');
@@ -830,7 +893,8 @@ function restyleBarycentres() {{
   }});
   const abstBary = computeAbstBary(currentElectionId);
   if (abstBary) {{
-    const xm = abstBary[currentXVar], ym = abstBary[currentYVar];
+    const xm = abstBary[currentXVarData] ?? abstBary[currentXVar],
+          ym  = abstBary[currentYVarData] ?? abstBary[currentYVar];
     if (xm !== null && ym !== null) {{
       baryX.push(currentXInvert ? -xm : xm); baryY.push(ym);
       baryColors.push('#9CA3AF'); baryTexts.push('Abst.');
@@ -844,7 +908,7 @@ function restyleBarycentres() {{
     'textfont.color': [baryColors],
     text: [baryTexts],
     'marker.size': [barySzs],
-  }}, [0]);
+  }}, [1]);
 }}
 
 // ── Abstention stats panel ─────────────────────────────────────────────────
@@ -1067,11 +1131,45 @@ function updateTourBtns(type, year) {{
   tourBtn2.classList.toggle('active', currentElectionTour === 2 && available.includes(2));
 }}
 
+// ── Résolution mode strict ML ─────────────────────────────────────────────
+function resolveVarStrict(varName) {{
+  if (!mlStrictMode || !IRIS_X) return varName;
+  const sname = varName + '_strict';
+  return IRIS_X[sname] !== undefined ? sname : varName;
+}}
+
+function isMLImputed(irisIdx, dispVarName) {{
+  return ML_FLAGS && ML_FLAGS[dispVarName] && ML_FLAGS[dispVarName][irisIdx] === 1;
+}}
+
+// ── Restyle density contour (trace 0) ────────────────────────────────────
+function restyleDensity() {{
+  if (!IRIS_X || !IRIS_Y || !IRIS_POPS) return;
+  if (!densityVisible) {{
+    Plotly.restyle(chartDiv, {{x: [[]], y: [[]], z: [[]]}}, [0]);
+    return;
+  }}
+  const xArr = IRIS_X[currentXVarData] || IRIS_X[currentXVar] || [];
+  const yArr = IRIS_Y[currentYVarData] || IRIS_Y[currentYVar] || [];
+  const n = xArr.length;
+  const xs = [], ys = [], ws = [];
+  for (let i = 0; i < n; i++) {{
+    const xv = xArr[i], yv = yArr[i];
+    if (xv == null || yv == null) continue;
+    xs.push(currentXInvert ? -xv : xv);
+    ys.push(yv);
+    ws.push(IRIS_POPS[i] || 1);
+  }}
+  Plotly.restyle(chartDiv, {{x: [xs], y: [ys], z: [ws]}}, [0]);
+}}
+
 // ── Apply axes ────────────────────────────────────────────────────────────
 function applyAxes(xVar, xInvert, yVar, preset) {{
   currentXVar = xVar;
   currentYVar = yVar;
   currentXInvert = xInvert;
+  currentXVarData = resolveVarStrict(xVar);
+  currentYVarData = resolveVarStrict(yVar);
   if (preset) {{
     currentXRange = preset.xRange ? preset.xRange.slice() : computeDataRange(xVar, xInvert);
     currentYRange = preset.yRange ? preset.yRange.slice() : computeDataRange(yVar, false);
@@ -1084,6 +1182,7 @@ function applyAxes(xVar, xInvert, yVar, preset) {{
   activeGroups = new Set(btns.filter(b => b.count > 0).map(b => b.key));
   rebuildFilterButtons();
   updateToggleLabel();
+  restyleDensity();
   restyleIRIS();
   restyleBarycentres();
 
@@ -1308,6 +1407,31 @@ customToggle.addEventListener('click', () => {{
   customToggle.classList.toggle('open', open);
   customToggle.textContent = open ? 'Personnaliser ▴' : 'Personnaliser ▾';
 }});
+
+const mlToggleBtn = document.getElementById('mlToggleBtn');
+if (mlToggleBtn) {{
+  mlToggleBtn.addEventListener('click', () => {{
+    mlStrictMode = !mlStrictMode;
+    mlToggleBtn.textContent = mlStrictMode ? '⚠ Imputés ML : masqués' : '⚠ Imputés ML : affichés';
+    mlToggleBtn.classList.toggle('full-mode', !mlStrictMode);
+    currentXVarData = resolveVarStrict(currentXVar);
+    currentYVarData = resolveVarStrict(currentYVar);
+    restyleDensity();
+    restyleIRIS();
+    restyleBarycentres();
+  }});
+}}
+
+// ── Bouton toggle densité ─────────────────────────────────────────────────
+const densityToggleBtn = document.getElementById('densityToggleBtn');
+if (densityToggleBtn) {{
+  densityToggleBtn.addEventListener('click', () => {{
+    densityVisible = !densityVisible;
+    densityToggleBtn.textContent = densityVisible ? 'Densité : affichée' : 'Densité : masquée';
+    densityToggleBtn.classList.toggle('full-mode', !densityVisible);
+    restyleDensity();
+  }});
+}}
 
 function buildSelect(selectId, selectedVar) {{
   const sel = document.getElementById(selectId);
@@ -1660,13 +1784,16 @@ function hideCarte() {{
   setCorners(PRESETS[0].corners);
   updateDesc(PRESETS[0], PRESETS[0].xVar, PRESETS[0].yVar);
 
-  const [xData, yData] = await Promise.all([
+  const [xData, yData, mlFlagsData] = await Promise.all([
     fetch('data/iris_x_mobile.json').then(r => r.json()),
     fetch('data/iris_y_mobile.json').then(r => r.json()),
+    fetch('data/ml_flags.json').then(r => r.json()).catch(() => null),
   ]);
 
   IRIS_X = xData;
   IRIS_Y = yData;
+  ML_FLAGS = mlFlagsData;
+  if (mlToggleBtn && ML_FLAGS && Object.keys(ML_FLAGS).length > 0) mlToggleBtn.style.display = '';
 
   buildPresetButtons();
   buildSelect('xSelect', PRESETS[0].xVar);
@@ -1697,7 +1824,7 @@ function hideCarte() {{
     return html
 
 
-mobile_html = build_mobile_html()
+mobile_html = build_mobile_html(skip_build=_SKIP_BUILD)
 with open("saint_graphique_iris_mobile.html", "w", encoding="utf-8") as f:
     f.write(mobile_html)
 print(f"Mobile  → saint_graphique_iris_mobile.html ({len(mobile_html)//1024} KB)")
