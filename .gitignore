@@ -78,8 +78,6 @@ Thumbs.db
 *.swp
 *.swo
 
-#MD
-*.md
 
 #bat
 *.bat
@@ -112,3 +110,5 @@ eda_osm_cultes_politique.ipynb
 .claude/settings.local.json
 
 .claude/*
+CLAUDE.md
+TASKS.md
