@@ -72,11 +72,12 @@ python rebuild_vizu_iris.py --skipbuild
 
 ## Scores sociologiques
 
-Les scores sont calculés en 3 étapes :
+Les scores sont calculés par ACP pondérée (`make_score_pca_grouped`) :
 
-1. **Zscore pondéré** par population pour chaque variable
-2. **Agrégation pondérée** par poids théoriques → indice composite de groupe
-3. **Rang centile pondéré** → moyenne des rangs de groupes → score final ∈ [-50, +50]
+1. **Z-score pondéré** par population pour chaque variable 
+2. **ACP pondérée** par population sur les z-scores → PC1
+3. Si le score est défini par **plusieurs groupes** de variables : répétition de l'étape 2 par groupe, z-score des PC1 obtenus, puis ACP finale sur ces PC1
+4. **Rang centile pondéré** par population → score final ∈ [-50, +50]
 
 Scores disponibles (extrait) :
 
@@ -105,6 +106,46 @@ Les variantes `_strict` excluent les IRIS dont les variables FILO ont été impu
 - **Européennes** : 2014, 2019, 2024
 - **Municipales** : 2014, 2020, 2026 (T1 + T2)
 
+### Pipeline élections BV → IRIS
+
+Les résultats électoraux sont fournis par bureau de vote (BV). Le rattachement à un IRIS se fait via une **table de passage** construite en interne :
+
+```
+build_contours_iris.py   ← télécharge + fusionne les contours IRIS IGN 2025 (métropole + DOM)
+                           → iris/contours_iris_2025.gpkg
+
+build_passage_bv_iris.py ← spatial join BV→IRIS (within + nearest fallback)
+                           → table_passage_BV_IRIS.csv
+
+merge_bv_iris.py         ← agrège les voix par BV au niveau IRIS via la table de passage
+                           → iris/elections/<id_election>.csv (un fichier par scrutin+tour)
+```
+
+#### `build_contours_iris.py`
+
+Télécharge les Contours IRIS IGN 2025 pour la métropole et les DOM depuis [data.geopf.fr](https://data.geopf.fr), les extrait (7-Zip) et les fusionne en un seul GeoPackage WGS84 (`iris/contours_iris_2025.gpkg`).
+
+#### `build_passage_bv_iris.py`
+
+Construit `table_passage_BV_IRIS.csv` (colonnes : `ID_BUREAU_VOTE`, `CODE_IRIS`) par spatial join entre la couche de bureaux de vote ([data.gouv.fr — reconstruction géométrique BV](https://www.data.gouv.fr/datasets/reconstruction-automatique-de-la-geometrie-des-bureaux-de-vote-depuis-insee-reu-et-openstreetmap)) et les contours IRIS :
+
+1. **Within** : le point représentatif du BV tombe dans un IRIS → match direct
+2. **Nearest (fallback)** : BV hors contour → IRIS le plus proche
+3. **Passe inverse** : IRIS sans aucun BV → BV le plus proche assigné, afin qu'aucun IRIS ne reste vide
+
+#### `merge_bv_iris.py`
+
+Agrège `resultats_elections/candidats_results.parquet` et `resultats_elections/general_results.parquet` au niveau IRIS via `table_passage_BV_IRIS.csv` :
+
+- Mapping nuances/noms de candidats → partis (`NUANCE_TO_PARTI_BASE`, surcharges par élection, mapping présidentielles par nom)
+- Calcul des scores (% des exprimés) et du taux d'abstention par IRIS
+- Un CSV de sortie par scrutin+tour dans `iris/elections/`
+
+```bash
+~/anaconda3/envs/vadim_env/python.exe merge_bv_iris.py
+~/anaconda3/envs/vadim_env/python.exe merge_bv_iris.py --elections 2024_legi_t1 2024_legi_t2
+~/anaconda3/envs/vadim_env/python.exe merge_bv_iris.py --list   # liste les élections disponibles
+```
 
 ---
 
