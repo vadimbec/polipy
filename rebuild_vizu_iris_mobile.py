@@ -57,17 +57,24 @@ def _build_trace_data_single():
     traces.append(go.Histogram2dContour(
         x=[], y=[], z=[],
         histfunc='sum',
-        colorscale=[[0, 'rgba(200,200,200,0)'], [1, 'rgba(80,80,80,0.4)']],
+        # colorscale=[[0, 'rgba(200,200,200,0)'], [1, 'rgba(80,80,80,0.4)']],
+        # colorscale=[[0, 'rgba(220,220,220,0)'], [1, 'rgba(110,110,110,0.3)']],
+        colorscale = [[0, 'rgba(230,230,230,0)'], [0.1, 'rgba(130,130,130,0.2)'], [1, 'rgba(20,20,20,0.8)']],
         showscale=False,
-        ncontours=10,
-        nbinsx=40, nbinsy=40,
-        contours=dict(coloring='fill', showlines=True),
-        line=dict(color='rgba(120,120,120,0.5)', width=0.5),
+
+        ncontours=25, 
+
+        contours=dict(
+            coloring='fill', 
+            showlines=False, 
+        ),
+
+        nbinsx=40, nbinsy=40, 
         hoverinfo='none',
-        showlegend=False,
+        showlegend=True,
         name='densité pop.',
-        opacity=0.7,
-    ))
+        opacity=0.4,
+    ))    
     # Trace 1: barycentres (filled by applyElection)
     traces.append(go.Scattergl(
         x=[], y=[], mode="markers+text",
