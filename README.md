@@ -17,8 +17,8 @@ Chaque point est un IRIS (zone de recensement INSEE, ~2 000 habitants). Les axes
 ```
 shared_config.py            ← config centralisée (partis, scores, élections, fonctions)
 build_iris_final.py         ← pipeline de données : INSEE brut → iris_final_socio_politique.csv
-rebuild_vizu_iris.py        ← génère saint_graphique_iris.html (desktop, ~163 MB)
-rebuild_vizu_iris_mobile.py ← génère saint_graphique_iris_mobile.html (mobile, ~114 MB)
+rebuild_vizu_iris.py        ← génère .html (desktop, ~163 MB)
+rebuild_vizu_iris_mobile.py ← génère .html (mobile, ~114 MB)
 ```
 
 ### `shared_config.py`
@@ -27,7 +27,7 @@ Configuration et fonctions partagées entre desktop et mobile :
 
 - **Partis** : `COULEURS`, `LABELS`, `SHORT`, `OPACITY`, `ORDER`, `ALL_ORDER` (~40 partis/candidats)
 - **Scores** : `SCORES_CONFIG_GROUPED_PCA` — architecture en groupes pondérés (zscore → rang centile → moyenne des rangs)
-- **Axes** : `AXIS_PRESETS` — presets nommés (Saint-Graphique, Bourdieu, Territoire×Précarité, t-SNE, UMAP, PCA, etc.)
+- **Axes** : `AXIS_PRESETS` — presets nommés (Domination x Eploitation, Bourdieu, Territoire×Précarité, t-SNE, UMAP, PCA, etc.)
 - **Variables** : `VARS_BY_CAT`, `VAR_LABELS`, `ALL_VARS` — ~200 variables sélectionnables dans les dropdowns
 - **Élections** : `ELECTIONS_AVAILABLE` — 22 scrutins (législatives, présidentielles, européennes, municipales 2012–2026)
 - **Fonctions** : `load_iris_base`, `load_election_data`, `compute_parti_dominant`, `compute_marker_sizes`, `compute_jitter_vars`, `compute_barycentres`
@@ -82,8 +82,8 @@ Scores disponibles (extrait) :
 
 | Score | Description |
 |-------|-------------|
-| `score_domination` | Position dans la hiérarchie sociale |
-| `score_exploitation` | Revenus patrimoniaux/bénéfices vs salaires (axe x Saint-Graphique) |
+| `score_domination` | Position dans la hiérarchie sociale, pouvoir de décision (CSP, diplômes, stabilité contractuelle) |
+| `score_exploitation` | Revenus patrimoniaux/bénéfices vs salaires, rapport aux moyens de productions |
 | `score_cap_eco` | Capital économique (revenus, patrimoine, propriété) |
 | `score_cap_cult` | Capital culturel (diplômes, CSP intermédiaires+) |
 | `score_precarite` | Précarité sociale (chômage, minima sociaux, taux pauvreté) |
