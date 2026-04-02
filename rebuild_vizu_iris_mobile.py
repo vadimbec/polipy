@@ -606,12 +606,18 @@ function computeDataRange_embeddings(varName, invert) {{
   const arr = IRIS_X[varName] || IRIS_Y[varName];
   if (!arr) return [-1, 1];
   let mn = Infinity, mx = -Infinity;
-  for (const v of arr) {{
-    if (v === null || v === undefined || isNaN(v)) continue;
-    const val = invert ? -v : v;
-    if (val < mn) mn = val;
-    if (val > mx) mx = val;
-  }}
+  const scanArr = (a) => {{
+    for (const v of a) {{
+      if (v === null || v === undefined || isNaN(v)) continue;
+      const val = invert ? -v : v;
+      if (val < mn) mn = val;
+      if (val > mx) mx = val;
+    }}
+  }};
+  scanArr(arr);
+  // Inclure la variante _strict pour que le range couvre les deux modes (full et strict ML)
+  const arrStrict = (IRIS_X && IRIS_X[varName + '_strict']) || (IRIS_Y && IRIS_Y[varName + '_strict']);
+  if (arrStrict) scanArr(arrStrict);
   if (mn === Infinity) return [-1, 1];
   const pad = (mx - mn) * 0.02;
   return [mn - pad, mx + pad];
