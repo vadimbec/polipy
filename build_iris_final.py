@@ -600,7 +600,7 @@ def compute_pca_scores(df, n_components=8, pop_col='pop_totale'):
     for k in range(n_components):
         col_name = f'score_pca_{k+1}'
         s = pd.Series(X_pca[:, k], index=df.index)
-        df[col_name] = _rang_pondere(s, pop_series)
+        # df[col_name] = _rang_pondere(s, pop_series)
         loadings = pd.Series(eigenvectors[:, k], index=var_names)
         top_pos = loadings.nlargest(5).index.tolist()
         top_neg = loadings.nsmallest(5).index.tolist()
@@ -705,10 +705,10 @@ def build_final(ml_path, with_embeddings=False):
     if n_removed > 0:
         print(f"  Filtrage pop==0 : {n_removed} IRIS supprimés, {len(df_final)} restants")
 
-    # Calcul des scores composites
+    # Calcul des scores composites + PCA stricte
     df_final = compute_scores(df_final)
 
-    # Calcul des scores PCA
+    # Calcul des scores PCA full
     df_final = compute_pca_scores(df_final)
 
     # Calcul optionnel t-SNE / UMAP

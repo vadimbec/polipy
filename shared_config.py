@@ -996,7 +996,8 @@ def make_score_pca_grouped(groupes, df, anchor_var=None, min_variance_explained=
     if anchor_var and anchor_var in df.columns:
         if score.corr(pd.to_numeric(df[anchor_var], errors='coerce')) < 0:
             score = -score
-    return _rang_pondere(score, pop), {'group_diags': diags, 'final_var_exp': final_var_exp}
+    # return _rang_pondere(score, pop), {'group_diags': diags, 'final_var_exp': final_var_exp}
+    return score, {'group_diags': diags, 'final_var_exp': final_var_exp}
 
 
 EMBEDDING_VARS_PCA = [
@@ -1076,7 +1077,8 @@ def compute_pca_vraie(df, n_components=8):
     for k in range(n_components):
         col_name = f'score_pca_{k+1}'
         s = pd.Series(X_pca[:, k], index=df.index)
-        df[col_name] = _rang_pondere(s, pop_series)
+        # df[col_name] = _rang_pondere(s, pop_series)
+        df[col_name] = s
         loadings = pd.Series(eigenvectors[:, k], index=var_names)
         top_pos = loadings.nlargest(3).index.tolist()
         top_neg = loadings.nsmallest(3).index.tolist()
@@ -1102,7 +1104,7 @@ AXIS_PRESETS = [
         'yVar': 'score_domination',
         'xTitle': '← Exploité (prolétaire) ─── Position dans le rapport capital/travail ─── Exploiteur (bourgeois) →',
         'yTitle': '← Dominé ─── Domination sociale (Bourdieu) ─── Dominant →',
-        'xRange': [-55.0, 55.0], 'yRange': [-55.0, 55.0],
+        'xRange': None, 'yRange': None,
         'corners': [
             {'pos': 'tl', 'text': 'ASCENSION<br>SOCIALE', 'color': '#E87070'},
             {'pos': 'tr', 'text': 'REPRODUCTION<br>DU CAPITAL', 'color': '#6B8FD4'},
@@ -1129,7 +1131,7 @@ AXIS_PRESETS = [
         'yVar': 'score_cap_cult',
         'xTitle': '← Pauvre ─── Capital Economique ─── Riche →',
         'yTitle': '← Peu diplômé · ouvrier ─── Capital culturel ─── Diplômé · cadre →',
-        'xRange': [-55.0, 55.0], 'yRange': [-55.0, 55.0],
+        'xRange': None, 'yRange': None,
         'corners': [
             {'pos': 'tl', 'text': 'PAUVRE<br>DIPLOME', 'color': '#E87070'},
             {'pos': 'tr', 'text': 'RICHE<br>DIPLOME', 'color': '#6B8FD4'},
@@ -1156,7 +1158,7 @@ AXIS_PRESETS = [
         'yVar': 'score_domination',
         'xTitle': '← Revenu du travail (salaires) ─── Rentier vs Travailleur ─── Revenu du capital →',
         'yTitle': '← Dominé ─── Domination sociale (Bourdieu) ─── Dominant →',
-        'xRange': [-55.0, 55.0], 'yRange': [-55.0, 55.0],
+        'xRange': None, 'yRange': None,
         'corners': [
             {'pos': 'tl', 'text': 'INTELLECTUELS<br>FONCTIONNAIRES', 'color': '#E87070'},
             {'pos': 'tr', 'text': 'ÉLITE<br>RENTIÈRE', 'color': '#6B8FD4'},
@@ -1210,7 +1212,7 @@ AXIS_PRESETS = [
         'yVar': 'score_precarite',
         'xTitle': '← Urbain dense (transports, apparts) ─── Axe territorial ─── Rural / pavillonnaire (voiture, maison) →',
         'yTitle': '← Sécurisé ─── Score précarité ─── Précaire →',
-        'xRange': [-55.0, 55.0], 'yRange': [-55.0, 55.0],
+        'xRange': None, 'yRange': None,
         'corners': [
             {'pos': 'bl', 'text': 'URBAIN<br>SÉCURISÉ', 'color': '#6B8FD4'},
             {'pos': 'br', 'text': 'RURAL/PAVILLONNAIRE<br>SÉCURISÉ', 'color': '#059669'},
@@ -1235,7 +1237,7 @@ AXIS_PRESETS = [
         'yVar': 'score_equipement_public',
         'xTitle': '\u2190 Rural / Pavillonnaire \u2500\u2500\u2500 Urbanit\u00e9 \u2500\u2500\u2500 Urbain dense \u2192',
         'yTitle': '\u2190 Sous-\u00e9quip\u00e9 \u2500\u2500\u2500 \u00c9quipement public \u2500\u2500\u2500 Bien \u00e9quip\u00e9 \u2192',
-        'xRange': [-55.0, 55.0], 'yRange': [-55.0, 55.0],
+        'xRange': None, 'yRange': None,
         'corners': [
             {'pos': 'tl', 'text': 'RURAL<br>\u00c9QUIP\u00c9', 'color': '#6B8FD4'},
             {'pos': 'tr', 'text': 'URBAIN<br>\u00c9QUIP\u00c9', 'color': '#E87070'},
@@ -1260,7 +1262,7 @@ AXIS_PRESETS = [
         'yVar': 'score_precarite',
         'xTitle': '\u2190 Parc d\u00e9grad\u00e9 \u2500\u2500\u2500 Confort r\u00e9sidentiel \u2500\u2500\u2500 Parc confortable \u2192',
         'yTitle': '\u2190 Ais\u00e9 \u2500\u2500\u2500 Pr\u00e9carit\u00e9 \u2500\u2500\u2500 Pr\u00e9caire \u2192',
-        'xRange': [-55.0, 55.0], 'yRange': [-55.0, 55.0],
+        'xRange': None, 'yRange': None,
         'corners': [
             {'pos': 'tl', 'text': 'D\u00c9GRAD\u00c9<br>PR\u00c9CAIRE', 'color': '#E87070'},
             {'pos': 'tr', 'text': 'CONFORTABLE<br>PR\u00c9CAIRE', 'color': '#C49A30'},
@@ -1285,7 +1287,7 @@ AXIS_PRESETS = [
         'yVar': 'score_urbanite',
         'xTitle': '← Faible dépendance fossile ─── Score dépendance carbone ─── Fort dépendance fossile →',
         'yTitle': '← Rural / pavillonnaire ─── Score urbanité ─── Urbain dense →',
-        'xRange': [-55.0, 55.0], 'yRange': [-55.0, 55.0],
+        'xRange': None, 'yRange': None,
         'corners': [
             {'pos': 'tl', 'text': 'RURAL<br>SOBRE', 'color': '#059669'},
             {'pos': 'tr', 'text': 'PAVILLONNAIRE<br>CARBONÉ', 'color': '#DC2626'},
@@ -1313,7 +1315,7 @@ AXIS_PRESETS = [
         'yVar': 'score_pca_2',
         'xTitle': '← Locatif dense (appartements, immigrés) ─── PCA 1 : Logement & confort ─── Propriétaire pavillonnaire →',
         'yTitle': '← Diplômé aisé ─── PCA 2 : Composition sociale ─── Ouvrier précaire →',
-        'xRange': [-55.0, 55.0], 'yRange': [-55.0, 55.0],
+        'xRange': None, 'yRange': None,
         'corners': [
             {'pos': 'tl', 'text': 'HLM<br>PRÉCAIRE', 'color': '#DC2626'},
             {'pos': 'tr', 'text': 'PAVILLONNAIRE<br>OUVRIER', 'color': '#374151'},

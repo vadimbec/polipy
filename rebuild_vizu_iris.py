@@ -89,7 +89,7 @@ def _build_trace_data_single():
         hoverinfo='none',
         showlegend=True,
         name='densité pop.',
-        opacity=0.4,
+        opacity=0.25,
     ))    
     
     # Trace 1: barycentres (filled by applyElection)
@@ -561,8 +561,8 @@ let currentXVar = 'score_exploitation';
 let currentYVar = 'score_domination';
 let currentXInvert = false;
 let currentPresetId = 'saint_graphique';
-let currentXRange = PRESETS[0].xRange.slice();
-let currentYRange = PRESETS[0].yRange.slice();
+let currentXRange = (PRESETS[0].xRange || [-10, 10]).slice();
+let currentYRange = (PRESETS[0].yRange || [-10, 10]).slice();
 let currentCorners = PRESETS[0].corners;
 let currentColorVar = null;   // null = couleur par élection, sinon nom de variable
 let colorVarMin = 0, colorVarMax = 1;
@@ -581,7 +581,7 @@ function setCorners(corners) {{
 setCorners(currentCorners);
 
 // ── Auto-range helper ─────────────────────────────────────────────────────
-function computeDataRange(varName, invert) {{
+function computeDataRange_embeddings(varName, invert) {{
   if (!IRIS_X || !IRIS_Y) return [-1, 1];
   const arr = IRIS_X[varName] || IRIS_Y[varName];
   if (!arr) return [-1, 1];
@@ -593,9 +593,45 @@ function computeDataRange(varName, invert) {{
     if (val > mx) mx = val;
   }}
   if (mn === Infinity) return [-1, 1];
-  const pad = (mx - mn) * 0.08;
+  const pad = (mx - mn) * 0.02;
   return [mn - pad, mx + pad];
 }}
+
+// ── Auto-range helper (Percentiles %) ──────────────────────────────
+function computeDataRange(varName, invert) {{
+  if (!IRIS_X || !IRIS_Y) return [-1, 1];
+  
+  const arr = IRIS_X[varName] || IRIS_Y[varName];
+  if (!arr || arr.length === 0) return [-1, 1];
+
+  // 1. Filtrage et inversion
+  let cleanArr = [];
+  for (let i = 0; i < arr.length; i++) {{
+    const v = arr[i];
+    if (v !== null && v !== undefined && !isNaN(v)) {{
+      cleanArr.push(invert ? -v : v);
+    }}
+  }}
+
+  if (cleanArr.length === 0) return [-1, 1];
+
+  // 2. Tri (nécessaire pour les percentiles)
+  cleanArr.sort((a, b) => a - b);
+
+  // 3. Calcul des indices %
+  const lowIdx = Math.floor(cleanArr.length * 0.0001);
+  const highIdx = Math.max(0, Math.ceil(cleanArr.length * 0.9999) - 1);
+
+  const p05 = cleanArr[lowIdx];
+  const p95 = cleanArr[highIdx];
+
+  // 4. Marge de sécurité réduite (2%)
+  const diff = p95 - p05;
+  const pad = diff === 0 ? 1 : diff * 0.02;
+
+  return [p05 - pad, p95 + pad];
+}}
+
 
 // ── Colorscale variable ────────────────────────────────────────────────────
 function lerp(a, b, t) {{ return a + (b - a) * t; }}
@@ -830,13 +866,15 @@ function applyAxes(xVar, xInvert, yVar, preset) {{
   // Résoudre les noms de variables pour l'accès aux données (strict si disponible)
   currentXVarData = resolveVarStrict(xVar);
   currentYVarData = resolveVarStrict(yVar);
+  const _rangeF = (preset && (preset.id === 'tsne' || preset.id === 'umap'))
+    ? computeDataRange_embeddings : computeDataRange;
   if (preset) {{
-    currentXRange = preset.xRange ? preset.xRange.slice() : computeDataRange(xVar, xInvert);
-    currentYRange = preset.yRange ? preset.yRange.slice() : computeDataRange(yVar, false);
+    currentXRange = preset.xRange ? preset.xRange.slice() : _rangeF(xVar, xInvert);
+    currentYRange = preset.yRange ? preset.yRange.slice() : _rangeF(yVar, false);
     currentCorners = preset.corners;
   }} else {{
-    currentXRange = computeDataRange(xVar, xInvert);
-    currentYRange = computeDataRange(yVar, false);
+    currentXRange = _rangeF(xVar, xInvert);
+    currentYRange = _rangeF(yVar, false);
   }}
 
   activeGroups = new Set(btns.filter(b => b.count > 0).map(b => b.key));
