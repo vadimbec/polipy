@@ -228,13 +228,10 @@ def build_desktop_html(skip_build=False):
         print(f"  data/static.json : {_os.path.getsize(_path)//1024} KB")
 
         _geo_path = 'data/geo.json'
-        if not _os.path.exists(_geo_path):
-            _lats, _lons = _build_geo_centroids(df)
-            with open(_geo_path, 'w', encoding='utf-8') as _f:
-                _json.dump({'lat': _lats, 'lon': _lons}, _f, separators=(',', ':'))
-            print(f"  data/geo.json : {_os.path.getsize(_geo_path)//1024} KB")
-        else:
-            print(f"  data/geo.json : déjà présent ({_os.path.getsize(_geo_path)//1024} KB)")
+        _lats, _lons = _build_geo_centroids(df)
+        with open(_geo_path, 'w', encoding='utf-8') as _f:
+            _json.dump({'lat': _lats, 'lon': _lons}, _f, separators=(',', ':'))
+        print(f"  data/geo.json : {_os.path.getsize(_geo_path)//1024} KB")
 
         # Un fichier par élection
         for eid_s, elec_obj in iris_elec.items():
