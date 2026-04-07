@@ -423,6 +423,32 @@ html, body {{ background: #FAF9F7; font-family: 'Helvetica Neue', system-ui, san
 
 #abst-stats-panel {{ padding: 5px 10px; font-size: 9px; color: #555;
                      border-top: 1px solid #E8E8E8; display: none; line-height: 1.6; word-break: break-word; }}
+
+/* ── Search / highlight bar ─────────────────────────────────────────────── */
+.search-bar {{ display: flex; align-items: center; gap: 5px; padding: 4px 10px; flex-wrap: wrap; }}
+.search-bar select {{ padding: 3px 6px; border-radius: 8px; border: 1px solid #D0D0D0;
+                      font-size: 10px; font-family: inherit; color: #555; background: #fff; cursor: pointer; max-width: 130px; }}
+.search-input-wrap {{ position: relative; }}
+.search-bar input {{ padding: 4px 8px; border-radius: 8px; border: 1px solid #D0D0D0;
+                     font-size: 10px; font-family: inherit; color: #222; width: 140px;
+                     background: #fff; outline: none; }}
+.search-bar input:focus {{ border-color: #888; }}
+.search-bar input::placeholder {{ color: #BBB; }}
+.search-results-dropdown {{ position: absolute; top: 100%; left: 0; width: 280px;
+                            max-height: 260px; overflow-y: auto; background: #fff;
+                            border: 1px solid #DDD; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+                            z-index: 100; display: none; }}
+.search-results-dropdown .sr-category {{ font-size: 8px; font-weight: 800; text-transform: uppercase;
+                                         letter-spacing: 0.5px; color: #AAA; padding: 6px 10px 2px; }}
+.search-results-dropdown .sr-item {{ padding: 5px 10px; font-size: 11px; cursor: pointer;
+                                     display: flex; justify-content: space-between; align-items: center; }}
+.search-results-dropdown .sr-item:hover {{ background: #F5F5F5; }}
+.search-results-dropdown .sr-item .sr-count {{ font-size: 9px; color: #AAA; }}
+.search-reset-btn {{ padding: 2px 8px; border-radius: 10px; border: 1px solid #CCC;
+                     background: transparent; font-size: 9px; font-weight: 700; color: #888;
+                     font-family: inherit; cursor: pointer; display: none; }}
+.search-highlight-info {{ font-size: 9px; color: #888; font-style: italic; display: none; max-width: 200px;
+                          overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }}
 </style>
 </head>
 <body>
@@ -468,6 +494,16 @@ html, body {{ background: #FAF9F7; font-family: 'Helvetica Neue', system-ui, san
 
 <button class="toggle-all" id="toggleAll">Tout décocher</button>
 <div class="filters" id="filters"></div>
+<div class="search-bar" id="searchBar">
+  <select id="regionSelect"><option value="">Région…</option></select>
+  <select id="depSelect"><option value="">Département…</option></select>
+  <div class="search-input-wrap">
+    <input type="text" id="searchInput" placeholder="Commune…" autocomplete="off" spellcheck="false">
+    <div class="search-results-dropdown" id="searchDropdown"></div>
+  </div>
+  <button class="search-reset-btn" id="searchResetBtn">✕</button>
+  <span class="search-highlight-info" id="searchHighlightInfo"></span>
+</div>
 
 <div id="chartWrap">
   <div id="chart"></div>
@@ -585,6 +621,222 @@ let elecByType = {{}};
 let baryMeans = {{}};
 let currentBarySizeMap = {{}};
 const typeLabels = {{legi:'Législatives', euro:'Européennes', pres:'Présidentielles', muni:'Municipales'}};
+
+// ── Recherche / highlight IRIS ───────────────────────────────────────────
+let highlightedSet = null;
+let highlightLabels = [];
+const HIGHLIGHT_OPACITY = 0.92;
+const DIM_OPACITY = 0.06;
+
+const DEP_TO_REGION = {{}};
+(function() {{
+  const R = {{
+    'Île-de-France': ['75','77','78','91','92','93','94','95'],
+    'Auvergne-Rhône-Alpes': ['01','03','07','15','26','38','42','43','63','69','73','74'],
+    'Bourgogne-Franche-Comté': ['21','25','39','58','70','71','89','90'],
+    'Bretagne': ['22','29','35','56'],
+    'Centre-Val de Loire': ['18','28','36','37','41','45'],
+    'Corse': ['2A','2B'],
+    'Grand Est': ['08','10','51','52','54','55','57','67','68','88'],
+    'Hauts-de-France': ['02','59','60','62','80'],
+    'Normandie': ['14','27','50','61','76'],
+    'Nouvelle-Aquitaine': ['16','17','19','23','24','33','40','47','64','79','86','87'],
+    'Occitanie': ['09','11','12','30','31','32','34','46','48','65','66','81','82'],
+    'Pays de la Loire': ['44','49','53','72','85'],
+    "Provence-Alpes-Côte d'Azur": ['04','05','06','13','83','84'],
+    'Outre-mer': ['971','972','973','974','976'],
+  }};
+  for (const [region, deps] of Object.entries(R)) {{
+    for (const d of deps) DEP_TO_REGION[d] = region;
+  }}
+}})();
+
+function _depCodeFromLabel(depLabel) {{
+  const m = String(depLabel || '').match(/\(([^)]+)\)\s*$/);
+  return m ? m[1] : '';
+}}
+
+let searchIndex = null;
+
+function buildSearchIndex() {{
+  if (!IRIS_INFO) return;
+  const communes = new Map(), deps = new Map(), regions = new Map();
+  for (let i = 0; i < IRIS_INFO.length; i++) {{
+    const cd = IRIS_INFO[i];
+    const communeName = cd[1] || '';
+    const depLabel = cd[19] || '';
+    const depCode = _depCodeFromLabel(depLabel);
+    if (communeName) {{
+      const key = communeName.toLowerCase();
+      if (!communes.has(key)) communes.set(key, {{ label: communeName, dep: depLabel, indices: [] }});
+      communes.get(key).indices.push(i);
+    }}
+    if (depCode) {{
+      if (!deps.has(depCode)) deps.set(depCode, {{ label: depLabel, indices: [] }});
+      deps.get(depCode).indices.push(i);
+    }}
+    const regionName = DEP_TO_REGION[depCode];
+    if (regionName) {{
+      if (!regions.has(regionName)) regions.set(regionName, {{ label: regionName, indices: [] }});
+      regions.get(regionName).indices.push(i);
+    }}
+  }}
+  // Agréger arrondissements en villes
+  const villes = new Map();
+  const arrRe = /^(.+?)\s+\d+e[r]?\s+arrondissement$/i;
+  for (const [key, data] of communes) {{
+    const m = data.label.match(arrRe);
+    if (m) {{
+      const vKey = m[1].toLowerCase();
+      if (!villes.has(vKey)) villes.set(vKey, {{ label: m[1], dep: data.dep, indices: [] }});
+      for (const idx of data.indices) villes.get(vKey).indices.push(idx);
+    }}
+  }}
+  searchIndex = {{ communes, deps, regions, villes }};
+  // Populate selects
+  const regionSel = document.getElementById('regionSelect');
+  [...regions.keys()].sort((a, b) => a.localeCompare(b, 'fr')).forEach(name => {{
+    const opt = document.createElement('option');
+    opt.value = name;
+    opt.textContent = name + ' (' + regions.get(name).indices.length + ')';
+    regionSel.appendChild(opt);
+  }});
+  const depSel = document.getElementById('depSelect');
+  [...deps.entries()].sort((a, b) => a[0].localeCompare(b[0], 'fr', {{numeric: true}})).forEach(([code, data]) => {{
+    const opt = document.createElement('option');
+    opt.value = code;
+    opt.textContent = data.label;
+    depSel.appendChild(opt);
+  }});
+}}
+
+function _norm(s) {{
+  return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+}}
+
+function searchIRIS(query) {{
+  const dropdown = document.getElementById('searchDropdown');
+  if (!searchIndex || !query || query.length < 2) {{ dropdown.style.display = 'none'; return; }}
+  const q = _norm(query);
+  const results = [];
+  for (const [vKey, data] of searchIndex.villes) {{
+    if (_norm(vKey).includes(q) || _norm(data.label).includes(q))
+      results.push({{ type: 'ville', label: data.label + ' (ville entière)', sub: data.dep, count: data.indices.length, indices: data.indices }});
+  }}
+  let cc = 0;
+  for (const [key, data] of searchIndex.communes) {{
+    if (cc >= 8) break;
+    if (_norm(key).includes(q) || _norm(data.label).includes(q)) {{
+      results.push({{ type: 'commune', label: data.label, sub: data.dep, count: data.indices.length, indices: data.indices }});
+      cc++;
+    }}
+  }}
+  let dc = 0;
+  for (const [code, data] of searchIndex.deps) {{
+    if (dc >= 4) break;
+    if (_norm(data.label).includes(q) || code.includes(query)) {{
+      results.push({{ type: 'dept', label: data.label, sub: '', count: data.indices.length, indices: data.indices }});
+      dc++;
+    }}
+  }}
+  let rc = 0;
+  for (const [name, data] of searchIndex.regions) {{
+    if (rc >= 4) break;
+    if (_norm(name).includes(q)) {{
+      results.push({{ type: 'region', label: data.label, sub: '', count: data.indices.length, indices: data.indices }});
+      rc++;
+    }}
+  }}
+  if (results.length === 0) {{
+    dropdown.innerHTML = '<div style="padding:10px;color:#AAA;font-size:10px;text-align:center">Aucun résultat</div>';
+    dropdown.style.display = 'block'; return;
+  }}
+  const typeLabel = {{ ville: 'Villes', commune: 'Communes', dept: 'Départements', region: 'Régions' }};
+  let html = '', lastType = '';
+  for (const r of results) {{
+    if (r.type !== lastType) {{ html += `<div class="sr-category">${{typeLabel[r.type]}}</div>`; lastType = r.type; }}
+    html += `<div class="sr-item" data-type="${{r.type}}"><span>${{r.label}}${{r.sub ? ' <span style="color:#AAA;font-size:9px">' + r.sub + '</span>' : ''}}</span><span class="sr-count">${{r.count}} IRIS</span></div>`;
+  }}
+  dropdown.innerHTML = html;
+  dropdown.style.display = 'block';
+  dropdown.querySelectorAll('.sr-item').forEach((el, idx) => {{
+    el.addEventListener('click', () => {{
+      applyHighlight(results[idx].indices, results[idx].label, results[idx].type);
+      dropdown.style.display = 'none';
+    }});
+  }});
+}}
+
+function fitMapToIndices(indices) {{
+  if (!isCarteActive || !mapReady || !IRIS_LAT || !IRIS_LON || indices.length === 0) return;
+  let minLat = 90, maxLat = -90, minLon = 180, maxLon = -180, count = 0;
+  for (const i of indices) {{
+    const lat = IRIS_LAT[i], lon = IRIS_LON[i];
+    if (lat == null || lon == null) continue;
+    if (lat < minLat) minLat = lat; if (lat > maxLat) maxLat = lat;
+    if (lon < minLon) minLon = lon; if (lon > maxLon) maxLon = lon;
+    count++;
+  }}
+  if (count === 0) return;
+  const dlat = Math.max((maxLat - minLat) * 0.15, 0.005);
+  const dlon = Math.max((maxLon - minLon) * 0.15, 0.005);
+  mapInstance.fitBounds([[minLon - dlon, minLat - dlat], [maxLon + dlon, maxLat + dlat]], {{ padding: 20, maxZoom: 15, duration: 800 }});
+}}
+
+function applyHighlight(indices, label, type) {{
+  if (!highlightedSet) {{
+    highlightedSet = new Set(indices);
+    highlightLabels = [label];
+  }} else {{
+    for (const idx of indices) highlightedSet.add(idx);
+    if (!highlightLabels.includes(label)) highlightLabels.push(label);
+  }}
+  document.getElementById('searchInput').value = '';
+  document.getElementById('searchResetBtn').style.display = 'inline-block';
+  const info = document.getElementById('searchHighlightInfo');
+  info.style.display = 'inline';
+  info.textContent = highlightLabels.join(', ') + ' — ' + highlightedSet.size + ' IRIS';
+  restyleIRIS();
+  updateMapColors();
+  fitMapToIndices(indices);
+}}
+
+function clearHighlight() {{
+  highlightedSet = null;
+  highlightLabels = [];
+  document.getElementById('searchInput').value = '';
+  document.getElementById('depSelect').value = '';
+  document.getElementById('regionSelect').value = '';
+  document.getElementById('searchResetBtn').style.display = 'none';
+  document.getElementById('searchHighlightInfo').style.display = 'none';
+  document.getElementById('searchDropdown').style.display = 'none';
+  restyleIRIS();
+  updateMapColors();
+  if (isCarteActive && mapReady) mapInstance.fitBounds([[-5.2, 41.3], [9.6, 51.2]], {{ padding: 10, duration: 800 }});
+}}
+
+(function() {{
+  const input = document.getElementById('searchInput');
+  const dropdown = document.getElementById('searchDropdown');
+  let debounceTimer;
+  input.addEventListener('input', () => {{
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => searchIRIS(input.value.trim()), 180);
+  }});
+  input.addEventListener('keydown', (e) => {{ if (e.key === 'Escape') {{ dropdown.style.display = 'none'; input.blur(); }} }});
+  document.getElementById('searchResetBtn').addEventListener('click', clearHighlight);
+  document.getElementById('depSelect').addEventListener('change', function() {{
+    if (!searchIndex || !this.value) return;
+    const data = searchIndex.deps.get(this.value);
+    if (data) applyHighlight(data.indices, data.label, 'dept');
+  }});
+  document.getElementById('regionSelect').addEventListener('change', function() {{
+    if (!searchIndex || !this.value) return;
+    const data = searchIndex.regions.get(this.value);
+    if (data) applyHighlight(data.indices, data.label, 'region');
+  }});
+  document.addEventListener('click', (e) => {{ if (!e.target.closest('.search-bar')) dropdown.style.display = 'none'; }});
+}})();
 
 const chartDiv = document.getElementById('chart');
 
@@ -878,7 +1130,8 @@ function restyleIRIS() {{
   const colorArr = currentColorVar ? (IRIS_X[currentColorVar] || IRIS_Y[currentColorVar] || null) : null;
   const n = xArr.length;
   const knownKeys = new Set(btns.map(b => b.key));
-  const fx = [], fy = [], fc = [], fs = [], fcd = [];
+  const fx = [], fy = [], fc = [], fs = [], fcd = [], fo = [], flw = [], flc = [];
+  const hasHighlight = highlightedSet !== null;
   for (let i = 0; i < n; i++) {{
     let parti = data.partis[i];
     let isFallback = false;
@@ -899,13 +1152,20 @@ function restyleIRIS() {{
       const baseColor = isFallback ? (t1Data.colors[i] || '#9CA3AF') : (data.colors[i] || '#9CA3AF');
       fc.push(colorArr ? '#CCCCCC' : baseColor);
     }}
-    fs.push(MARKER_SIZES[i] || 3);
+    const isHL = hasHighlight && highlightedSet.has(i);
+    fs.push(isHL ? (MARKER_SIZES[i] || 3) + 1.5 : (MARKER_SIZES[i] || 3));
+    fo.push(hasHighlight ? (isHL ? HIGHLIGHT_OPACITY : DIM_OPACITY) : 0.75);
+    flw.push(isHL ? 1.2 : 0.4);
+    flc.push(isHL ? 'rgba(30,30,30,0.6)' : 'rgba(255,255,255,0.4)');
     fcd.push(i);
   }}
   Plotly.restyle(chartDiv, {{
     x: [fx], y: [fy],
     'marker.color': [fc],
     'marker.size': [fs],
+    'marker.opacity': [fo],
+    'marker.line.width': [flw],
+    'marker.line.color': [flc],
     customdata: [fcd],
   }}, [2]);
 }}
@@ -1671,10 +1931,11 @@ function buildMapGeoJSON() {{
       const baseColor = isFallback ? (t1Data.colors[i] || '#9CA3AF') : (elecData.colors[i] || '#9CA3AF');
       color = colorArr ? '#CCCCCC' : baseColor;
     }}
+    const opa = highlightedSet ? (highlightedSet.has(i) ? 0.9 : 0.06) : 0.85;
     features.push({{
       type: 'Feature',
       geometry: {{ type: 'Point', coordinates: [IRIS_LON[i], IRIS_LAT[i]] }},
-      properties: {{ idx: i, color, size: MARKER_SIZES[i] || 3 }}
+      properties: {{ idx: i, color, size: MARKER_SIZES[i] || 3, opa }}
     }});
   }}
   return {{ type: 'FeatureCollection', features }};
@@ -1699,7 +1960,7 @@ function _addIrisLayer(map, sourceId, layerId, clickCb) {{
         10, ['*', ['get', 'size'], 1.3],
         14, ['*', ['get', 'size'], 2.5]
       ],
-      'circle-opacity': 0.85,
+      'circle-opacity': ['get', 'opa'],
       'circle-stroke-width': 0.5,
       'circle-stroke-color': 'rgba(255,255,255,0.4)',
     }}
@@ -1827,6 +2088,7 @@ function hideCarte() {{
   GROUP_INDICES = staticData.GROUP_INDICES;
   elecCache[DEFAULT_ELECTION_ID] = defaultElecData;
   currentGroupIndices = Object.assign({{}}, GROUP_INDICES);
+  buildSearchIndex();
 
   setLoadingProgress(40, 'Données électorales chargées — chargement des axes…', 'iris_x_mobile.json + iris_y_mobile.json');
 
