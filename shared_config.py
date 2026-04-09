@@ -1231,31 +1231,31 @@ AXIS_PRESETS = [
             }
         }
     },
-    {
-        'id': 'urbanisme', 'label': 'Urbanisme', 'emoji': '\U0001f3d7\ufe0f',
-        'xVar': 'score_urbanite', 'xInvert': False,
-        'yVar': 'score_equipement_public',
-        'xTitle': '\u2190 Rural / Pavillonnaire \u2500\u2500\u2500 Urbanit\u00e9 \u2500\u2500\u2500 Urbain dense \u2192',
-        'yTitle': '\u2190 Sous-\u00e9quip\u00e9 \u2500\u2500\u2500 \u00c9quipement public \u2500\u2500\u2500 Bien \u00e9quip\u00e9 \u2192',
-        'xRange': None, 'yRange': None,
-        'corners': [
-            {'pos': 'tl', 'text': 'RURAL<br>\u00c9QUIP\u00c9', 'color': '#6B8FD4'},
-            {'pos': 'tr', 'text': 'URBAIN<br>\u00c9QUIP\u00c9', 'color': '#E87070'},
-            {'pos': 'bl', 'text': 'RURAL<br>SOUS-\u00c9QUIP\u00c9', 'color': '#C49A30'},
-            {'pos': 'br', 'text': 'URBAIN<br>SOUS-\u00c9QUIP\u00c9', 'color': '#60B87A'},
-        ],
-        'desc': {
-            'title': 'Urbanisme \u2014 Urbanit\u00e9 \u00d7 \u00c9quipement public',
-            'x': '<b>Axe X \u2014 Score d\'urbanit\u00e9</b> : composite int\u00e9grant type de logement, mode de chauffage, motorisation et transports. Gauche = rural/pavillonnaire, droite = urbain dense.',
-            'y': '<b>Axe Y \u2014 Score d\'\u00e9quipement public</b> : composite sant\u00e9, enseignement, sport, commerces, services pour 1000 hab.',
-            'quadrants': {
-                'tl': '<b>Rural \u00e9quip\u00e9</b> \u2014 Bourgs-centres avec bons services malgr\u00e9 l\'habitat pavillonnaire.',
-                'tr': '<b>Urbain \u00e9quip\u00e9</b> \u2014 C\u0153urs de ville denses et bien dot\u00e9s.',
-                'bl': '<b>Rural sous-\u00e9quip\u00e9</b> \u2014 P\u00e9riurbain \u00e9loign\u00e9, d\u00e9serts de services.',
-                'br': '<b>Urbain sous-\u00e9quip\u00e9</b> \u2014 Quartiers denses type grands ensembles, peu de services de proximit\u00e9.',
-            }
-        }
-    },
+    # {
+    #     'id': 'urbanisme', 'label': 'Urbanisme', 'emoji': '\U0001f3d7\ufe0f',
+    #     'xVar': 'score_urbanite', 'xInvert': False,
+    #     'yVar': 'score_equipement_public',
+    #     'xTitle': '\u2190 Rural / Pavillonnaire \u2500\u2500\u2500 Urbanit\u00e9 \u2500\u2500\u2500 Urbain dense \u2192',
+    #     'yTitle': '\u2190 Sous-\u00e9quip\u00e9 \u2500\u2500\u2500 \u00c9quipement public \u2500\u2500\u2500 Bien \u00e9quip\u00e9 \u2192',
+    #     'xRange': None, 'yRange': None,
+    #     'corners': [
+    #         {'pos': 'tl', 'text': 'RURAL<br>\u00c9QUIP\u00c9', 'color': '#6B8FD4'},
+    #         {'pos': 'tr', 'text': 'URBAIN<br>\u00c9QUIP\u00c9', 'color': '#E87070'},
+    #         {'pos': 'bl', 'text': 'RURAL<br>SOUS-\u00c9QUIP\u00c9', 'color': '#C49A30'},
+    #         {'pos': 'br', 'text': 'URBAIN<br>SOUS-\u00c9QUIP\u00c9', 'color': '#60B87A'},
+    #     ],
+    #     'desc': {
+    #         'title': 'Urbanisme \u2014 Urbanit\u00e9 \u00d7 \u00c9quipement public',
+    #         'x': '<b>Axe X \u2014 Score d\'urbanit\u00e9</b> : composite int\u00e9grant type de logement, mode de chauffage, motorisation et transports. Gauche = rural/pavillonnaire, droite = urbain dense.',
+    #         'y': '<b>Axe Y \u2014 Score d\'\u00e9quipement public</b> : composite sant\u00e9, enseignement, sport, commerces, services pour 1000 hab.',
+    #         'quadrants': {
+    #             'tl': '<b>Rural \u00e9quip\u00e9</b> \u2014 Bourgs-centres avec bons services malgr\u00e9 l\'habitat pavillonnaire.',
+    #             'tr': '<b>Urbain \u00e9quip\u00e9</b> \u2014 C\u0153urs de ville denses et bien dot\u00e9s.',
+    #             'bl': '<b>Rural sous-\u00e9quip\u00e9</b> \u2014 P\u00e9riurbain \u00e9loign\u00e9, d\u00e9serts de services.',
+    #             'br': '<b>Urbain sous-\u00e9quip\u00e9</b> \u2014 Quartiers denses type grands ensembles, peu de services de proximit\u00e9.',
+    #         }
+    #     }
+    # },
     {
         'id': 'confort', 'label': 'Confort r\u00e9sidentiel', 'emoji': '\U0001f3e0',
         'xVar': 'score_confort_residentiel', 'xInvert': False,
