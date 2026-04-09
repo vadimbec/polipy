@@ -1103,7 +1103,7 @@ AXIS_PRESETS = [
         'xVar': 'score_exploitation', 'xInvert': False,
         'yVar': 'score_domination',
         'xTitle': '← Exploité (prolétaire) ─── Position dans le rapport capital/travail ─── Exploiteur (bourgeois) →',
-        'yTitle': '← Dominé ─── Domination sociale (Bourdieu) ─── Dominant →',
+        'yTitle': '← Dominé ─── Domination sociale ─── Dominant →',
         'xRange': None, 'yRange': None,
         'corners': [
             {'pos': 'tl', 'text': 'ASCENSION<br>SOCIALE', 'color': '#E87070'},
@@ -1125,7 +1125,7 @@ AXIS_PRESETS = [
     },
     {
         'id': 'bourdieu',
-        'label': 'Bourdieu',
+        'label': 'Cap économique × Cap culturel',
         'emoji': '🎓',
         'xVar': 'score_cap_eco', 'xInvert': False,
         'yVar': 'score_cap_cult',
